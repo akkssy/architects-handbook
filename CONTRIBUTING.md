@@ -1,11 +1,17 @@
-# Contributing to The Architect's Handbook
+# Contributing to Software Engineering Study Guides
 
 Thank you for your interest in contributing! This guide will help you get started.
+
+## 📚 Project Overview
+
+This repository contains two study guides:
+- **DSA Study Guide** (`index.html`) - Data Structures & Algorithms
+- **Architect's Handbook** (`software-engineering-knowledge-base.html`) - System Design
 
 ## 🎯 Ways to Contribute
 
 ### 1. Report Issues
-- Found a bug or typo? [Open an issue](https://github.com/akkssy/architects-handbook/issues/new)
+- Found a bug or typo? [Open an issue](../../issues/new)
 - Include screenshots if relevant
 - Describe the expected vs actual behavior
 
@@ -14,6 +20,14 @@ Thank you for your interest in contributing! This guide will help you get starte
 - Want to improve an explanation? PRs are welcome!
 
 ### 3. Add Content
+
+**For DSA Study Guide:**
+- New LeetCode problems with solutions
+- Additional video tutorial links
+- Solutions in other languages (Java, JavaScript, C++)
+- Better explanations of algorithms
+
+**For Architect's Handbook:**
 - New architecture patterns
 - Additional code examples
 - Updated best practices
@@ -24,20 +38,34 @@ Thank you for your interest in contributing! This guide will help you get starte
 ### Writing Style
 - **Clear and concise** - Avoid jargon where possible
 - **Practical examples** - Show real-world usage
-- **Trade-offs** - Always discuss pros and cons
+- **Time/Space complexity** - Always include for algorithms
 - **Up-to-date** - Use current versions and practices
 
 ### Code Examples
+
+**DSA Guide (Python):**
+```python
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+# Time: O(n), Space: O(n)
+```
+
+**Architect's Handbook (C#):**
 - Use modern C# features (C# 12+, .NET 8+)
 - Include comments for complex logic
 - Follow .NET naming conventions
-- Keep examples focused and minimal
 
 ### Formatting
 - Use semantic HTML5 elements
 - Follow existing CSS class conventions
 - Maintain consistent indentation (4 spaces)
-- Test on both light and dark modes
+- Test responsive design
 
 ## 🔧 Development Setup
 
@@ -45,28 +73,34 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 2. **Clone your fork:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/architects-handbook.git
-   cd architects-handbook
+   git clone https://github.com/YOUR_USERNAME/dsa-study-guide.git
+   cd dsa-study-guide
    ```
 
-3. **Make changes** to `software-engineering-knowledge-base.html`
-
-4. **Test locally** by opening the HTML file in a browser
-
-5. **Commit with a descriptive message:**
+3. **Run locally:**
    ```bash
-   git commit -m "Add: Event sourcing example with Marten"
+   python3 -m http.server 8080
+   # Visit http://localhost:8080
    ```
 
-6. **Push and create a Pull Request**
+4. **Make changes** to the appropriate HTML file
+
+5. **Test locally** in multiple browsers
+
+6. **Commit with a descriptive message:**
+   ```bash
+   git commit -m "Add: Binary search tree deletion problem"
+   ```
+
+7. **Push and create a Pull Request**
 
 ## ✅ Pull Request Checklist
 
 - [ ] Content is accurate and well-researched
-- [ ] Code examples compile and work correctly
+- [ ] Code examples are correct and tested
 - [ ] Tested on multiple browsers (Chrome, Firefox, Safari)
-- [ ] Dark mode and light mode both look good
 - [ ] Mobile responsive layout preserved
+- [ ] Progress tracking checkboxes work correctly
 - [ ] No console errors in browser dev tools
 
 ## 📋 Commit Message Format
@@ -84,6 +118,11 @@ Longer description if needed
 - `Refactor:` Code restructuring
 - `Docs:` Documentation changes
 
+**Examples:**
+- `Add: Dijkstra's algorithm problem and solution`
+- `Fix: Typo in merge sort explanation`
+- `Update: Improve two pointers visualization`
+
 ## 🙏 Code of Conduct
 
 - Be respectful and constructive
@@ -97,5 +136,5 @@ Open an issue with the `question` label or reach out to the maintainers.
 
 ---
 
-Thank you for helping make The Architect's Handbook better! 🚀
+Thank you for helping improve these study guides! 🚀
 
