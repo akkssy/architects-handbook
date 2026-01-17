@@ -1,48 +1,8 @@
 # Changelog
 
-All notable changes to the Software Engineering Study Guides will be documented in this file.
+All notable changes to The Architect's Handbook will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-## [2.0.0] - 2026-01-17
-
-### Added
-- 🎯 **DSA Study Guide** (`index.html`) - Complete Data Structures & Algorithms guide
-
-  **Beginner Topics:**
-  - Time & Space Complexity with Big O notation
-  - Arrays (Two Sum, Best Time to Buy/Sell Stock, Contains Duplicate, Product of Array)
-  - Strings (Valid Anagram, Valid Palindrome, Longest Substring)
-  - Sorting Algorithms (Bubble, Selection, Insertion, Merge, Quick Sort)
-  - Searching (Binary Search, Search in Rotated Sorted Array)
-
-  **Intermediate Topics:**
-  - Linked Lists (Reverse, Merge, Cycle Detection, Remove Nth Node)
-  - Stacks (Valid Parentheses, Min Stack)
-  - Queues (Implement Queue using Stacks)
-  - Hash Tables (Group Anagrams, Top K Frequent Elements)
-  - Binary Trees (Traversals, Max Depth, Same Tree, Invert Tree, Level Order)
-  - BST (Validate BST, Kth Smallest, LCA)
-
-  **Advanced Topics:**
-  - Heaps (Kth Largest Element, Merge K Sorted Lists)
-  - Dynamic Programming (Climbing Stairs, House Robber, Coin Change, LIS)
-  - Graphs (BFS/DFS, Number of Islands, Clone Graph, Course Schedule)
-  - Backtracking (Subsets, Permutations)
-
-  **Features:**
-  - 32 LeetCode problems with Python solutions
-  - 30+ video tutorial links
-  - Progress tracking with localStorage
-  - Collapsible problem sections
-  - Interview tips and study plan
-
-### Changed
-- Updated README.md to cover both study guides
-- Updated CONTRIBUTING.md with guidelines for both guides
-- Added .gitignore file
-
----
 
 ## [1.0.0] - 2025-01-17
 
