@@ -439,6 +439,264 @@
             transform: translateY(-5px);
         }
         .matrix-item h5 { color: var(--primary); margin-bottom: 10px; }
+
+        /* =========== DSA SHEET STYLES =========== */
+        .dsa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dsa-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .dsa-stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 25px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .dsa-stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .dsa-stat-card .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .dsa-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .dsa-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .dsa-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .dsa-btn-primary:hover {
+            background: #2563eb;
+        }
+        .dsa-btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .dsa-btn-secondary:hover {
+            border-color: var(--primary);
+        }
+        .dsa-day-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .dsa-day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .dsa-day-header:hover {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+        .dsa-day-header h4 {
+            margin: 0;
+            color: white;
+            font-size: 1.1rem;
+        }
+        .dsa-day-progress {
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .dsa-day-content {
+            padding: 20px;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.3s ease;
+        }
+        .dsa-day-card.collapsed .dsa-day-content {
+            max-height: 0;
+            padding: 0 20px;
+        }
+        .dsa-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dsa-table th, .dsa-table td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .dsa-table th {
+            background: var(--bg-primary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .dsa-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .dsa-table tr.completed-row {
+            background: rgba(34, 197, 94, 0.1);
+        }
+        .dsa-table tr.completed-row .dsa-problem-name {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+        .dsa-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+        .dsa-problem-name {
+            font-weight: 500;
+        }
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .resource-link.article {
+            background: #e0f2fe;
+        }
+        .resource-link.youtube {
+            background: #fee2e2;
+        }
+        .resource-link.leetcode {
+            background: #fef3c7;
+        }
+        .resource-link:hover {
+            transform: scale(1.1);
+        }
+        .diff-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .diff-easy {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .diff-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .diff-hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .time-estimate {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .company-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .company-tag {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+        }
+        .company-google { background: #4285f4; }
+        .company-amazon { background: #ff9900; }
+        .company-meta { background: #1877f2; }
+        .company-microsoft { background: #00a4ef; }
+        .company-apple { background: #555; }
+        .company-netflix { background: #e50914; }
+        .bookmark-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+        }
+        .bookmark-btn:hover, .bookmark-btn.saved {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        .saved-panel {
+            position: fixed;
+            right: -350px;
+            top: 100px;
+            width: 320px;
+            max-height: 70vh;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px 0 0 12px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .saved-panel.open {
+            right: 0;
+        }
+        .saved-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--primary);
+            color: white;
+        }
+        .saved-panel-header h4 {
+            margin: 0;
+        }
+        .saved-panel-content {
+            padding: 15px;
+            max-height: calc(70vh - 60px);
+            overflow-y: auto;
+        }
+        .saved-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
         /* Footer */
         footer {
             background: #1e293b;
@@ -626,6 +884,216 @@
             font-size: 0.8rem;
             font-weight: 500;
         }
+        /* =========== DSA PROBLEM SHEET STYLES =========== */
+        .dsa-stats-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        .dsa-stats-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .dsa-stat-item {
+            text-align: center;
+            padding: 10px 25px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        .dsa-stat-item:last-child { border-right: none; }
+        .dsa-stat-item .count { font-size: 2rem; font-weight: 700; }
+        .dsa-stat-item .label { font-size: 0.85rem; opacity: 0.8; }
+        .dsa-stat-item.easy .count { color: #4ade80; }
+        .dsa-stat-item.medium .count { color: #fbbf24; }
+        .dsa-stat-item.hard .count { color: #f87171; }
+        .dsa-stat-item.total .count { color: #60a5fa; }
+        .dsa-stat-item.solved .count { color: #a78bfa; }
+        /* Day Card */
+        .dsa-day-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .dsa-day-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .dsa-day-header h4 { margin: 0; font-size: 1.1rem; }
+        .dsa-day-progress {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        .dsa-day-content { padding: 0; }
+        .dsa-day-card.collapsed .dsa-day-content { display: none; }
+        /* Problem Table */
+        .dsa-table { width: 100%; border-collapse: collapse; }
+        .dsa-table th {
+            background: var(--bg-primary);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        .dsa-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .dsa-table tr:hover { background: var(--bg-primary); }
+        .dsa-table tr.completed-row { background: #dcfce7; }
+        .dsa-problem-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        /* Difficulty Badges */
+        .diff-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .diff-easy { background: #dcfce7; color: #166534; }
+        .diff-medium { background: #fef3c7; color: #92400e; }
+        .diff-hard { background: #fee2e2; color: #991b1b; }
+        /* Time Badge */
+        .time-estimate {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        /* Company Tags */
+        .company-tags {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .company-tag {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .company-tag:hover { transform: scale(1.2); }
+        .company-google { background: #4285f4; color: white; }
+        .company-amazon { background: #ff9900; color: black; }
+        .company-meta { background: #0668e1; color: white; }
+        .company-microsoft { background: #00a4ef; color: white; }
+        .company-apple { background: #555; color: white; }
+        .company-netflix { background: #e50914; color: white; }
+        /* Link Icons */
+        .resource-links {
+            display: flex;
+            gap: 8px;
+        }
+        .resource-link {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .resource-link:hover { transform: scale(1.1); }
+        .resource-link.youtube { background: #fee2e2; }
+        .resource-link.leetcode { background: #fef3c7; }
+        .resource-link.article { background: #dbeafe; }
+        /* Bookmark Button */
+        .bookmark-btn {
+            background: none;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .bookmark-btn:hover { border-color: var(--primary); }
+        .bookmark-btn.saved {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        /* Saved Questions Panel */
+        .saved-panel {
+            position: fixed;
+            top: 80px;
+            right: -350px;
+            width: 350px;
+            height: calc(100vh - 100px);
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+        }
+        .saved-panel.open { right: 0; }
+        .saved-panel-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+        }
+        .saved-panel-content { padding: 15px; }
+        .saved-item {
+            background: var(--bg-primary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle-saved-btn {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-saved-btn:hover { background: var(--primary-dark); }
     </style>
 </head>
 <body>
@@ -650,6 +1118,7 @@
         <div class="container">
             <ul>
                 <li><a href="#overview">📋 Overview</a></li>
+                <li><a href="#dsa-sheet">💻 DSA Sheet</a></li>
                 <li><a href="#schedule">📅 Schedule</a></li>
                 <li><a href="#fundamentals">🎯 Fundamentals</a></li>
                 <li><a href="#system-design">🏗️ System Design</a></li>
@@ -688,6 +1157,734 @@
                 </div>
             </div>
         </div>
+
+        <!-- DSA PROBLEM SHEET SECTION -->
+        <section id="dsa-sheet">
+            <h2>💻 DSA Problem Sheet - Most Important Interview Questions</h2>
+            <p>Master these essential Data Structures & Algorithms problems asked by top tech companies. Track your progress, estimate study time, and bookmark problems for later review.</p>
+
+            <!-- Saved Questions Toggle Button -->
+            <button class="toggle-saved-btn" onclick="toggleSavedPanel()">
+                🔖 Saved (<span id="savedCount">0</span>)
+            </button>
+
+            <!-- Difficulty Stats Banner -->
+            <div class="dsa-stats-banner">
+                <div class="dsa-stats-grid">
+                    <div class="dsa-stat-item easy">
+                        <div class="count" id="easyCount">12</div>
+                        <div class="label">Easy</div>
+                    </div>
+                    <div class="dsa-stat-item medium">
+                        <div class="count" id="mediumCount">18</div>
+                        <div class="label">Medium</div>
+                    </div>
+                    <div class="dsa-stat-item hard">
+                        <div class="count" id="hardCount">6</div>
+                        <div class="label">Hard</div>
+                    </div>
+                    <div class="dsa-stat-item total">
+                        <div class="count" id="totalProblems">36</div>
+                        <div class="label">Total Problems</div>
+                    </div>
+                    <div class="dsa-stat-item solved">
+                        <div class="count" id="solvedProblems">0</div>
+                        <div class="label">Solved</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 1: Arrays (Part 1) -->
+            <div class="dsa-day-card" id="day1">
+                <div class="dsa-day-header" onclick="toggleDay('day1')">
+                    <h4>📅 Day 1: Arrays (Part 1)</h4>
+                    <span class="dsa-day-progress"><span class="day1-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="two-sum">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Two Sum</td>
+                                <td><a href="https://takeuforward.org/data-structure/two-sum-problem/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=UXDSeD9mN-k" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/two-sum/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 20 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Two Sum')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="best-time-buy-sell">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Best Time to Buy and Sell Stock</td>
+                                <td><a href="https://takeuforward.org/data-structure/stock-buy-and-sell/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=1pkOgXD63yU" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Best Time to Buy and Sell Stock')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="contains-duplicate">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Contains Duplicate</td>
+                                <td><a href="https://takeuforward.org/data-structure/contains-duplicate/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=3OamzN90kPg" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/contains-duplicate/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 15 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-apple" title="Apple">🍎</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Contains Duplicate')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="product-except-self">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Product of Array Except Self</td>
+                                <td><a href="https://takeuforward.org/data-structure/product-of-array-except-self/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=bNvIQI2wAjk" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Product of Array Except Self')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="max-subarray">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Maximum Subarray (Kadane's)</td>
+                                <td><a href="https://takeuforward.org/data-structure/kadanes-algorithm-maximum-subarray-sum-in-an-array/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=w_KEocd__20" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/maximum-subarray/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Maximum Subarray')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="max-product-subarray">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="1"></td>
+                                <td class="dsa-problem-name">Maximum Product Subarray</td>
+                                <td><a href="https://takeuforward.org/data-structure/maximum-product-subarray/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=lXVy6YWFcRM" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/maximum-product-subarray/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-netflix" title="Netflix">N</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Maximum Product Subarray')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Day 2: Arrays (Part 2) -->
+            <div class="dsa-day-card" id="day2">
+                <div class="dsa-day-header" onclick="toggleDay('day2')">
+                    <h4>📅 Day 2: Arrays (Part 2)</h4>
+                    <span class="dsa-day-progress"><span class="day2-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="min-rotated-sorted">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">Find Minimum in Rotated Sorted Array</td>
+                                <td><a href="https://takeuforward.org/data-structure/minimum-in-rotated-sorted-array/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=nhEMDKMB44g" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Find Minimum in Rotated Sorted Array')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="search-rotated-sorted">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">Search in Rotated Sorted Array</td>
+                                <td><a href="https://takeuforward.org/data-structure/search-in-rotated-sorted-array/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=r3pMQ8-Ad5s" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Search in Rotated Sorted Array')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="3sum">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">3Sum</td>
+                                <td><a href="https://takeuforward.org/data-structure/3-sum-find-triplets-that-add-up-to-a-zero/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=jzZsG8n2R9A" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/3sum/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, '3Sum')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="container-water">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">Container With Most Water</td>
+                                <td><a href="https://takeuforward.org/data-structure/container-with-most-water/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=aO9eAw1wKvE" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/container-with-most-water/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-apple" title="Apple">🍎</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Container With Most Water')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="merge-intervals">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">Merge Intervals</td>
+                                <td><a href="https://takeuforward.org/data-structure/merge-overlapping-subintervals/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=2JzRBPFYbKE" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/merge-intervals/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Merge Intervals')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="trapping-rain">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="2"></td>
+                                <td class="dsa-problem-name">Trapping Rain Water</td>
+                                <td><a href="https://takeuforward.org/data-structure/trapping-rainwater/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=m18Hntz4go8" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/trapping-rain-water/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-hard">Hard</span></td>
+                                <td><span class="time-estimate">⏱️ 45 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Trapping Rain Water')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Day 3: Linked Lists -->
+            <div class="dsa-day-card" id="day3">
+                <div class="dsa-day-header" onclick="toggleDay('day3')">
+                    <h4>📅 Day 3: Linked Lists</h4>
+                    <span class="dsa-day-progress"><span class="day3-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="reverse-ll">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Reverse Linked List</td>
+                                <td><a href="https://takeuforward.org/data-structure/reverse-a-linked-list/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=iRtLEoL-r-g" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/reverse-linked-list/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 20 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Reverse Linked List')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="ll-cycle">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Linked List Cycle</td>
+                                <td><a href="https://takeuforward.org/data-structure/detect-a-cycle-in-a-linked-list/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=354J83hX7RI" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/linked-list-cycle/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 20 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Linked List Cycle')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="merge-two-ll">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Merge Two Sorted Lists</td>
+                                <td><a href="https://takeuforward.org/data-structure/merge-two-sorted-linked-lists/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=Xb4slcp1U38" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/merge-two-sorted-lists/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 20 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-apple" title="Apple">🍎</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Merge Two Sorted Lists')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="remove-nth">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Remove Nth Node From End</td>
+                                <td><a href="https://takeuforward.org/data-structure/remove-n-th-node-from-the-end-of-a-linked-list/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=3kMKYQ2wNIU" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Remove Nth Node From End')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="reorder-list">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Reorder List</td>
+                                <td><a href="https://takeuforward.org/data-structure/reorder-list/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=S5bfdUTrKLM" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/reorder-list/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Reorder List')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="merge-k-ll">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="3"></td>
+                                <td class="dsa-problem-name">Merge k Sorted Lists</td>
+                                <td><a href="https://takeuforward.org/data-structure/merge-k-sorted-linked-lists/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=q5a5OiGbT6Q" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/merge-k-sorted-lists/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-hard">Hard</span></td>
+                                <td><span class="time-estimate">⏱️ 45 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Merge k Sorted Lists')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Day 4: Trees -->
+            <div class="dsa-day-card" id="day4">
+                <div class="dsa-day-header" onclick="toggleDay('day4')">
+                    <h4>📅 Day 4: Binary Trees</h4>
+                    <span class="dsa-day-progress"><span class="day4-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="max-depth-tree">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Maximum Depth of Binary Tree</td>
+                                <td><a href="https://takeuforward.org/data-structure/maximum-depth-of-a-binary-tree/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=eD3tmO66aBA" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 15 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Maximum Depth of Binary Tree')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="same-tree">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Same Tree</td>
+                                <td><a href="https://takeuforward.org/data-structure/check-if-two-trees-are-identical/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=BhuvF_-PWS0" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/same-tree/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 15 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Same Tree')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="invert-tree">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Invert Binary Tree</td>
+                                <td><a href="https://takeuforward.org/data-structure/invert-binary-tree/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=OnSn2XEQ4MY" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/invert-binary-tree/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 15 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-apple" title="Apple">🍎</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Invert Binary Tree')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="level-order">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Binary Tree Level Order Traversal</td>
+                                <td><a href="https://takeuforward.org/data-structure/level-order-traversal-of-a-binary-tree/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=EoAsWbO7sqg" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/binary-tree-level-order-traversal/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Binary Tree Level Order Traversal')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="validate-bst">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Validate Binary Search Tree</td>
+                                <td><a href="https://takeuforward.org/data-structure/check-if-a-tree-is-a-bst/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=s6ATEkipzow" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/validate-binary-search-tree/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Validate Binary Search Tree')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="serialize-tree">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="4"></td>
+                                <td class="dsa-problem-name">Serialize and Deserialize Binary Tree</td>
+                                <td><a href="https://takeuforward.org/data-structure/serialize-and-deserialize-binary-tree/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=u4JAi2JJhI8" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-hard">Hard</span></td>
+                                <td><span class="time-estimate">⏱️ 45 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-netflix" title="Netflix">N</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Serialize and Deserialize Binary Tree')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Day 5: Dynamic Programming -->
+            <div class="dsa-day-card" id="day5">
+                <div class="dsa-day-header" onclick="toggleDay('day5')">
+                    <h4>📅 Day 5: Dynamic Programming</h4>
+                    <span class="dsa-day-progress"><span class="day5-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="climbing-stairs">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">Climbing Stairs</td>
+                                <td><a href="https://takeuforward.org/data-structure/climbing-stairs/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=mLfjzJsN8us" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/climbing-stairs/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-easy">Easy</span></td>
+                                <td><span class="time-estimate">⏱️ 20 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-apple" title="Apple">🍎</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Climbing Stairs')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="house-robber">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">House Robber</td>
+                                <td><a href="https://takeuforward.org/data-structure/house-robber/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=73r3KWiEvyk" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/house-robber/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 25 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'House Robber')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="coin-change">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">Coin Change</td>
+                                <td><a href="https://takeuforward.org/data-structure/coin-change/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=myPeWb3Y68A" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/coin-change/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Coin Change')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="longest-inc-subseq">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">Longest Increasing Subsequence</td>
+                                <td><a href="https://takeuforward.org/data-structure/longest-increasing-subsequence/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=ekcwMsSIzVc" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/longest-increasing-subsequence/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Longest Increasing Subsequence')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="word-break">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">Word Break</td>
+                                <td><a href="https://takeuforward.org/data-structure/word-break/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=th4OnoGasMU" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/word-break/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Word Break')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="edit-distance">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="5"></td>
+                                <td class="dsa-problem-name">Edit Distance</td>
+                                <td><a href="https://takeuforward.org/data-structure/edit-distance/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=AuYujVj646Q" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/edit-distance/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-hard">Hard</span></td>
+                                <td><span class="time-estimate">⏱️ 45 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-microsoft" title="Microsoft">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Edit Distance')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Day 6: Graphs -->
+            <div class="dsa-day-card" id="day6">
+                <div class="dsa-day-header" onclick="toggleDay('day6')">
+                    <h4>📅 Day 6: Graphs</h4>
+                    <span class="dsa-day-progress"><span class="day6-solved">0</span>/6</span>
+                </div>
+                <div class="dsa-day-content">
+                    <table class="dsa-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">✓</th>
+                                <th>Problem</th>
+                                <th>Article</th>
+                                <th>Video</th>
+                                <th>Practice</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                                <th>Companies</th>
+                                <th>Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-problem="num-islands">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Number of Islands</td>
+                                <td><a href="https://takeuforward.org/data-structure/number-of-islands/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=pV2kpPD66nE" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/number-of-islands/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Number of Islands')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="clone-graph">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Clone Graph</td>
+                                <td><a href="https://takeuforward.org/data-structure/clone-graph/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=mQeF6bN8hMk" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/clone-graph/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Clone Graph')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="course-schedule">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Course Schedule</td>
+                                <td><a href="https://takeuforward.org/data-structure/course-schedule/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=WAOfKpxYHR8" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/course-schedule/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 35 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Course Schedule')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="graph-valid-tree">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Pacific Atlantic Water Flow</td>
+                                <td><a href="https://takeuforward.org/data-structure/pacific-atlantic-water-flow/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=s-VkcjHqkGI" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/pacific-atlantic-water-flow/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 40 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Pacific Atlantic Water Flow')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="longest-consec-seq">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Longest Consecutive Sequence</td>
+                                <td><a href="https://takeuforward.org/data-structure/longest-consecutive-sequence/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=P6RZZMu_maU" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/longest-consecutive-sequence/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-medium">Medium</span></td>
+                                <td><span class="time-estimate">⏱️ 30 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Longest Consecutive Sequence')">🔖</button></td>
+                            </tr>
+                            <tr data-problem="alien-dict">
+                                <td><input type="checkbox" class="dsa-checkbox" data-day="6"></td>
+                                <td class="dsa-problem-name">Alien Dictionary</td>
+                                <td><a href="https://takeuforward.org/data-structure/alien-dictionary/" target="_blank" class="resource-link article" title="Article">📄</a></td>
+                                <td><a href="https://www.youtube.com/watch?v=U3N_je7zWy8" target="_blank" class="resource-link youtube" title="YouTube">▶️</a></td>
+                                <td><a href="https://leetcode.com/problems/alien-dictionary/" target="_blank" class="resource-link leetcode" title="LeetCode">⌨️</a></td>
+                                <td><span class="diff-badge diff-hard">Hard</span></td>
+                                <td><span class="time-estimate">⏱️ 45 min</span></td>
+                                <td class="company-tags">
+                                    <span class="company-tag company-meta" title="Meta">M</span>
+                                    <span class="company-tag company-amazon" title="Amazon">A</span>
+                                    <span class="company-tag company-google" title="Google">G</span>
+                                </td>
+                                <td><button class="bookmark-btn" onclick="toggleBookmark(this, 'Alien Dictionary')">🔖</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Saved Questions Panel -->
+            <div class="saved-panel" id="savedPanel">
+                <div class="saved-panel-header">
+                    <h4>🔖 Saved Questions</h4>
+                    <button onclick="toggleSavedPanel()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">×</button>
+                </div>
+                <div class="saved-panel-content" id="savedPanelContent">
+                    <p style="color: var(--text-secondary); text-align: center;">No saved questions yet</p>
+                </div>
+            </div>
+
+        </section>
 
         <!-- OVERVIEW SECTION -->
         <section id="intro">
@@ -3790,8 +4987,150 @@ builder.Services.AddAuthorization(options =>
             });
         });
 
+        // =========== DSA SHEET JAVASCRIPT ===========
+
+        // Toggle Day Card
+        function toggleDay(dayId) {
+            const card = document.getElementById(dayId);
+            card.classList.toggle('collapsed');
+        }
+
+        // Bookmarks Storage
+        let savedProblems = JSON.parse(localStorage.getItem('dsa-saved-problems') || '[]');
+
+        // Toggle Bookmark
+        function toggleBookmark(btn, problemName) {
+            btn.classList.toggle('saved');
+            if (btn.classList.contains('saved')) {
+                if (!savedProblems.includes(problemName)) {
+                    savedProblems.push(problemName);
+                }
+            } else {
+                savedProblems = savedProblems.filter(p => p !== problemName);
+            }
+            localStorage.setItem('dsa-saved-problems', JSON.stringify(savedProblems));
+            updateSavedCount();
+            updateSavedPanel();
+        }
+
+        // Toggle Saved Panel
+        function toggleSavedPanel() {
+            document.getElementById('savedPanel').classList.toggle('open');
+        }
+
+        // Update Saved Count
+        function updateSavedCount() {
+            document.getElementById('savedCount').textContent = savedProblems.length;
+        }
+
+        // Update Saved Panel Content
+        function updateSavedPanel() {
+            const content = document.getElementById('savedPanelContent');
+            if (savedProblems.length === 0) {
+                content.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No saved questions yet</p>';
+            } else {
+                content.innerHTML = savedProblems.map(p => `
+                    <div class="saved-item">
+                        <span>${p}</span>
+                        <button onclick="removeSaved('${p}')" style="background:none;border:none;cursor:pointer;">❌</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Remove from saved
+        function removeSaved(problemName) {
+            savedProblems = savedProblems.filter(p => p !== problemName);
+            localStorage.setItem('dsa-saved-problems', JSON.stringify(savedProblems));
+            updateSavedCount();
+            updateSavedPanel();
+            // Update bookmark button
+            document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                if (btn.onclick.toString().includes(problemName)) {
+                    btn.classList.remove('saved');
+                }
+            });
+        }
+
+        // DSA Progress Tracking
+        function updateDSAProgress() {
+            const dsaCheckboxes = document.querySelectorAll('.dsa-checkbox');
+            const checkedDSA = document.querySelectorAll('.dsa-checkbox:checked');
+
+            // Update total solved
+            document.getElementById('solvedProblems').textContent = checkedDSA.length;
+
+            // Update per-day progress
+            for (let day = 1; day <= 6; day++) {
+                const dayCheckboxes = document.querySelectorAll(`.dsa-checkbox[data-day="${day}"]`);
+                const daySolved = document.querySelectorAll(`.dsa-checkbox[data-day="${day}"]:checked`).length;
+                const dayCounter = document.querySelector(`.day${day}-solved`);
+                if (dayCounter) {
+                    dayCounter.textContent = daySolved;
+                }
+            }
+
+            // Update row styling
+            dsaCheckboxes.forEach(cb => {
+                const row = cb.closest('tr');
+                if (cb.checked) {
+                    row.classList.add('completed-row');
+                } else {
+                    row.classList.remove('completed-row');
+                }
+            });
+
+            // Save DSA progress
+            const dsaProgress = {};
+            dsaCheckboxes.forEach((cb, index) => {
+                dsaProgress[index] = cb.checked;
+            });
+            localStorage.setItem('dsa-progress', JSON.stringify(dsaProgress));
+        }
+
+        // Load DSA Progress
+        function loadDSAProgress() {
+            // Load checkbox progress
+            const saved = localStorage.getItem('dsa-progress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                const dsaCheckboxes = document.querySelectorAll('.dsa-checkbox');
+                dsaCheckboxes.forEach((cb, index) => {
+                    if (progress[index]) {
+                        cb.checked = true;
+                    }
+                });
+            }
+            updateDSAProgress();
+
+            // Load bookmarks
+            savedProblems = JSON.parse(localStorage.getItem('dsa-saved-problems') || '[]');
+            updateSavedCount();
+            updateSavedPanel();
+
+            // Restore bookmark button states
+            document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                savedProblems.forEach(problem => {
+                    if (onclick && onclick.includes(problem)) {
+                        btn.classList.add('saved');
+                    }
+                });
+            });
+        }
+
+        // DSA Checkbox change handler
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('dsa-checkbox')) {
+                updateDSAProgress();
+            }
+        });
+
         // Initialize
-        document.addEventListener('DOMContentLoaded', loadProgress);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgress();
+            loadDSAProgress();
+        });
     </script>
 </body>
 </html>
