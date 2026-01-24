@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEGA BPM Complete Learning Guide</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --accent-color: #ea4335;
+            --bg-color: #f8f9fa;
+            --text-color: #202124;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --border-color: #dadce0;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: white;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+        
+        .sidebar nav ul {
+            list-style: none;
+        }
+        
+        .sidebar nav ul li a {
+            display: block;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .sidebar nav ul li a:hover,
+        .sidebar nav ul li a.active {
+            background: #e8f0fe;
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .sidebar nav ul li ul {
+            padding-left: 15px;
+        }
+        
+        .sidebar nav ul li ul li a {
+            font-size: 0.85rem;
+            padding: 6px 20px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 60px;
+            max-width: 1000px;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            margin: 50px 0 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            color: #5f6368;
+            margin: 35px 0 15px;
+        }
+        
+        h4 {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin: 25px 0 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #5f6368;
+            margin-bottom: 30px;
+        }
+        
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #e8eaed;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        /* Lists */
+        ul, ol {
+            margin: 15px 0 15px 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: #e8f0fe;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .success-box {
+            background: #e6f4ea;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* Diagram Container */
+        .diagram {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        /* Question/Answer Styling */
+        .qa-section {
+            background: white;
+            border-radius: 8px;
+            margin: 25px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .question {
+            background: linear-gradient(135deg, var(--primary-color), #4285f4);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .answer {
+            padding: 20px;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .badge-beginner { background: #e6f4ea; color: #137333; }
+        .badge-intermediate { background: #fef7e0; color: #b06000; }
+        .badge-advanced { background: #fce8e6; color: #c5221f; }
+
+        /* Horizontal Rule */
+        hr {
+            border: none;
+            height: 1px;
+            background: var(--border-color);
+            margin: 40px 0;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .back-to-top { display: none; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>📘 PEGA BPM Guide</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#introduction">Introduction & Overview</a></li>
+                <li><a href="#prerequisites">Prerequisites</a></li>
+                <li><a href="#beginner">Beginner Level</a>
+                    <ul>
+                        <li><a href="#pega-architecture">PEGA Architecture</a></li>
+                        <li><a href="#case-management">Case Management</a></li>
+                        <li><a href="#data-model">Data Model</a></li>
+                        <li><a href="#ui-development">UI Development</a></li>
+                    </ul>
+                </li>
+                <li><a href="#intermediate">Intermediate Level</a>
+                    <ul>
+                        <li><a href="#decision-rules">Decision Rules</a></li>
+                        <li><a href="#integration">Integration</a></li>
+                        <li><a href="#reporting">Reporting</a></li>
+                    </ul>
+                </li>
+                <li><a href="#advanced">Advanced Level</a>
+                    <ul>
+                        <li><a href="#performance">Performance</a></li>
+                        <li><a href="#security">Security</a></li>
+                        <li><a href="#devops">DevOps</a></li>
+                    </ul>
+                </li>
+                <li><a href="#scenarios">Business Scenarios</a></li>
+                <li><a href="#integration-patterns">Integration Patterns</a></li>
+                <li><a href="#interview">Interview Preparation</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+                <li><a href="#quick-reference">Quick Reference</a></li>
+                <li><a href="#glossary">Glossary</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1>PEGA BPM Complete Learning Guide</h1>
+        <p class="subtitle">From Beginner to Advanced - A Comprehensive Learning Journey</p>
+
+        <!-- Introduction Section -->
+        <section id="introduction">
+            <h2>Introduction and Overview</h2>
+
+            <h3>What is PEGA BPM?</h3>
+            <p>PEGA BPM (Business Process Management) is a low-code application development platform developed by Pegasystems. It enables organizations to build enterprise applications that automate business processes, manage cases, and deliver personalized customer experiences.</p>
+
+            <h3>Key Characteristics of PEGA</h3>
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                    PEGA PLATFORM PILLARS                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐    │
+│   │   Low-Code    │   │     Case      │   │   Decision    │    │
+│   │  Development  │   │  Management   │   │   Management  │    │
+│   └───────────────┘   └───────────────┘   └───────────────┘    │
+│                                                                 │
+│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐    │
+│   │   Process     │   │     AI &      │   │  Robotic      │    │
+│   │  Automation   │   │  Analytics    │   │  Automation   │    │
+│   └───────────────┘   └───────────────┘   └───────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <h3>Why Learn PEGA?</h3>
+            <ul>
+                <li><strong>Market Demand:</strong> PEGA is a leader in the Gartner Magic Quadrant for CRM and BPM</li>
+                <li><strong>Enterprise Adoption:</strong> Used by Fortune 500 companies globally</li>
+                <li><strong>Low-Code Advantage:</strong> Build applications 6x faster than traditional coding</li>
+                <li><strong>Career Growth:</strong> High-paying jobs with excellent growth opportunities</li>
+                <li><strong>Versatility:</strong> Applicable across industries (Banking, Insurance, Healthcare, Government)</li>
+            </ul>
+
+            <h3>Learning Path Overview</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Duration</th>
+                        <th>Focus Areas</th>
+                        <th>Certification Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-beginner">Beginner</span></td>
+                        <td>4-6 weeks</td>
+                        <td>Core concepts, UI, Basic rules</td>
+                        <td>CSA (Certified System Architect)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-intermediate">Intermediate</span></td>
+                        <td>6-8 weeks</td>
+                        <td>Case management, Integration, Reporting</td>
+                        <td>CSSA (Certified Senior System Architect)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-advanced">Advanced</span></td>
+                        <td>8-12 weeks</td>
+                        <td>Architecture, Performance, DevOps</td>
+                        <td>LSA (Lead System Architect)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <!-- Prerequisites Section -->
+        <section id="prerequisites">
+            <h2>Prerequisites and Background Knowledge</h2>
+
+            <h3>Technical Prerequisites</h3>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Required Knowledge</h4>
+                    <ul>
+                        <li>Basic understanding of software development concepts</li>
+                        <li>Familiarity with databases and SQL</li>
+                        <li>Understanding of web technologies (HTML, CSS, JavaScript basics)</li>
+                        <li>Object-Oriented Programming concepts</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Recommended Knowledge</h4>
+                    <ul>
+                        <li>Java programming fundamentals</li>
+                        <li>REST/SOAP web services</li>
+                        <li>XML and JSON data formats</li>
+                        <li>Basic understanding of enterprise architecture</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Setting Up Your Learning Environment</h3>
+
+            <div class="info-box">
+                <h4>Option 1: PEGA Personal Edition (Recommended for Beginners)</h4>
+                <ol>
+                    <li>Visit: <a href="https://community.pega.com/personal-edition">https://community.pega.com/personal-edition</a></li>
+                    <li>Register for a PEGA Community account</li>
+                    <li>Download PEGA Personal Edition VM</li>
+                    <li>Install VirtualBox or VMware</li>
+                    <li>Import the VM and start learning</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h4>Option 2: PEGA Cloud Trial</h4>
+                <p>Available through PEGA Academy - No installation required</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Beginner Level Section -->
+        <section id="beginner">
+            <h2>Beginner Level</h2>
+            <span class="badge badge-beginner">4-6 Weeks</span>
+
+            <h3 id="pega-architecture">PEGA Architecture Overview</h3>
+
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                    PEGA PLATFORM ARCHITECTURE                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                    PRESENTATION LAYER                    │   │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐    │   │
+│  │  │   Web   │  │ Mobile  │  │  Portal │  │   API   │    │   │
+│  │  │ Browser │  │   App   │  │         │  │ Gateway │    │   │
+│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘    │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              │                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                    APPLICATION LAYER                     │   │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │   │
+│  │  │    Case     │  │   Process   │  │  Decision   │     │   │
+│  │  │ Management  │  │   Engine    │  │   Engine    │     │   │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              │                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                      DATA LAYER                          │   │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │   │
+│  │  │   PRPC DB   │  │  External   │  │    Cache    │     │   │
+│  │  │  (Rules +   │  │    Data     │  │   (Hazel-   │     │   │
+│  │  │   Data)     │  │   Sources   │  │    cast)    │     │   │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <h4>Key Architectural Components</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Purpose</th>
+                        <th>Key Features</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PRPC Engine</strong></td>
+                        <td>Core processing engine</td>
+                        <td>Rule execution, Case processing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rule Repository</strong></td>
+                        <td>Stores all application rules</td>
+                        <td>Versioning, Inheritance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>Persistent storage</td>
+                        <td>Rules + Work data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clipboard</strong></td>
+                        <td>In-memory data storage</td>
+                        <td>Session-specific data</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="case-management">Case Management Fundamentals</h3>
+
+            <div class="info-box">
+                <p><strong>What is a Case?</strong> A case represents a unit of work that needs to be completed. It has a defined lifecycle with stages, steps, and processes.</p>
+            </div>
+
+            <div class="diagram">CASE LIFECYCLE STRUCTURE:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                         CASE                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐        │
+│  │   STAGE 1   │───▶│   STAGE 2   │───▶│   STAGE 3   │        │
+│  │  (Create)   │    │  (Process)  │    │  (Resolve)  │        │
+│  └─────────────┘    └─────────────┘    └─────────────┘        │
+│        │                  │                  │                 │
+│        ▼                  ▼                  ▼                 │
+│  ┌───────────┐      ┌───────────┐      ┌───────────┐          │
+│  │  Step 1   │      │  Step 1   │      │  Step 1   │          │
+│  │  Step 2   │      │  Step 2   │      │  Step 2   │          │
+│  │  Step 3   │      │  Step 3   │      │           │          │
+│  └───────────┘      └───────────┘      └───────────┘          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <h4>Case Types</h4>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Work Case</h4>
+                    <p>Primary case type for business processes</p>
+                    <ul>
+                        <li>Has full lifecycle</li>
+                        <li>Supports stages and steps</li>
+                        <li>Can have child cases</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Data Case</h4>
+                    <p>For reference/master data</p>
+                    <ul>
+                        <li>No workflow</li>
+                        <li>CRUD operations</li>
+                        <li>Shared across cases</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 id="data-model">Data Model and Properties</h3>
+
+            <h4>Property Types</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Single Value</strong></td>
+                        <td>Holds one value</td>
+                        <td>.CustomerName = "John"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Value List</strong></td>
+                        <td>Ordered collection</td>
+                        <td>.PhoneNumbers(1), .PhoneNumbers(2)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Value Group</strong></td>
+                        <td>Named properties</td>
+                        <td>.Address.Street, .Address.City</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Page</strong></td>
+                        <td>Complex object</td>
+                        <td>.Customer (embedded page)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Page List</strong></td>
+                        <td>Collection of pages</td>
+                        <td>.OrderItems(1).ProductName</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Page Group</strong></td>
+                        <td>Named page collection</td>
+                        <td>.Addresses("Home").Street</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="ui-development">UI Development</h3>
+
+            <div class="diagram">UI COMPONENT HIERARCHY:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                         PORTAL                                  │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │                        HARNESS                             │ │
+│  │  ┌─────────────────────────────────────────────────────┐  │ │
+│  │  │                      SECTION                         │  │ │
+│  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │  │ │
+│  │  │  │   Layout    │  │   Layout    │  │   Layout    │  │  │ │
+│  │  │  │ ┌─────────┐ │  │ ┌─────────┐ │  │ ┌─────────┐ │  │  │ │
+│  │  │  │ │ Control │ │  │ │ Control │ │  │ │ Control │ │  │  │ │
+│  │  │  │ └─────────┘ │  │ └─────────┘ │  │ └─────────┘ │  │  │ │
+│  │  │  └─────────────┘  └─────────────┘  └─────────────┘  │  │ │
+│  │  └─────────────────────────────────────────────────────┘  │ │
+│  └───────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+        </section>
+
+        <hr>
+
+        <!-- Intermediate Level Section -->
+        <section id="intermediate">
+            <h2>Intermediate Level</h2>
+            <span class="badge badge-intermediate">6-8 Weeks</span>
+
+            <h3 id="decision-rules">Decision Rules</h3>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>When Condition</h4>
+                    <p>Simple true/false evaluation</p>
+                    <pre><code>.Amount > 10000</code></pre>
+                </div>
+                <div class="card">
+                    <h4>Decision Table</h4>
+                    <p>Multiple conditions → single result</p>
+                    <p>Best for: Pricing, eligibility rules</p>
+                </div>
+                <div class="card">
+                    <h4>Decision Tree</h4>
+                    <p>Hierarchical condition evaluation</p>
+                    <p>Best for: Complex nested logic</p>
+                </div>
+                <div class="card">
+                    <h4>Map Value</h4>
+                    <p>Simple key-value lookup</p>
+                    <p>Best for: Code translations</p>
+                </div>
+            </div>
+
+            <h4>Decision Table Example</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Credit Score</th>
+                        <th>Income</th>
+                        <th>Decision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>&gt; 750</td>
+                        <td>&gt; $75,000</td>
+                        <td>Auto-Approve</td>
+                    </tr>
+                    <tr>
+                        <td>650-750</td>
+                        <td>&gt; $50,000</td>
+                        <td>Manual Review</td>
+                    </tr>
+                    <tr>
+                        <td>&lt; 650</td>
+                        <td>Any</td>
+                        <td>Decline</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="integration">Integration Concepts</h3>
+
+            <div class="diagram">INTEGRATION ARCHITECTURE:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    PEGA INTEGRATION LAYER                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  OUTBOUND (PEGA → External)          INBOUND (External → PEGA) │
+│  ┌─────────────────────────┐         ┌─────────────────────────┐│
+│  │ • Connect REST          │         │ • Service REST          ││
+│  │ • Connect SOAP          │         │ • Service SOAP          ││
+│  │ • Connect SQL           │         │ • Service File          ││
+│  │ • Connect File          │         │ • Service Email         ││
+│  │ • Connect MQ            │         │ • Service MQ            ││
+│  └─────────────────────────┘         └─────────────────────────┘│
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <h4>Data Pages</h4>
+            <div class="info-box">
+                <p><strong>Data Pages</strong> are PEGA's mechanism for loading, caching, and managing data from various sources.</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scope</th>
+                        <th>Lifetime</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Thread</strong></td>
+                        <td>Single request</td>
+                        <td>User-specific data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Requestor</strong></td>
+                        <td>User session</td>
+                        <td>Shopping cart, preferences</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Node</strong></td>
+                        <td>Server lifetime</td>
+                        <td>Reference data, lookups</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="reporting">Reporting and Analytics</h3>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Report Definition</h4>
+                    <p>SQL-based queries for data retrieval</p>
+                    <ul>
+                        <li>List reports</li>
+                        <li>Summary reports</li>
+                        <li>Optimized queries</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Report Browser</h4>
+                    <p>End-user report creation tool</p>
+                    <ul>
+                        <li>Drag-and-drop interface</li>
+                        <li>Export capabilities</li>
+                        <li>Scheduling options</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Advanced Level Section -->
+        <section id="advanced">
+            <h2>Advanced Level</h2>
+            <span class="badge badge-advanced">8-12 Weeks</span>
+
+            <h3 id="performance">Performance Optimization</h3>
+
+            <div class="warning-box">
+                <h4>Key Performance Areas</h4>
+                <ul>
+                    <li><strong>Data Management:</strong> Optimize Data Page scope and refresh strategies</li>
+                    <li><strong>Database:</strong> Create indexes, archive old data, optimize queries</li>
+                    <li><strong>UI:</strong> Minimize section nesting, use lazy loading</li>
+                    <li><strong>Integration:</strong> Implement caching, set appropriate timeouts</li>
+                </ul>
+            </div>
+
+            <h4>Performance Monitoring Tools</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Purpose</th>
+                        <th>When to Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PAL</strong></td>
+                        <td>Performance Analyzer</td>
+                        <td>Identify slow interactions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tracer</strong></td>
+                        <td>Rule execution debugging</td>
+                        <td>Debug specific scenarios</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database Trace</strong></td>
+                        <td>SQL query analysis</td>
+                        <td>Optimize database calls</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clipboard</strong></td>
+                        <td>Memory inspection</td>
+                        <td>Check data loading</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="security">Security Architecture</h3>
+
+            <div class="diagram">PEGA SECURITY MODEL:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    SECURITY LAYERS                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  AUTHENTICATION                                          │   │
+│  │  • LDAP/Active Directory                                 │   │
+│  │  • SAML/OAuth 2.0                                        │   │
+│  │  • Multi-factor Authentication                           │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              │                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  AUTHORIZATION                                           │   │
+│  │  • Access Groups (Role-based)                            │   │
+│  │  • Access Roles (Permissions)                            │   │
+│  │  • Access When (Row-level security)                      │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              │                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  DATA SECURITY                                           │   │
+│  │  • Encryption at rest                                    │   │
+│  │  • Encryption in transit (TLS)                           │   │
+│  │  • Field-level encryption                                │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <h3 id="devops">DevOps and Deployment</h3>
+
+            <div class="diagram">DEPLOYMENT PIPELINE:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  DEV ──▶ QA ──▶ STAGING ──▶ PRODUCTION                        │
+│   │      │        │            │                               │
+│   ▼      ▼        ▼            ▼                               │
+│ Branch  Merge   Export      Deploy                             │
+│ Review  Test    Product     Verify                             │
+│                 Rule                                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Deployment Manager</h4>
+                    <ul>
+                        <li>Pipeline-based automation</li>
+                        <li>Approval workflows</li>
+                        <li>Rollback capability</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Branch Management</h4>
+                    <ul>
+                        <li>Feature branches</li>
+                        <li>Merge with conflict resolution</li>
+                        <li>Code review integration</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Business Scenarios Section -->
+        <section id="scenarios">
+            <h2>Real-World Business Scenarios</h2>
+
+            <h3>Scenario 1: Loan Approval Process</h3>
+            <div class="card">
+                <p><strong>Business Context:</strong> A financial institution needs to automate their loan approval process to reduce processing time from 5 days to same-day decisions.</p>
+
+                <div class="diagram">LOAN APPROVAL CASE LIFECYCLE:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  STAGE 1: APPLICATION                                                   │
+│  • Collect applicant information                                        │
+│  • Upload required documents (ID, Income proof, Bank statements)        │
+│  • Select loan type and amount                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│  STAGE 2: AUTOMATED VERIFICATION (Parallel)                             │
+│  • Identity verification (External API)                                 │
+│  • Credit score check (Bureau Integration)                              │
+│  • Income verification (Employer API)                                   │
+│  • Fraud detection (ML Model)                                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  STAGE 3: DECISION                                                      │
+│  IF Credit Score >= 750 AND DTI < 35% → Auto-Approve                   │
+│  IF Credit Score < 600 OR Fraud Score > 70 → Auto-Decline             │
+│  ELSE → Route to Underwriter for Manual Review                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  STAGE 4: FULFILLMENT                                                   │
+│  • Generate loan documents                                              │
+│  • E-signature process                                                  │
+│  • Disbursement                                                         │
+└─────────────────────────────────────────────────────────────────────────┘</div>
+            </div>
+
+            <h3>Scenario 2: Insurance Claims Processing</h3>
+            <div class="card">
+                <p><strong>Business Context:</strong> An insurance company wants to streamline claims processing and implement straight-through processing for simple claims.</p>
+
+                <h4>Claim Routing Decision Table</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Claim Type</th>
+                            <th>Amount</th>
+                            <th>Fraud Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Auto</td>
+                            <td>≤ $5,000</td>
+                            <td>&lt; 30</td>
+                            <td>Auto-Approve (STP)</td>
+                        </tr>
+                        <tr>
+                            <td>Auto</td>
+                            <td>≤ $5,000</td>
+                            <td>≥ 30</td>
+                            <td>Route to Adjuster</td>
+                        </tr>
+                        <tr>
+                            <td>Auto</td>
+                            <td>&gt; $5,000</td>
+                            <td>Any</td>
+                            <td>Route to Senior Adjuster</td>
+                        </tr>
+                        <tr>
+                            <td>Property</td>
+                            <td>≤ $10,000</td>
+                            <td>&lt; 30</td>
+                            <td>Auto-Approve (STP)</td>
+                        </tr>
+                        <tr>
+                            <td>Property</td>
+                            <td>&gt; $10,000</td>
+                            <td>Any</td>
+                            <td>Assign Adjuster Visit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Scenario 3: Customer Onboarding</h3>
+            <div class="card">
+                <p><strong>Business Context:</strong> A bank needs to digitize customer onboarding with KYC compliance and multi-product enrollment capabilities.</p>
+
+                <div class="diagram">CUSTOMER ONBOARDING FLOW:
+
+  ┌─────────────────┐
+  │ IDENTITY CAPTURE│
+  │ • Personal info │
+  │ • ID scan       │
+  │ • Selfie        │
+  └────────┬────────┘
+           ▼
+  ┌─────────────────┐
+  │ KYC VERIFICATION│ ←── Parallel: ID Check, Address Check, AML Screening
+  └────────┬────────┘
+           │
+     ┌─────┼─────┐
+     ▼     ▼     ▼
+[Approved][Review][Declined]
+     │     │     │
+     ▼     │     ▼
+  ┌─────────────────┐     ┌─────────────────┐
+  │ PRODUCT SELECT  │     │ REJECTION       │
+  │ • Savings       │     │ NOTIFICATION    │
+  │ • Checking      │     └─────────────────┘
+  │ • Credit Card   │
+  └────────┬────────┘
+           ▼
+  ┌─────────────────┐
+  │ ACCOUNT CREATION│
+  │ • Core banking  │
+  │ • Welcome kit   │
+  └─────────────────┘</div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Integration Patterns Section -->
+        <section id="integration-patterns">
+            <h2>Integration Patterns</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Pattern 1: Synchronous Request-Response</h4>
+                    <p><strong>Use Case:</strong> Real-time credit score check</p>
+                    <div class="diagram">PEGA ──▶ REST Connector ──▶ Credit Bureau API
+     ◀──────────────────────◀──────────────────</div>
+                    <ul>
+                        <li>Method: POST</li>
+                        <li>Authentication: OAuth 2.0</li>
+                        <li>Timeout: 30 seconds</li>
+                        <li>Retry: 3 attempts with exponential backoff</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Pattern 2: Asynchronous Fire-and-Forget</h4>
+                    <p><strong>Use Case:</strong> Send notification to external system</p>
+                    <div class="diagram">PEGA ──▶ Queue Processor (Kafka) ──▶ External System</div>
+                    <ul>
+                        <li>Decoupled processing</li>
+                        <li>Idempotency handling</li>
+                        <li>Dead letter queue for failures</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Pattern 3: Callback/Webhook</h4>
+                    <p><strong>Use Case:</strong> Long-running background check</p>
+                    <div class="diagram">PEGA ──(1)──▶ External Service
+     ◀──(2)── Acknowledge
+     [Case Waits...]
+     ◀──(3)── Callback with Results</div>
+                    <ul>
+                        <li>Submit with callback URL</li>
+                        <li>Store request ID</li>
+                        <li>Resume on callback</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Interview Preparation Section -->
+        <section id="interview">
+            <h2>Interview Preparation</h2>
+
+            <h3>Beginner Level Questions</h3>
+
+            <div class="qa-section">
+                <div class="question">Q1: What is PEGA and what are its main components?</div>
+                <div class="answer">
+                    <p><strong>PEGA</strong> is a low-code Business Process Management (BPM) and Customer Relationship Management (CRM) platform.</p>
+                    <p><strong>Main Components:</strong></p>
+                    <ul>
+                        <li><strong>Process Automation:</strong> Workflow and case management</li>
+                        <li><strong>Decision Management:</strong> Business rules engine</li>
+                        <li><strong>Customer Engagement:</strong> Omni-channel interactions</li>
+                        <li><strong>AI/ML:</strong> Predictive analytics and decisioning</li>
+                        <li><strong>Robotic Automation:</strong> RPA capabilities</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q2: Explain the difference between a Flow and a Case in PEGA.</div>
+                <div class="answer">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Case</th>
+                                <th>Flow</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Represents a unit of work</td>
+                                <td>Defines sequence of steps</td>
+                            </tr>
+                            <tr>
+                                <td>Has lifecycle with stages</td>
+                                <td>Part of case implementation</td>
+                            </tr>
+                            <tr>
+                                <td>Contains data, documents, history</td>
+                                <td>Contains shapes (assignments, decisions)</td>
+                            </tr>
+                            <tr>
+                                <td>Can have child cases</td>
+                                <td>Can be reused across cases</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q3: What are the different types of properties in PEGA?</div>
+                <div class="answer">
+                    <p><strong>By Structure:</strong></p>
+                    <ul>
+                        <li><strong>Single Value:</strong> One value (e.g., CustomerName)</li>
+                        <li><strong>Value List:</strong> Ordered collection (e.g., PhoneNumbers[])</li>
+                        <li><strong>Value Group:</strong> Named properties (e.g., Address.Street)</li>
+                        <li><strong>Page:</strong> Complex object (e.g., Customer)</li>
+                        <li><strong>Page List:</strong> Collection of objects (e.g., OrderItems[])</li>
+                        <li><strong>Page Group:</strong> Named collection of pages</li>
+                    </ul>
+                    <p><strong>By Data Type:</strong> Text, Integer, Decimal, Boolean, Date, DateTime, Time, Identifier, Password</p>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q4: What is a Data Page and why is it important?</div>
+                <div class="answer">
+                    <p>A <strong>Data Page</strong> is PEGA's mechanism for loading, caching, and managing data from various sources.</p>
+                    <p><strong>Importance:</strong></p>
+                    <ul>
+                        <li><strong>Performance:</strong> Caches data to reduce database calls</li>
+                        <li><strong>Reusability:</strong> Define once, use everywhere</li>
+                        <li><strong>Abstraction:</strong> Separates data access from UI/process</li>
+                        <li><strong>Flexibility:</strong> Multiple source options (DB, API, activity)</li>
+                    </ul>
+                    <p><strong>Key Properties:</strong> Scope (Thread/Requestor/Node), Structure (Page/List), Source, Refresh Strategy</p>
+                </div>
+            </div>
+
+            <h3>Intermediate Level Questions</h3>
+
+            <div class="qa-section">
+                <div class="question">Q5: How does PEGA handle parallel processing in workflows?</div>
+                <div class="answer">
+                    <p>PEGA supports parallel processing through:</p>
+                    <ul>
+                        <li><strong>Split-Join (Flow):</strong> Split shape creates parallel branches, Join waits for completion</li>
+                        <li><strong>Parallel Stages (Case):</strong> Multiple stages execute simultaneously</li>
+                        <li><strong>Child Cases:</strong> Create multiple child cases with propagation options</li>
+                        <li><strong>Spin-off Processing:</strong> Queue-based parallel execution</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q6: How do you implement error handling in PEGA integrations?</div>
+                <div class="answer">
+                    <p><strong>Integration Error Handling Approaches:</strong></p>
+                    <ul>
+                        <li><strong>Connector-Level:</strong> Configure timeout, retry with exponential backoff, circuit breakers</li>
+                        <li><strong>Data Page Level:</strong> Handle "Object not found", configure fallback sources</li>
+                        <li><strong>Activity-Level:</strong> Try-Catch blocks, step-level error handling</li>
+                        <li><strong>Flow-Level:</strong> Ticket for exceptions, SLA-based escalation</li>
+                    </ul>
+                    <p><strong>Error Response Mapping:</strong></p>
+                    <ul>
+                        <li>HTTP 4xx → Client error → User notification</li>
+                        <li>HTTP 5xx → Server error → Retry then escalate</li>
+                        <li>Timeout → Retry with exponential backoff</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Advanced Level Questions</h3>
+
+            <div class="qa-section">
+                <div class="question">Q7: Explain PEGA's rule resolution algorithm.</div>
+                <div class="answer">
+                    <p><strong>Rule Resolution Priority Order:</strong></p>
+                    <ol>
+                        <li><strong>Circumstance/Specialization:</strong> Most specific circumstances win</li>
+                        <li><strong>Class Hierarchy:</strong> Most specific class wins (child overrides parent)</li>
+                        <li><strong>Ruleset List Order:</strong> Application → Framework → Pega</li>
+                        <li><strong>Ruleset Version:</strong> Higher version number wins</li>
+                        <li><strong>Circumstance Date/Time:</strong> Currently valid rules only</li>
+                        <li><strong>Availability:</strong> Available rules only (Blocked/Withdrawn excluded)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q8: What is the Situational Layer Cake pattern in PEGA?</div>
+                <div class="answer">
+                    <div class="diagram">SITUATIONAL LAYER CAKE:
+
+┌─────────────────────────────────────────────────────┐
+│  IMPLEMENTATION LAYER (Top)                         │
+│  - Division/Region specific customizations          │
+├─────────────────────────────────────────────────────┤
+│  APPLICATION LAYER (Middle)                         │
+│  - Business process implementations                 │
+├─────────────────────────────────────────────────────┤
+│  FRAMEWORK LAYER (Lower-Middle)                     │
+│  - Shared components across applications            │
+├─────────────────────────────────────────────────────┤
+│  PEGA PLATFORM (Bottom)                             │
+│  - Out-of-box functionality                         │
+└─────────────────────────────────────────────────────┘</div>
+                    <p><strong>Benefits:</strong> Reusability, Maintainability, Upgradability, Customization, Governance</p>
+                </div>
+            </div>
+
+            <h3>Scenario-Based Questions</h3>
+
+            <div class="qa-section">
+                <div class="question">Q9: Design a loan approval system with auto-approve for low-risk applications</div>
+                <div class="answer">
+                    <p><strong>Decision Table Design:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Loan Amount</th>
+                                <th>Credit Score</th>
+                                <th>DTI Ratio</th>
+                                <th>Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>≤ $50,000</td>
+                                <td>&gt; 700</td>
+                                <td>&lt; 40%</td>
+                                <td>Auto-Approve</td>
+                            </tr>
+                            <tr>
+                                <td>≤ $50,000</td>
+                                <td>650-700</td>
+                                <td>&lt; 40%</td>
+                                <td>Junior Review</td>
+                            </tr>
+                            <tr>
+                                <td>&gt; $50,000</td>
+                                <td>Any</td>
+                                <td>Any</td>
+                                <td>Senior Review</td>
+                            </tr>
+                            <tr>
+                                <td>Any</td>
+                                <td>&lt; 600</td>
+                                <td>Any</td>
+                                <td>Auto-Decline</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="qa-section">
+                <div class="question">Q10: You're experiencing slow page load times in production. How would you diagnose and fix?</div>
+                <div class="answer">
+                    <p><strong>Diagnostic Steps:</strong></p>
+                    <ol>
+                        <li><strong>Identify:</strong> Use PAL to find slow interactions, check browser Network tab</li>
+                        <li><strong>Trace:</strong> Enable Tracer, filter by rule execution, DB queries, connectors</li>
+                        <li><strong>Analyze:</strong> Check for missing indexes, full table scans, excessive joins</li>
+                    </ol>
+                    <p><strong>Common Fixes:</strong></p>
+                    <ul>
+                        <li>Change Data Page scope (Thread → Node for reference data)</li>
+                        <li>Implement lazy loading for tabs</li>
+                        <li>Replace Obj-List with Obj-Browse</li>
+                        <li>Add missing database indexes</li>
+                        <li>Implement connection pooling for integrations</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Best Practices Section -->
+        <section id="best-practices">
+            <h2>Best Practices and Common Pitfalls</h2>
+
+            <h3>Development Best Practices</h3>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>✅ Rule Naming</h4>
+                    <ul>
+                        <li>Use descriptive, meaningful names</li>
+                        <li>Follow naming conventions consistently</li>
+                        <li>Include purpose in name (Calculate, Validate, Get)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>✅ Development</h4>
+                    <ul>
+                        <li>Check in rules frequently</li>
+                        <li>Add meaningful check-in comments</li>
+                        <li>Review guardrail warnings</li>
+                        <li>Unit test rules before integration</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>✅ Performance</h4>
+                    <ul>
+                        <li>Use declarative rules when possible</li>
+                        <li>Optimize data page scope and refresh</li>
+                        <li>Implement pagination for large lists</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>✅ Security</h4>
+                    <ul>
+                        <li>Implement proper access control</li>
+                        <li>Use Access When rules for data security</li>
+                        <li>Encrypt sensitive data</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Common Pitfalls to Avoid</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>❌ Problem</th>
+                        <th>✅ Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Clipboard Bloat - Loading too much data</td>
+                        <td>Use data pages, pagination, targeted queries</td>
+                    </tr>
+                    <tr>
+                        <td>N+1 Query Problem - DB calls in loops</td>
+                        <td>Batch operations, join queries</td>
+                    </tr>
+                    <tr>
+                        <td>Hardcoded Values - Magic numbers/strings</td>
+                        <td>Use application settings, lookup tables</td>
+                    </tr>
+                    <tr>
+                        <td>Circular References - Rules calling each other</td>
+                        <td>Proper rule design, break cycles</td>
+                    </tr>
+                    <tr>
+                        <td>Improper Error Handling - Swallowing exceptions</td>
+                        <td>Log errors, notify appropriate parties</td>
+                    </tr>
+                    <tr>
+                        <td>Ignoring Guardrails - Dismissing warnings</td>
+                        <td>Treat warnings seriously, fix issues</td>
+                    </tr>
+                    <tr>
+                        <td>Wrong Data Page Scope - Thread for shared data</td>
+                        <td>Analyze data usage, choose appropriate scope</td>
+                    </tr>
+                    <tr>
+                        <td>Monolithic Flows - Hundreds of shapes</td>
+                        <td>Break into sub-flows, use stages</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <hr>
+
+        <!-- Quick Reference Section -->
+        <section id="quick-reference">
+            <h2>Quick Reference Cards</h2>
+
+            <h3>Data Page Quick Reference</h3>
+            <div class="card">
+                <h4>Naming Convention</h4>
+                <ul>
+                    <li><code>D_&lt;Name&gt;</code> → Single page (e.g., D_Customer)</li>
+                    <li><code>D_&lt;Name&gt;List</code> → Page list (e.g., D_CustomerList)</li>
+                </ul>
+
+                <h4>Scope Selection</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scope</th>
+                            <th>Use For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Thread</td>
+                            <td>User-specific, request-specific data</td>
+                        </tr>
+                        <tr>
+                            <td>Requestor</td>
+                            <td>User session data, shopping cart</td>
+                        </tr>
+                        <tr>
+                            <td>Node</td>
+                            <td>Reference data, lookup tables</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Access Syntax</h4>
+                <ul>
+                    <li><code>D_Customer.Name</code> → Property access</li>
+                    <li><code>D_CustomerList(1).Name</code> → List index access</li>
+                    <li><code>D_CustomerList[.ID = "123"].Name</code> → Filter access</li>
+                </ul>
+            </div>
+
+            <h3>Decision Rules Quick Reference</h3>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule Type</th>
+                            <th>When to Use</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>When Condition</td>
+                            <td>Simple true/false check</td>
+                            <td>.Amount &gt; 1000</td>
+                        </tr>
+                        <tr>
+                            <td>Decision Table</td>
+                            <td>Multiple conditions → single result</td>
+                            <td>Pricing based on tier + quantity</td>
+                        </tr>
+                        <tr>
+                            <td>Decision Tree</td>
+                            <td>Complex nested conditions</td>
+                            <td>Eligibility with exception paths</td>
+                        </tr>
+                        <tr>
+                            <td>Map Value</td>
+                            <td>Simple key-value lookup</td>
+                            <td>Country code → Country name</td>
+                        </tr>
+                        <tr>
+                            <td>Declare Expression</td>
+                            <td>Auto-calculated property</td>
+                            <td>TotalPrice = Qty × UnitPrice</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Keyboard Shortcuts</h3>
+            <div class="card">
+                <div class="card-grid">
+                    <div>
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><kbd>Ctrl</kbd> + <kbd>G</kbd> → Go to rule</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>K</kbd> → Quick search</li>
+                            <li><kbd>Alt</kbd> + <kbd>←</kbd> → Back</li>
+                            <li><kbd>Alt</kbd> + <kbd>→</kbd> → Forward</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Editing</h4>
+                        <ul>
+                            <li><kbd>Ctrl</kbd> + <kbd>S</kbd> → Save</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> → Undo</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> → Redo</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>D</kbd> → Duplicate</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Development</h4>
+                        <ul>
+                            <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> → Tracer</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> → Clipboard</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd> → Live UI</li>
+                            <li><kbd>F5</kbd> → Refresh</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Glossary Section -->
+        <section id="glossary">
+            <h2>Glossary</h2>
+
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Definition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Access Group</strong></td><td>Defines user permissions and available applications</td></tr>
+                        <tr><td><strong>Activity</strong></td><td>Procedural rule for complex logic</td></tr>
+                        <tr><td><strong>Agent</strong></td><td>Background process that runs on schedule</td></tr>
+                        <tr><td><strong>Assignment</strong></td><td>Work item assigned to user/workbasket</td></tr>
+                        <tr><td><strong>Case</strong></td><td>Unit of work with lifecycle (stages, steps)</td></tr>
+                        <tr><td><strong>Circumstance</strong></td><td>Rule variation based on conditions</td></tr>
+                        <tr><td><strong>Class</strong></td><td>Category for organizing rules and data</td></tr>
+                        <tr><td><strong>Clipboard</strong></td><td>In-memory data storage during session</td></tr>
+                        <tr><td><strong>Connector</strong></td><td>Integration rule for external systems</td></tr>
+                        <tr><td><strong>Data Page</strong></td><td>Cached data container</td></tr>
+                        <tr><td><strong>Data Transform</strong></td><td>Rule for data manipulation</td></tr>
+                        <tr><td><strong>Decision Table</strong></td><td>Tabular decision logic</td></tr>
+                        <tr><td><strong>Declare Expression</strong></td><td>Auto-calculated property</td></tr>
+                        <tr><td><strong>Flow</strong></td><td>Visual process definition</td></tr>
+                        <tr><td><strong>Guardrail</strong></td><td>Best practice warning/compliance check</td></tr>
+                        <tr><td><strong>Operator</strong></td><td>User account in PEGA</td></tr>
+                        <tr><td><strong>Property</strong></td><td>Data field/attribute</td></tr>
+                        <tr><td><strong>Queue Processor</strong></td><td>Async background processing</td></tr>
+                        <tr><td><strong>Report Definition</strong></td><td>Database query rule</td></tr>
+                        <tr><td><strong>Ruleset</strong></td><td>Container for related rules</td></tr>
+                        <tr><td><strong>Section</strong></td><td>Reusable UI component</td></tr>
+                        <tr><td><strong>SLA</strong></td><td>Service Level Agreement (time-based goals)</td></tr>
+                        <tr><td><strong>Stage</strong></td><td>Major phase in case lifecycle</td></tr>
+                        <tr><td><strong>Step</strong></td><td>Task within a stage</td></tr>
+                        <tr><td><strong>Tracer</strong></td><td>Debugging tool for rule execution</td></tr>
+                        <tr><td><strong>Validate</strong></td><td>Rule for data validation</td></tr>
+                        <tr><td><strong>When</strong></td><td>Boolean condition rule</td></tr>
+                        <tr><td><strong>Workbasket</strong></td><td>Shared queue for assignments</td></tr>
+                        <tr><td><strong>Work Object</strong></td><td>Instance of a case</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Conclusion Section -->
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+
+            <div class="success-box">
+                <h3>Key Takeaways</h3>
+                <ol>
+                    <li><strong>Case Management</strong> is central to PEGA - understand stages, steps, and case lifecycle</li>
+                    <li><strong>Data Pages</strong> are crucial for performance - choose scope and refresh strategy wisely</li>
+                    <li><strong>Decision Rules</strong> provide flexibility - use the right type for each scenario</li>
+                    <li><strong>Integration Patterns</strong> enable connectivity - implement proper error handling</li>
+                    <li><strong>Performance Optimization</strong> requires attention - follow guardrails and best practices</li>
+                    <li><strong>Deployment</strong> should be automated - use Deployment Manager and CI/CD</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3>For Certification Preparation</h3>
+                <ul>
+                    <li>Hands-on practice in PEGA Personal Edition</li>
+                    <li>Understanding rule resolution and inheritance</li>
+                    <li>Mastering case design patterns</li>
+                    <li>Learning integration approaches</li>
+                    <li>Studying real-world scenarios</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center; margin-top: 40px; color: #5f6368;">
+                <strong>Good luck with your PEGA journey!</strong>
+            </p>
+
+            <hr>
+
+            <p style="text-align: center; font-size: 0.9rem; color: #5f6368;">
+                <em>Document Version: 1.0 | Last Updated: January 2025 | Covers: PEGA Platform 8.x / Infinity</em>
+            </p>
+        </section>
+
+    </main>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top" id="backToTop">↑</a>
+
+    <script>
+        // Back to top button functionality
+        const backToTop = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Active navigation highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.sidebar nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
