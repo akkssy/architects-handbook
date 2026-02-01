@@ -1,0 +1,119 @@
+# AI Code Assistant Configuration
+# Copy this file to ~/.ai-code-assistant/config.yaml for user-specific settings
+
+# LLM Configuration
+llm:
+  # Ollama model to use (recommended: codellama, deepseek-coder, llama3.1)
+  model: "deepseek-coder:6.7b"
+  # Ollama server URL
+  base_url: "http://localhost:11434"
+  # Temperature for generation (0.0 = deterministic, 1.0 = creative)
+  temperature: 0.1
+  # Maximum tokens for response
+  max_tokens: 4096
+  # Request timeout in seconds
+  timeout: 120
+
+# Code Review Settings
+review:
+  # Severity levels to include: critical, warning, suggestion
+  severity_levels:
+    - critical
+    - warning
+    - suggestion
+  # Categories to check
+  categories:
+    - bugs
+    - security
+    - performance
+    - style
+    - best_practices
+  # Maximum file size to review (in KB)
+  max_file_size_kb: 500
+  # Include line numbers in output
+  include_line_numbers: true
+  # Generate confidence scores
+  include_confidence: true
+
+# Code Generation Settings
+generation:
+  # Include type hints in generated Python code
+  include_type_hints: true
+  # Include docstrings
+  include_docstrings: true
+  # Default generation mode: function, class, script, test
+  default_mode: "function"
+  # Maximum lines to generate
+  max_lines: 500
+
+# Output Settings
+output:
+  # Default format: console, markdown, json
+  default_format: "console"
+  # Color output (for console)
+  use_colors: true
+  # Output directory for generated files
+  output_dir: "./output"
+  # Verbose mode
+  verbose: false
+
+# File Editing Settings
+editor:
+  # Create backup before editing
+  create_backup: true
+  # Show diff before applying changes
+  show_diff: true
+  # Maximum file size to edit (in KB)
+  max_file_size_kb: 500
+  # Auto-format code after editing (requires formatter)
+  auto_format: false
+
+# Codebase Retrieval Settings (RAG)
+retrieval:
+  # Embedding model for semantic search (runs locally)
+  embedding_model: "all-MiniLM-L6-v2"
+  # Directory to store the index
+  persist_directory: ".ai-assistant-index"
+  # Collection name in the database
+  collection_name: "codebase"
+  # Maximum lines per chunk
+  chunk_size: 50
+  # Overlap between chunks
+  chunk_overlap: 10
+  # Maximum file size to index (in KB)
+  max_file_size_kb: 1024
+
+# Multi-File Refactoring Settings
+refactor:
+  # Maximum number of files to include in a refactoring operation
+  max_files: 20
+  # Maximum file size to include (in KB)
+  max_file_size_kb: 500
+  # Create backup before applying changes
+  create_backup: true
+  # Require confirmation before applying changes
+  require_confirmation: true
+  # Show refactoring plan before execution
+  show_plan: true
+
+# Supported Languages
+languages:
+  python:
+    extensions: [".py", ".pyw"]
+    comment_style: "#"
+  javascript:
+    extensions: [".js", ".jsx", ".mjs"]
+    comment_style: "//"
+  typescript:
+    extensions: [".ts", ".tsx"]
+    comment_style: "//"
+  java:
+    extensions: [".java"]
+    comment_style: "//"
+  go:
+    extensions: [".go"]
+    comment_style: "//"
+  rust:
+    extensions: [".rs"]
+    comment_style: "//"
+

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Editing Feature - AI Code Assistant</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #34d399;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e1e1e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--text); }
+        .card ul { padding-left: 1.25rem; }
+        .card li { margin: 0.5rem 0; color: var(--text-muted); }
+        .card li strong { color: var(--text); }
+        code {
+            background: var(--code-bg);
+            color: #d4d4d4;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        pre {
+            background: var(--code-bg);
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+        .highlight { color: var(--primary-light); }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--bg); font-weight: 600; }
+        .full-width { grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✏️ File Editing Feature</h1>
+            <p>AI-Powered Code Modifications with Natural Language</p>
+            <span class="badge">Version 0.3.0 • January 2026</span>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h2>🚀 Quick Start</h2>
+                <p>Edit files using natural language instructions:</p>
+                <pre>ai-assist edit main.py "Add error handling"
+ai-assist edit utils.py "Add type hints" --mode refactor
+ai-assist edit app.py "Fix the bug" --mode fix --preview</pre>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Edit Modes</h2>
+                <table>
+                    <tr><th>Mode</th><th>Use Case</th></tr>
+                    <tr><td><code>edit</code></td><td>General editing (default)</td></tr>
+                    <tr><td><code>refactor</code></td><td>Structural improvements</td></tr>
+                    <tr><td><code>fix</code></td><td>Bug fixes</td></tr>
+                    <tr><td><code>add</code></td><td>Add new features</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>🔧 Options</h2>
+                <ul>
+                    <li><code>--preview, -p</code> - Preview without applying</li>
+                    <li><code>--no-backup</code> - Skip backup creation</li>
+                    <li><code>--format, -f</code> - Output: console, json</li>
+                    <li><code>--start-line, -s</code> - Target start line</li>
+                    <li><code>--end-line, -e</code> - Target end line</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>📁 Configuration</h2>
+                <pre>editor:
+  create_backup: true
+  show_diff: true
+  max_file_size_kb: 500
+  auto_format: false</pre>
+            </div>
+
+            <div class="card full-width">
+                <h2>📊 Architecture</h2>
+                <pre>User Instruction → Prompt Selection → LLM Generation → Code Extraction
+                                                              ↓
+                                    File Write ← Backup Creation ← Diff Generation</pre>
+                <h3>Key Components</h3>
+                <ul>
+                    <li><strong>FileEditor</strong> - Main editing logic with backup support</li>
+                    <li><strong>DiffHandler</strong> - Unified diff generation and formatting</li>
+                    <li><strong>EditResult</strong> - Operation result with success/error status</li>
+                    <li><strong>Prompts</strong> - Specialized templates for each edit mode</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

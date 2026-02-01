@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognify AI — Your Local AI-Powered Code Assistant</title>
+    <meta name="description" content="A powerful CLI tool that brings AI-powered code cognition to your terminal. Review, generate, search, and refactor code locally with complete privacy.">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --bg-alt: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --code-bg: #0f172a;
+            --code-text: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.9);
+        }
+
+        [data-theme="dark"] nav {
+            background: rgba(15,23,42,0.9);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-alt);
+        }
+
+        .github-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .github-btn:hover {
+            opacity: 0.9;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            background: var(--bg-alt);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .hero-badge span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-tagline {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 60px;
+            font-size: 1.1rem;
+        }
+
+        /* Features Section */
+        .features {
+            background: var(--bg);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Installation Section */
+        .installation {
+            background: var(--bg-alt);
+        }
+
+        .steps {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px 24px;
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block code {
+            color: var(--code-text);
+        }
+
+        .code-block .comment {
+            color: #6b7280;
+        }
+
+        .code-block .command {
+            color: #a5f3fc;
+        }
+
+        /* Usage Section */
+        .usage {
+            background: var(--bg);
+        }
+
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .usage-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .usage-card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .usage-card-header span {
+            font-size: 1.5rem;
+        }
+
+        .usage-card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .usage-card .code-block {
+            border-radius: 0;
+            margin: 0;
+        }
+
+        /* Tech Stack Section */
+        .tech-stack {
+            background: var(--bg-alt);
+        }
+
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .tech-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tech-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        footer .logo {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: inline-flex;
+        }
+
+        footer p {
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+
+        footer .links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        footer .links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer .links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .github-btn span {
+                display: none;
+            }
+
+            .step {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .usage-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+</style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="#" class="logo">🧠 Cognify AI</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#tech">Tech Stack</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+                <a href="https://github.com/akkssy/cognify-ai" class="github-btn" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+                <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span>✨ 100% Local & Private</span> — No API keys required
+            </div>
+            <h1 class="hero-title">🧠 Cognify AI</h1>
+            <p class="hero-tagline">Code Cognition — Your Local AI-Powered Code Assistant</p>
+            <p class="hero-description">
+                A powerful CLI tool that brings AI-powered code cognition to your terminal.<br>
+                Review code, generate functions, search semantically, and refactor projects—all running <strong>locally</strong> with Ollama.
+            </p>
+            <div class="hero-buttons">
+                <a href="#installation" class="btn btn-primary">🚀 Get Started</a>
+                <a href="https://github.com/akkssy/cognify-ai" class="btn btn-secondary" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">✨ Powerful Features</h2>
+            <p class="section-subtitle">Everything you need to supercharge your development workflow, running entirely on your local machine.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Code Review</h3>
+                    <p>Analyze code for bugs, security vulnerabilities, performance issues, and style problems. Get actionable suggestions with severity levels.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Code Generation</h3>
+                    <p>Generate functions, classes, scripts, and unit tests from natural language descriptions. Includes type hints and docstrings.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔎</div>
+                    <h3>Semantic Search</h3>
+                    <p>Search your codebase using natural language queries. Powered by RAG (Retrieval Augmented Generation) for intelligent results.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>AI File Editing</h3>
+                    <p>Edit files with natural language instructions. Preview changes before applying, with automatic backup support.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Multi-File Refactoring</h3>
+                    <p>Refactor across multiple files at once. Add docstrings, convert patterns, or apply consistent changes project-wide.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Symbol Renaming</h3>
+                    <p>Rename functions, classes, and variables across your entire project. Smart detection ensures all references are updated.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Interactive Chat</h3>
+                    <p>Have conversations with AI about your code. Ask questions, get explanations, and receive suggestions interactively.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Codebase Indexing</h3>
+                    <p>Create a searchable semantic index of your codebase. Enables fast, intelligent code discovery and context retrieval.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2 class="section-title">🚀 Quick Start</h2>
+            <p class="section-subtitle">Get up and running in minutes with these simple steps.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Install Ollama</h3>
+                        <p>Download and install Ollama from the official website to run LLMs locally.</p>
+                        <div class="code-block">
+                            <code><span class="comment"># Download from https://ollama.ai</span><br><span class="command">ollama pull deepseek-coder:6.7b</span></code>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Clone & Install</h3>
+                        <p>Clone the repository and install the package in a virtual environment.</p>
+                        <div class="code-block">
+                            <code><span class="command">git clone</span> https://github.com/akkssy/cognify-ai.git<br><span class="command">cd</span> cognify-ai<br><span class="command">python -m venv</span> .venv<br><span class="command">source</span> .venv/bin/activate<br><span class="command">pip install -e</span> .</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Verify Installation</h3>
+                        <p>Check that everything is working correctly.</p>
+                        <div class="code-block">
+                            <code><span class="command">ai-assist</span> status</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Section -->
+    <section id="usage" class="usage">
+        <div class="container">
+            <h2 class="section-title">📖 Usage Examples</h2>
+            <p class="section-subtitle">Powerful commands at your fingertips. Here's what you can do with Cognify AI.</p>
+
+            <div class="usage-grid">
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>🔍</span>
+                        <h3>Code Review</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Review a single file</span><br><span class="command">ai-assist review</span> path/to/file.py<br><br><span class="comment"># Review with JSON output</span><br><span class="command">ai-assist review</span> src/ --format json</code>
+                    </div>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>⚡</span>
+                        <h3>Code Generation</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Generate a function</span><br><span class="command">ai-assist generate</span> "binary search" --language python<br><br><span class="comment"># Generate a class</span><br><span class="command">ai-assist generate</span> "REST client" --mode class</code>
+                    </div>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>🔎</span>
+                        <h3>Semantic Search</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Index your codebase first</span><br><span class="command">ai-assist index</span> .<br><br><span class="comment"># Search with natural language</span><br><span class="command">ai-assist search</span> "error handling"</code>
+                    </div>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>📝</span>
+                        <h3>File Editing</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Preview changes before applying</span><br><span class="command">ai-assist edit</span> config.py "add logging" --preview<br><br><span class="comment"># Edit with backup</span><br><span class="command">ai-assist edit</span> utils.py "add type hints" --backup</code>
+                    </div>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>🔄</span>
+                        <h3>Multi-File Refactoring</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Dry run to preview changes</span><br><span class="command">ai-assist refactor</span> "add docstrings" -p "**/*.py" --dry-run<br><br><span class="comment"># Apply with confirmation</span><br><span class="command">ai-assist refactor</span> "convert print to logging" --confirm</code>
+                    </div>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>🏷️</span>
+                        <h3>Symbol Renaming</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># Rename a function</span><br><span class="command">ai-assist rename</span> old_func new_func --type function<br><br><span class="comment"># Rename a class</span><br><span class="command">ai-assist rename</span> MyClass BetterClass --type class</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section id="tech" class="tech-stack">
+        <div class="container">
+            <h2 class="section-title">🛠️ Tech Stack</h2>
+            <p class="section-subtitle">Built with modern, reliable technologies for the best developer experience.</p>
+
+            <div class="tech-grid">
+                <div class="tech-item">🦜 LangChain</div>
+                <div class="tech-item">🦙 Ollama</div>
+                <div class="tech-item">🗄️ ChromaDB</div>
+                <div class="tech-item">🤗 Sentence Transformers</div>
+                <div class="tech-item">🖱️ Click</div>
+                <div class="tech-item">✨ Rich</div>
+                <div class="tech-item">📋 Pydantic</div>
+                <div class="tech-item">🧪 Pytest</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <a href="#" class="logo">🧠 Cognify AI</a>
+            <p>Code Cognition — Your Local AI-Powered Code Assistant</p>
+            <p style="font-size: 0.9rem;">Made with ❤️ for developers who value privacy and local AI</p>
+            <div class="links">
+                <a href="https://github.com/akkssy/cognify-ai" target="_blank">GitHub</a>
+                <a href="https://github.com/akkssy/cognify-ai#installation" target="_blank">Documentation</a>
+                <a href="https://github.com/akkssy/cognify-ai/issues" target="_blank">Issues</a>
+                <a href="https://github.com/akkssy/cognify-ai/blob/main/LICENSE" target="_blank">MIT License</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            document.querySelector('.theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', next);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+    </script>
+</body>
+</html>
+

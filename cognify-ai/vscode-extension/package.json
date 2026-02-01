@@ -1,0 +1,207 @@
+{
+  "name": "cognify-ai",
+  "displayName": "Cognify AI",
+  "description": "AI-powered code assistant for code review, generation, editing, and explanation. Works with Ollama, OpenAI, Groq, Google Gemini, and more.",
+  "version": "0.1.0",
+  "publisher": "cognify",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "code review",
+    "code generation",
+    "ollama",
+    "llm",
+    "assistant",
+    "copilot",
+    "chatgpt",
+    "openai",
+    "groq",
+    "gemini",
+    "code completion",
+    "refactoring"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/github/stars/akkssy/cognify-ai?style=social",
+      "href": "https://github.com/akkssy/cognify-ai",
+      "description": "GitHub Stars"
+    }
+  ],
+  "homepage": "https://akkssy.github.io/cognify-ai/",
+  "bugs": {
+    "url": "https://github.com/akkssy/cognify-ai/issues"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akkssy/cognify-ai"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cognify-sidebar",
+          "title": "Cognify AI",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "cognify-sidebar": [
+        {
+          "type": "webview",
+          "id": "cognify.chatView",
+          "name": "Chat",
+          "contextualTitle": "Cognify AI Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "cognify.reviewFile",
+        "title": "Cognify: Review Current File"
+      },
+      {
+        "command": "cognify.reviewSelection",
+        "title": "Cognify: Review Selection"
+      },
+      {
+        "command": "cognify.generateCode",
+        "title": "Cognify: Generate Code"
+      },
+      {
+        "command": "cognify.editCode",
+        "title": "Cognify: Edit Code with AI"
+      },
+      {
+        "command": "cognify.explainCode",
+        "title": "Cognify: Explain Selection"
+      },
+      {
+        "command": "cognify.openChat",
+        "title": "Cognify: Open Chat Panel"
+      },
+      {
+        "command": "cognify.checkStatus",
+        "title": "Cognify: Check Status"
+      },
+      {
+        "command": "cognify.switchProvider",
+        "title": "Cognify: Switch LLM Provider"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "cognify.reviewSelection",
+          "when": "editorHasSelection",
+          "group": "cognify@1"
+        },
+        {
+          "command": "cognify.explainCode",
+          "when": "editorHasSelection",
+          "group": "cognify@2"
+        },
+        {
+          "command": "cognify.editCode",
+          "when": "editorHasSelection",
+          "group": "cognify@3"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "cognify.reviewFile",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      },
+      {
+        "command": "cognify.generateCode",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      },
+      {
+        "command": "cognify.explainCode",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "cognify.openChat",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c"
+      }
+    ],
+    "configuration": {
+      "title": "Cognify AI",
+      "properties": {
+        "cognify.provider": {
+          "type": "string",
+          "default": "ollama",
+          "enum": [
+            "ollama",
+            "groq",
+            "google",
+            "cerebras",
+            "openrouter",
+            "openai"
+          ],
+          "description": "LLM provider to use"
+        },
+        "cognify.model": {
+          "type": "string",
+          "default": "deepseek-coder:6.7b",
+          "description": "Model name to use"
+        },
+        "cognify.autoContext": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically include relevant context files"
+        },
+        "cognify.maxContextTokens": {
+          "type": "number",
+          "default": 8000,
+          "description": "Maximum tokens for context"
+        },
+        "cognify.showInlineHints": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline hints for issues"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/vsce": "^2.32.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.0"
+  }
+}

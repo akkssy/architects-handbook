@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codebase Indexing & Search - Implementation Details</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e1e1e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--text); }
+        .card ul { padding-left: 1.25rem; }
+        .card li { margin: 0.5rem 0; color: var(--text-muted); }
+        .card li strong { color: var(--text); }
+        code {
+            background: var(--code-bg);
+            color: #d4d4d4;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        pre {
+            background: var(--code-bg);
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+        pre code { background: none; padding: 0; }
+        .highlight { color: #9cdcfe; }
+        .string { color: #ce9178; }
+        .keyword { color: #569cd6; }
+        .comment { color: #6a9955; }
+        .tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem;
+               background: #ecfdf5; color: #059669; border-radius: 4px; font-size: 0.75rem; }
+        .tag.new { background: #dbeafe; color: #2563eb; }
+        .tag.modified { background: #fef3c7; color: #d97706; }
+        .full-width { grid-column: 1 / -1; }
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .flow-box {
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .flow-arrow { font-size: 1.5rem; color: var(--primary); }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; font-weight: 600; }
+        .file-tree { font-family: monospace; font-size: 0.9rem; }
+        .file-tree .folder { color: var(--primary); }
+        .file-tree .file { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Codebase Indexing & Search</h1>
+            <p>RAG (Retrieval Augmented Generation) Implementation</p>
+            <span class="badge">AI Code Assistant v0.2.0</span>
+        </header>
+
+        <div class="grid">
+            <!-- Overview Card -->
+            <div class="card">
+                <h2>📋 Feature Overview</h2>
+                <p>This feature enables <strong>semantic search</strong> across your entire codebase using natural language queries.</p>
+                <h3>Key Capabilities</h3>
+                <ul>
+                    <li><strong>Index</strong> - Scan and vectorize code files</li>
+                    <li><strong>Search</strong> - Find code using natural language</li>
+                    <li><strong>Filter</strong> - By file path or language</li>
+                    <li><strong>Format</strong> - Output as console, JSON, or LLM context</li>
+                </ul>
+            </div>
+
+            <!-- Architecture Card -->
+            <div class="card">
+                <h2>🏗️ Architecture</h2>
+                <div class="flow-diagram">
+                    <div class="flow-box">Code Files</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">Chunker<br><small>(AST Parser)</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">Embeddings<br><small>(MiniLM)</small></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">ChromaDB<br><small>(Vector Store)</small></div>
+                </div>
+                <div class="flow-diagram">
+                    <div class="flow-box">User Query</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">Query Embedding</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">Vector Search</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box">Ranked Results</div>
+                </div>
+            </div>
+
+            <!-- New Files Card -->
+            <div class="card">
+                <h2>📁 New Files Created</h2>
+                <div class="file-tree">
+                    <p><span class="folder">📂 src/ai_code_assistant/retrieval/</span></p>
+                    <p>&nbsp;&nbsp;<span class="file">├── __init__.py</span> <span class="tag new">NEW</span></p>
+                    <p>&nbsp;&nbsp;<span class="file">├── chunker.py</span> <span class="tag new">NEW</span></p>
+                    <p>&nbsp;&nbsp;<span class="file">├── indexer.py</span> <span class="tag new">NEW</span></p>
+                    <p>&nbsp;&nbsp;<span class="file">└── search.py</span> <span class="tag new">NEW</span></p>
+                    <br>
+                    <p><span class="folder">📂 tests/</span></p>
+                    <p>&nbsp;&nbsp;<span class="file">└── test_retrieval.py</span> <span class="tag new">NEW</span></p>
+                </div>
+            </div>
+
+            <!-- Modified Files Card -->
+            <div class="card">
+                <h2>✏️ Modified Files</h2>
+                <table>
+                    <tr>
+                        <th>File</th>
+                        <th>Changes</th>
+                    </tr>
+                    <tr>
+                        <td><code>pyproject.toml</code></td>
+                        <td>Added chromadb, sentence-transformers, watchdog</td>
+                    </tr>
+                    <tr>
+                        <td><code>config.py</code></td>
+                        <td>Added RetrievalConfig class</td>
+                    </tr>
+                    <tr>
+                        <td><code>config.yaml</code></td>
+                        <td>Added retrieval settings section</td>
+                    </tr>
+                    <tr>
+                        <td><code>cli.py</code></td>
+                        <td>Added index, search commands; updated status</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- CLI Commands Card -->
+            <div class="card full-width">
+                <h2>💻 New CLI Commands</h2>
+
+                <h3>Index Command</h3>
+                <pre><code><span class="comment"># Index current directory</span>
+ai-assist index .
+
+<span class="comment"># Index specific directory with fresh start</span>
+ai-assist index ./src --clear</code></pre>
+
+                <h3>Search Command</h3>
+                <pre><code><span class="comment"># Basic search</span>
+ai-assist search <span class="string">"user authentication"</span>
+
+<span class="comment"># Search with options</span>
+ai-assist search <span class="string">"database connection"</span> -k <span class="highlight">10</span> --language python
+
+<span class="comment"># Output as JSON for programmatic use</span>
+ai-assist search <span class="string">"error handling"</span> --format json
+
+<span class="comment"># Output formatted for LLM context</span>
+ai-assist search <span class="string">"config loading"</span> --format context</code></pre>
+            </div>
+
+            <!-- Code Chunker Card -->
+            <div class="card">
+                <h2>🧩 Code Chunker</h2>
+                <p>Intelligently splits code into semantic chunks for better search results.</p>
+
+                <h3>Python Files (AST-based)</h3>
+                <ul>
+                    <li>Extracts individual <strong>functions</strong></li>
+                    <li>Extracts <strong>classes</strong> with methods</li>
+                    <li>Preserves <strong>module-level</strong> code</li>
+                    <li>Maintains <strong>line numbers</strong></li>
+                </ul>
+
+                <h3>Other Languages (Line-based)</h3>
+                <ul>
+                    <li>Configurable <strong>chunk size</strong> (default: 50 lines)</li>
+                    <li>Overlapping chunks for <strong>context preservation</strong></li>
+                    <li>Language detection from <strong>file extension</strong></li>
+                </ul>
+            </div>
+
+            <!-- Indexer Card -->
+            <div class="card">
+                <h2>📊 Codebase Indexer</h2>
+                <p>Creates and manages the vector database index.</p>
+
+                <h3>Features</h3>
+                <ul>
+                    <li><strong>Local embeddings</strong> - No API calls needed</li>
+                    <li><strong>Persistent storage</strong> - Index saved to disk</li>
+                    <li><strong>Incremental updates</strong> - Re-index changed files</li>
+                    <li><strong>Smart filtering</strong> - Ignores node_modules, .git, etc.</li>
+                </ul>
+
+                <h3>Supported Extensions</h3>
+                <p><code>.py .js .ts .jsx .tsx .java .go .rs .rb .php .c .cpp .h .cs .swift .kt .scala .sql .yaml .json .md .html .css .vue .svelte</code></p>
+            </div>
+
+            <!-- Search Card -->
+            <div class="card">
+                <h2>🔎 Semantic Search</h2>
+                <p>Find code using natural language descriptions.</p>
+
+                <h3>How It Works</h3>
+                <ol style="padding-left: 1.25rem;">
+                    <li>Query text is converted to an <strong>embedding vector</strong></li>
+                    <li>ChromaDB finds <strong>similar vectors</strong> in the index</li>
+                    <li>Results are <strong>ranked by similarity score</strong></li>
+                    <li>Filters are applied (file path, language)</li>
+                </ol>
+
+                <h3>Output Formats</h3>
+                <ul>
+                    <li><strong>console</strong> - Rich formatted terminal output</li>
+                    <li><strong>json</strong> - Structured data for automation</li>
+                    <li><strong>context</strong> - Formatted for LLM prompts</li>
+                </ul>
+            </div>
+
+            <!-- Configuration Card -->
+            <div class="card full-width">
+                <h2>⚙️ Configuration</h2>
+                <pre><code><span class="comment"># config.yaml - Retrieval Settings</span>
+<span class="keyword">retrieval:</span>
+  <span class="comment"># Embedding model (runs locally, ~90MB download)</span>
+  <span class="highlight">embedding_model:</span> <span class="string">"all-MiniLM-L6-v2"</span>
+
+  <span class="comment"># Directory to store the index</span>
+  <span class="highlight">persist_directory:</span> <span class="string">".ai-assistant-index"</span>
+
+  <span class="comment"># ChromaDB collection name</span>
+  <span class="highlight">collection_name:</span> <span class="string">"codebase"</span>
+
+  <span class="comment"># Maximum lines per chunk (for non-AST chunking)</span>
+  <span class="highlight">chunk_size:</span> <span class="string">50</span>
+
+  <span class="comment"># Overlap between chunks</span>
+  <span class="highlight">chunk_overlap:</span> <span class="string">10</span>
+
+  <span class="comment"># Skip files larger than this (KB)</span>
+  <span class="highlight">max_file_size_kb:</span> <span class="string">1024</span></code></pre>
+            </div>
+
+            <!-- Test Results Card -->
+            <div class="card">
+                <h2>✅ Test Results</h2>
+                <p style="color: var(--success); font-weight: 600; font-size: 1.2rem;">18 tests passed</p>
+
+                <h3>Test Coverage</h3>
+                <ul>
+                    <li><strong>TestCodeChunker</strong> - 8 tests</li>
+                    <li><strong>TestCodebaseIndexer</strong> - 2 tests</li>
+                    <li><strong>TestCodebaseSearch</strong> - 6 tests</li>
+                    <li><strong>TestSearchResult</strong> - 2 tests</li>
+                </ul>
+
+                <pre><code>pytest tests/test_retrieval.py -v
+<span class="comment"># 18 passed in 85.82s</span></code></pre>
+            </div>
+
+            <!-- Usage Example Card -->
+            <div class="card">
+                <h2>🚀 Quick Start</h2>
+                <pre><code><span class="comment"># 1. Index your project</span>
+ai-assist index .
+
+<span class="comment"># 2. Search for code</span>
+ai-assist search <span class="string">"handle errors"</span>
+
+<span class="comment"># 3. Check status</span>
+ai-assist status</code></pre>
+
+                <h3>Example Output</h3>
+                <pre><code>Search: handle errors
+Results: 5
+
+─── Result 1 ───
+src/utils.py:45-67
+Type: function | Name: handle_exception
+Score: 0.752
+
+def handle_exception(e):
+    """Handle and log exceptions."""
+    ...</code></pre>
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <p>AI Code Assistant - Codebase Indexing & Search Feature</p>
+            <p>Implementation Date: 2026-01-23</p>
+        </footer>
+    </div>
+</body>
+</html>
+

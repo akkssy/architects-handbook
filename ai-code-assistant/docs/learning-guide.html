@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Assistant - Learning Guide</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-code: #0d1117;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.9; font-size: 1.2rem; }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+        .badge-easy { background: var(--secondary); color: white; }
+        .badge-medium { background: var(--warning); color: black; }
+        .badge-hard { background: var(--danger); color: white; }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card h3 { color: var(--secondary); margin: 1rem 0 0.5rem; }
+        
+        pre {
+            background: var(--bg-code);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; }
+        .function { color: #50fa7b; }
+        .class { color: #8be9fd; }
+        .decorator { color: #ffb86c; }
+        
+        .flow-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        .flow-box {
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            min-width: 150px;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .file-tree {
+            font-family: monospace;
+            background: var(--bg-code);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .file-tree .folder { color: var(--warning); }
+        .file-tree .file { color: var(--text); }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { color: var(--primary); }
+        
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .concept-box {
+            background: var(--bg);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .concept-box h4 { color: var(--secondary); margin-bottom: 0.5rem; }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab:hover, .tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .tip {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .tip::before { content: "💡 "; }
+        
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .warning::before { content: "⚠️ "; }
+        
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+        nav ul {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background 0.2s;
+        }
+        nav a:hover { background: var(--primary); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🤖 AI Code Assistant</h1>
+        <p>A Beginner's Guide to Building AI-Powered Developer Tools</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#concepts">AI Concepts</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#modules">Modules</a></li>
+            <li><a href="#code-walkthrough">Code Walkthrough</a></li>
+            <li><a href="#hands-on">Hands-On</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="card">
+            <h2>📋 Project Overview</h2>
+            <p>This project demonstrates how to build a practical AI application that can:</p>
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>🔍 Review Code</h4>
+                    <p>Analyze code for bugs, security issues, and style problems using AI</p>
+                </div>
+                <div class="concept-box">
+                    <h4>✨ Generate Code</h4>
+                    <p>Create functions, classes, and scripts from plain English descriptions</p>
+                </div>
+                <div class="concept-box">
+                    <h4>💬 Chat About Code</h4>
+                    <p>Have interactive conversations with AI about programming topics</p>
+                </div>
+            </div>
+
+            <h3>Project Structure</h3>
+            <div class="file-tree">
+<pre>
+<span class="folder">ai-code-assistant/</span>
+├── <span class="folder">src/ai_code_assistant/</span>
+│   ├── __init__.py          <span class="comment"># Package exports</span>
+│   ├── cli.py               <span class="comment"># Command-line interface</span>
+│   ├── config.py            <span class="comment"># Configuration management</span>
+│   ├── llm.py               <span class="comment"># LLM integration (Ollama)</span>
+│   ├── <span class="folder">reviewer/</span>
+│   │   ├── analyzer.py      <span class="comment"># Code review logic</span>
+│   │   └── prompts.py       <span class="comment"># Review prompts</span>
+│   ├── <span class="folder">generator/</span>
+│   │   ├── code_gen.py      <span class="comment"># Code generation</span>
+│   │   └── prompts.py       <span class="comment"># Generation prompts</span>
+│   ├── <span class="folder">chat/</span>
+│   │   └── session.py       <span class="comment"># Chat sessions</span>
+│   └── <span class="folder">utils/</span>
+│       ├── file_handler.py  <span class="comment"># File operations</span>
+│       └── formatters.py    <span class="comment"># Output formatting</span>
+├── <span class="folder">tests/</span>                   <span class="comment"># Unit tests</span>
+├── config.yaml              <span class="comment"># Configuration file</span>
+└── pyproject.toml           <span class="comment"># Dependencies</span>
+</pre>
+            </div>
+        </section>
+
+        <!-- AI Concepts Section -->
+        <section id="concepts" class="card">
+            <h2>🧠 Key AI Concepts for Beginners</h2>
+
+            <h3>What is an LLM (Large Language Model)?</h3>
+            <p>An LLM is an AI trained on massive amounts of text. Think of it as a very smart autocomplete that can:</p>
+            <ul style="margin: 1rem 0 1rem 2rem;">
+                <li>Understand natural language (human text)</li>
+                <li>Generate human-like responses</li>
+                <li>Analyze and reason about code</li>
+                <li>Follow complex instructions</li>
+            </ul>
+
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>🦙 Ollama</h4>
+                    <p><strong>What:</strong> A tool to run AI models locally on your computer</p>
+                    <p><strong>Why:</strong> Free, private, works offline - your code never leaves your machine</p>
+                </div>
+                <div class="concept-box">
+                    <h4>🔗 LangChain</h4>
+                    <p><strong>What:</strong> A Python framework for building LLM applications</p>
+                    <p><strong>Why:</strong> Provides unified interface, prompt management, and utilities</p>
+                </div>
+                <div class="concept-box">
+                    <h4>📝 Prompts</h4>
+                    <p><strong>What:</strong> Instructions you give to the AI</p>
+                    <p><strong>Why:</strong> The quality of your prompt determines the quality of AI output</p>
+                </div>
+            </div>
+
+            <h3>How AI Communication Works</h3>
+            <div class="flow-diagram">
+                <div class="flow-box">
+                    <strong>Your Code</strong><br>
+                    <small>+ Instructions</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <strong>Prompt</strong><br>
+                    <small>Formatted text</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <strong>LLM</strong><br>
+                    <small>AI processes</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <strong>Response</strong><br>
+                    <small>JSON/Code</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <strong>Parse</strong><br>
+                    <small>Extract data</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="card">
+            <h2>🏗️ System Architecture</h2>
+
+            <h3>Component Diagram</h3>
+<pre style="text-align: center; line-height: 1.4;">
+┌─────────────────────────────────────────────────────────────────┐
+│                      <span class="function">CLI (cli.py)</span>                              │
+│            Commands: review, generate, chat, status             │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+         ┌────────────────┼────────────────┐
+         ▼                ▼                ▼
+┌─────────────────┐ ┌──────────────┐ ┌──────────────┐
+│  <span class="class">CodeAnalyzer</span>   │ │<span class="class">CodeGenerator</span>│ │ <span class="class">ChatSession</span>  │
+│  (reviewer/)    │ │ (generator/) │ │   (chat/)    │
+└────────┬────────┘ └──────┬───────┘ └──────┬───────┘
+         │                 │                │
+         └────────────────┬┴────────────────┘
+                          ▼
+              ┌───────────────────────┐
+              │     <span class="class">LLMManager</span>        │
+              │       (llm.py)        │
+              └───────────┬───────────┘
+                          │
+              ┌───────────▼───────────┐
+              │   <span class="keyword">LangChain + Ollama</span>  │
+              │   (Local LLM Server)  │
+              └───────────────────────┘
+</pre>
+
+            <h3>Data Flow: Code Review</h3>
+            <table>
+                <tr>
+                    <th>Step</th>
+                    <th>Component</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td><span class="step-number">1</span></td>
+                    <td>CLI</td>
+                    <td>User runs <code>review myfile.py</code></td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">2</span></td>
+                    <td>FileHandler</td>
+                    <td>Reads source code from disk</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">3</span></td>
+                    <td>Prompts</td>
+                    <td>Builds instruction prompt with the code</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">4</span></td>
+                    <td>LLMManager</td>
+                    <td>Sends prompt to Ollama, gets response</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">5</span></td>
+                    <td>Analyzer</td>
+                    <td>Parses JSON response into structured result</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">6</span></td>
+                    <td>Formatter</td>
+                    <td>Displays result in console/markdown/JSON</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Modules Section -->
+        <section id="modules" class="card">
+            <h2>📦 Module Guide</h2>
+            <p>Learn each module in this order (easiest to hardest):</p>
+
+            <table>
+                <tr>
+                    <th>Order</th>
+                    <th>File</th>
+                    <th>Difficulty</th>
+                    <th>What You'll Learn</th>
+                </tr>
+                <tr>
+                    <td><span class="step-number">1</span></td>
+                    <td><code>config.py</code></td>
+                    <td><span class="badge badge-easy">Easy</span></td>
+                    <td>Dataclasses, Pydantic validation, YAML loading</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">2</span></td>
+                    <td><code>llm.py</code></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>LangChain, API calls, message types, streaming</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">3</span></td>
+                    <td><code>generator/prompts.py</code></td>
+                    <td><span class="badge badge-easy">Easy</span></td>
+                    <td>Prompt engineering, string templates</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">4</span></td>
+                    <td><code>generator/code_gen.py</code></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>Regex, code extraction, dataclasses</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">5</span></td>
+                    <td><code>reviewer/prompts.py</code></td>
+                    <td><span class="badge badge-easy">Easy</span></td>
+                    <td>Complex prompts, JSON schemas</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">6</span></td>
+                    <td><code>reviewer/analyzer.py</code></td>
+                    <td><span class="badge badge-hard">Hard</span></td>
+                    <td>JSON parsing, error handling, retry logic</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">7</span></td>
+                    <td><code>utils/formatters.py</code></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>Strategy pattern, Rich library, abstract classes</td>
+                </tr>
+                <tr>
+                    <td><span class="step-number">8</span></td>
+                    <td><code>cli.py</code></td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                    <td>Click library, subcommands, dependency injection</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Code Walkthrough Section -->
+        <section id="code-walkthrough" class="card">
+            <h2>💻 Code Walkthrough</h2>
+
+            <h3><span class="step-number">1</span> Configuration (config.py)</h3>
+            <p>This module manages all settings. It uses Python dataclasses and Pydantic for validation.</p>
+<pre><code><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass
+<span class="keyword">from</span> pydantic_settings <span class="keyword">import</span> BaseSettings
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class">LLMConfig</span>:
+    <span class="string">"""Configuration for the LLM."""</span>
+    model: str = <span class="string">"deepseek-coder:6.7b"</span>      <span class="comment"># Which AI model to use</span>
+    base_url: str = <span class="string">"http://localhost:11434"</span> <span class="comment"># Where Ollama runs</span>
+    temperature: float = <span class="string">0.1</span>                 <span class="comment"># Creativity (0=precise, 1=creative)</span>
+    max_tokens: int = <span class="string">4096</span>                   <span class="comment"># Max response length</span>
+</code></pre>
+            <div class="tip">
+                <strong>Key Concept:</strong> Dataclasses automatically generate __init__, __repr__, and other methods.
+                They're perfect for configuration objects.
+            </div>
+
+            <h3><span class="step-number">2</span> LLM Manager (llm.py)</h3>
+            <p>This module handles all communication with the AI model via LangChain.</p>
+<pre><code><span class="keyword">from</span> langchain_ollama <span class="keyword">import</span> ChatOllama
+<span class="keyword">from</span> langchain_core.messages <span class="keyword">import</span> HumanMessage, SystemMessage
+
+<span class="keyword">class</span> <span class="class">LLMManager</span>:
+    <span class="string">"""Manages LLM interactions via Ollama."""</span>
+
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, config: LLMConfig):
+        self._config = config
+        self._llm = <span class="keyword">None</span>  <span class="comment"># Lazy initialization</span>
+
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">llm</span>(self) -> ChatOllama:
+        <span class="string">"""Create LLM connection on first use."""</span>
+        <span class="keyword">if</span> self._llm <span class="keyword">is None</span>:
+            self._llm = ChatOllama(
+                model=self._config.model,
+                base_url=self._config.base_url,
+                temperature=self._config.temperature,
+            )
+        <span class="keyword">return</span> self._llm
+
+    <span class="keyword">def</span> <span class="function">invoke</span>(self, prompt: str, system_prompt: str = <span class="keyword">None</span>) -> str:
+        <span class="string">"""Send a prompt to the LLM and get a response."""</span>
+        messages = []
+        <span class="keyword">if</span> system_prompt:
+            messages.append(SystemMessage(content=system_prompt))
+        messages.append(HumanMessage(content=prompt))
+
+        response = self.llm.invoke(messages)
+        <span class="keyword">return</span> response.content
+</code></pre>
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>SystemMessage</h4>
+                    <p>Sets the AI's role and behavior. Example: "You are an expert code reviewer."</p>
+                </div>
+                <div class="concept-box">
+                    <h4>HumanMessage</h4>
+                    <p>The user's input or question. Example: "Review this Python code."</p>
+                </div>
+            </div>
+
+            <h3><span class="step-number">3</span> Prompts (prompts.py)</h3>
+            <p>Prompts are the instructions you give to the AI. Good prompts = good results.</p>
+<pre><code><span class="comment"># System prompt tells the AI WHO it is</span>
+REVIEW_SYSTEM_PROMPT = <span class="string">"""You are an expert code reviewer.
+Analyze code for bugs, security issues, and style problems.
+Always respond with valid JSON in this format:
+{
+    "summary": "Brief overview of the code",
+    "issues": [
+        {
+            "severity": "critical|warning|suggestion",
+            "title": "Issue title",
+            "description": "What's wrong",
+            "line_start": 10,
+            "suggestion": "How to fix it"
+        }
+    ]
+}"""</span>
+
+<span class="comment"># User prompt tells the AI WHAT to do</span>
+<span class="keyword">def</span> <span class="function">build_review_prompt</span>(code: str, language: str) -> str:
+    <span class="keyword">return</span> <span class="string">f"""Review this {language} code:
+
+```{language}
+{code}
+```
+
+Analyze for bugs, security issues, and improvements."""</span>
+</code></pre>
+            <div class="warning">
+                <strong>Prompt Engineering Tip:</strong> Be specific about the output format.
+                Asking for JSON helps you parse the response programmatically.
+            </div>
+
+            <h3><span class="step-number">4</span> Code Generator (code_gen.py)</h3>
+            <p>Generates code from natural language descriptions.</p>
+<pre><code><span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class">GenerationResult</span>:
+    <span class="string">"""Result of code generation."""</span>
+    code: str
+    language: str
+    mode: str  <span class="comment"># function, class, script, test</span>
+    description: str
+    error: Optional[str] = <span class="keyword">None</span>
+
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">success</span>(self) -> bool:
+        <span class="keyword">return</span> self.error <span class="keyword">is None and</span> bool(self.code.strip())
+
+<span class="keyword">class</span> <span class="class">CodeGenerator</span>:
+    <span class="keyword">def</span> <span class="function">generate</span>(self, description: str, mode: str, language: str) -> GenerationResult:
+        <span class="comment"># Build prompt for the AI</span>
+        prompt = build_generation_prompt(description, mode, language)
+
+        <span class="comment"># Get response from LLM</span>
+        response = self.llm_manager.invoke(prompt, GENERATION_SYSTEM_PROMPT)
+
+        <span class="comment"># Extract code from markdown blocks</span>
+        code = self._extract_code(response, language)
+
+        <span class="keyword">return</span> GenerationResult(code=code, language=language, ...)
+
+    <span class="keyword">def</span> <span class="function">_extract_code</span>(self, response: str, language: str) -> str:
+        <span class="string">"""Extract code from markdown code blocks."""</span>
+        <span class="comment"># Try language-specific: ```python ... ```</span>
+        pattern = rf<span class="string">'```{language}\s*(.*?)\s*```'</span>
+        <span class="keyword">if</span> match := re.search(pattern, response, re.DOTALL):
+            <span class="keyword">return</span> match.group(1).strip()
+        <span class="keyword">return</span> response.strip()
+</code></pre>
+
+            <h3><span class="step-number">5</span> Code Analyzer (analyzer.py)</h3>
+            <p>The most complex module - parses AI responses and handles errors.</p>
+<pre><code><span class="keyword">class</span> <span class="class">CodeAnalyzer</span>:
+    <span class="keyword">def</span> <span class="function">review_file</span>(self, file_path: str) -> ReviewResult:
+        <span class="comment"># Read the file</span>
+        code = self._read_file(file_path)
+        language = self._detect_language(file_path)
+
+        <span class="comment"># Build and send prompt</span>
+        prompt = build_review_prompt(code, language)
+        response = self.llm_manager.invoke(prompt, REVIEW_SYSTEM_PROMPT)
+
+        <span class="comment"># Parse JSON response (with error handling)</span>
+        <span class="keyword">return</span> self._parse_response(response, file_path, language)
+
+    <span class="keyword">def</span> <span class="function">_extract_json</span>(self, text: str) -> dict:
+        <span class="string">"""Extract JSON from LLM response."""</span>
+        <span class="comment"># Try: ```json ... ```</span>
+        <span class="keyword">if</span> match := re.search(r<span class="string">'```json\s*(.*?)\s*```'</span>, text):
+            <span class="keyword">return</span> json.loads(match.group(1))
+
+        <span class="comment"># Try: raw JSON { ... }</span>
+        <span class="keyword">if</span> match := re.search(r<span class="string">'\{.*\}'</span>, text):
+            <span class="keyword">return</span> json.loads(match.group())
+
+        <span class="keyword">return</span> self._repair_json(text)
+</code></pre>
+            <div class="tip">
+                <strong>Real-World Challenge:</strong> LLMs don't always produce valid JSON.
+                That's why we have multiple extraction strategies and repair logic.
+            </div>
+        </section>
+
+        <!-- Hands-On Section -->
+        <section id="hands-on" class="card">
+            <h2>🔬 Hands-On Learning</h2>
+
+            <h3>Interactive Python Session</h3>
+            <p>Open a terminal and try these commands:</p>
+<pre><code><span class="comment"># Start Python with the project</span>
+cd ai-code-assistant
+source .venv/bin/activate
+PYTHONPATH=src python
+
+<span class="comment"># Step 1: Load configuration</span>
+>>> <span class="keyword">from</span> ai_code_assistant.config <span class="keyword">import</span> load_config
+>>> config = load_config(<span class="string">"config.yaml"</span>)
+>>> print(config.llm.model)
+
+<span class="comment"># Step 2: Create LLM manager</span>
+>>> <span class="keyword">from</span> ai_code_assistant.llm <span class="keyword">import</span> LLMManager
+>>> llm = LLMManager(config.llm)
+
+<span class="comment"># Step 3: Generate code</span>
+>>> <span class="keyword">from</span> ai_code_assistant.generator <span class="keyword">import</span> CodeGenerator
+>>> gen = CodeGenerator(config, llm)
+>>> result = gen.generate(<span class="string">"reverse string"</span>, <span class="string">"function"</span>, <span class="string">"python"</span>)
+>>> print(result.code)
+</code></pre>
+
+            <h3>CLI Commands</h3>
+<pre><code><span class="comment"># Check status</span>
+PYTHONPATH=src python -m ai_code_assistant.cli status
+
+<span class="comment"># Generate code</span>
+PYTHONPATH=src python -m ai_code_assistant.cli generate <span class="string">"fibonacci"</span> --mode function
+
+<span class="comment"># Review file</span>
+PYTHONPATH=src python -m ai_code_assistant.cli review src/ai_code_assistant/config.py
+</code></pre>
+        </section>
+
+        <!-- Design Patterns -->
+        <section class="card">
+            <h2>🎨 Design Patterns Used</h2>
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>Dependency Injection</h4>
+                    <p>Components receive dependencies via constructor. Makes testing easy.</p>
+                </div>
+                <div class="concept-box">
+                    <h4>Strategy Pattern</h4>
+                    <p>Different formatters (Console, Markdown, JSON) share common interface.</p>
+                </div>
+                <div class="concept-box">
+                    <h4>Lazy Initialization</h4>
+                    <p>Create LLM connection only when first needed.</p>
+                </div>
+                <div class="concept-box">
+                    <h4>Data Classes</h4>
+                    <p>Use @dataclass for structured data with auto-generated methods.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="card">
+            <h2>📚 Summary & Next Steps</h2>
+            <h3>What You've Learned</h3>
+            <ul style="margin: 1rem 0 1rem 2rem;">
+                <li>How LLMs work and how to use them locally with Ollama</li>
+                <li>How LangChain simplifies LLM integration</li>
+                <li>How to write effective prompts for code tasks</li>
+                <li>How to parse and handle AI responses</li>
+                <li>Common Python design patterns</li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul style="margin: 1rem 0 1rem 2rem;">
+                <li><a href="https://python.langchain.com/docs/" style="color: var(--primary);">LangChain Docs</a></li>
+                <li><a href="https://ollama.ai/library" style="color: var(--primary);">Ollama Models</a></li>
+                <li><a href="https://www.promptingguide.ai/" style="color: var(--primary);">Prompt Engineering Guide</a></li>
+            </ul>
+        </section>
+
+        <footer style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <p>AI Code Assistant - 77 tests ✅ | deepseek-coder:6.7b | LangChain + Ollama</p>
+        </footer>
+    </div>
+
+    <script>
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
