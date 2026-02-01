@@ -19,6 +19,7 @@ interface IndexState {
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cognify.chatView';
     private static readonly HISTORY_KEY = 'cognify.conversationHistory';
+    private static readonly INDEX_STATE_KEY = 'cognify.indexState';
 
     private _view?: vscode.WebviewView;
     private _conversationHistory: ConversationMessage[] = [];
@@ -48,6 +49,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         this._loadSettings();
         // Load conversation history from persistent storage
         this._loadConversationHistory();
+        // Load index state from persistent storage
+        this._loadIndexState();
     }
 
     private _loadConversationHistory() {
@@ -59,6 +62,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     private _saveConversationHistory() {
         this._context.globalState.update(ChatViewProvider.HISTORY_KEY, this._conversationHistory);
+    }
+
+    private _loadIndexState() {
+        const savedState = this._context.globalState.get<IndexState>(ChatViewProvider.INDEX_STATE_KEY);
+        if (savedState && savedState.status) {
+            this._indexState = savedState;
+        }
+    }
+
+    private _saveIndexState() {
+        this._context.globalState.update(ChatViewProvider.INDEX_STATE_KEY, this._indexState);
     }
 
     private _loadSettings() {
@@ -126,7 +140,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 case 'webviewReady':
                     // Webview is ready, now send initial state
                     this._sendProviderState();
-                    this._checkAndInitializeIndex();
+                    this._restoreIndexState();
                     this._restoreConversationToWebview();
                     break;
             }
@@ -140,6 +154,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 command: 'restoreHistory',
                 messages: this._conversationHistory
             });
+        }
+    }
+
+    private _restoreIndexState() {
+        // If we have a cached "indexed" state, just send it without re-checking
+        if (this._indexState.status === 'indexed' && this._indexState.chunkCount > 0) {
+            this._sendIndexState();
+        } else if (this._indexState.status === 'not_indexed' || this._indexState.status === 'unknown') {
+            // Only check index status if we don't have a valid cached state
+            this._checkAndInitializeIndex();
+        } else {
+            // For other states (error, indexing), send current state
+            this._sendIndexState();
         }
     }
 
@@ -190,7 +217,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     private async _checkAndInitializeIndex() {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
-        // Update state to checking
+        // Update state to checking (don't save this temporary state)
         this._indexState = { status: 'checking', chunkCount: 0, fileCount: 0 };
         this._sendIndexState();
 
@@ -215,6 +242,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     chunkCount: status.chunkCount,
                     fileCount: status.fileCount || 0
                 };
+                this._saveIndexState(); // Persist indexed state
             } else {
                 this._indexState = {
                     status: 'not_indexed',
@@ -291,6 +319,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     chunkCount: result.chunksCreated,
                     fileCount: result.filesIndexed
                 };
+                this._saveIndexState(); // Persist indexed state
                 this._view?.webview.postMessage({
                     command: 'indexComplete',
                     success: true,
