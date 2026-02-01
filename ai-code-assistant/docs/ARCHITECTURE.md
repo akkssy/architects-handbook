@@ -430,3 +430,186 @@ Coordinate changes across multiple files with dependency tracking and backup sup
 - **RENAME** - Rename/move a file
 
 See [REFACTOR_FEATURE.md](./REFACTOR_FEATURE.md) for detailed documentation.
+
+## User Management System (Phase 1)
+
+### Purpose
+Provides configurable settings, privacy controls, usage analytics, and license management. All features can be enabled/disabled to give users full control.
+
+### Components
+
+| File | Purpose |
+|------|---------|
+| `settings/manager.py` | Privacy settings and configuration management |
+| `analytics/collector.py` | Event tracking with privacy controls |
+| `analytics/storage.py` | SQLite-based local storage for usage data |
+| `licensing/features.py` | License tiers and feature flags |
+| `auth/manager.py` | Authentication manager (Phase 1 placeholder) |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      CLI Commands                               │
+│  settings show/set | data show/export/delete | license status   │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+         ┌────────────────┼────────────────┬────────────────┐
+         ▼                ▼                ▼                ▼
+┌─────────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ SettingsManager │ │  Analytics   │ │   License    │ │     Auth     │
+│  (settings/)    │ │ (analytics/) │ │ (licensing/) │ │   (auth/)    │
+└────────┬────────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+         │                 │                │                │
+         └────────────────┬┴────────────────┴────────────────┘
+                          ▼
+              ┌───────────────────────┐
+              │   Local SQLite DB     │
+              │  (~/.cognify/*)       │
+              └───────────────────────┘
+```
+
+### Settings Schema
+
+```yaml
+version: "1.0.0"
+
+telemetry:
+  enabled: true                 # Master toggle
+  share_usage_stats: true       # Command usage statistics
+  share_error_reports: true     # Anonymous error reports
+  share_feature_usage: true     # Feature usage patterns
+
+analytics:
+  enabled: true                 # Local analytics
+  local_only: true              # Never sync to cloud
+  retention_days: 90            # Auto-cleanup period
+
+authentication:
+  enabled: false                # Phase 2 feature
+  auto_login: false             # Auto-login on startup
+
+licensing:
+  tier: "free"                  # free, pro, team, enterprise
+  offline_mode: true            # Work without license server
+
+privacy:
+  anonymize_paths: true         # Don't store full file paths
+  collect_code_metrics: false   # Don't analyze code content
+```
+
+### License Tiers
+
+| Tier | Cloud LLM Calls/Day | Local LLM Calls | Max Agents | History Retention |
+|------|---------------------|-----------------|------------|-------------------|
+| Free | 100 | Unlimited | 2 | 7 days |
+| Pro | Unlimited | Unlimited | 5 | 30 days |
+| Team | Unlimited | Unlimited | 10 | 90 days |
+| Enterprise | Unlimited | Unlimited | Unlimited | Unlimited |
+
+### Analytics Database Schema
+
+```sql
+-- Usage events table
+CREATE TABLE usage_events (
+    id INTEGER PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    event_type TEXT NOT NULL,      -- 'command', 'llm_call', 'feature', 'error'
+    event_name TEXT NOT NULL,      -- e.g., 'review', 'generate', 'chat'
+    metadata TEXT,                  -- JSON blob (no PII)
+    provider TEXT,                 -- 'ollama', 'openai', 'groq', etc.
+    model TEXT                     -- Model name (no API keys)
+);
+
+-- Token usage table
+CREATE TABLE token_usage (
+    id INTEGER PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    total_tokens INTEGER
+);
+
+-- Daily statistics (aggregated)
+CREATE TABLE daily_stats (
+    date TEXT PRIMARY KEY,
+    total_commands INTEGER,
+    llm_calls INTEGER,
+    errors INTEGER
+);
+```
+
+### Privacy-First Design Principles
+
+1. **Opt-in by default**: Telemetry enabled but can be disabled anytime
+2. **Local-first**: All data stored locally in SQLite, no cloud sync by default
+3. **No PII collection**: Never store code content, file paths (anonymized), or API keys
+4. **Transparent tracking**: `cognify data show` displays all collected data
+5. **Right to deletion**: `cognify data delete` permanently removes all analytics
+6. **GDPR compliant**: Export (`cognify data export`) and delete functionality
+
+### CLI Commands
+
+```bash
+# Settings management
+cognify settings show                    # View all settings
+cognify settings set <key> <value>       # Change a setting
+cognify settings privacy                 # Show privacy-specific settings
+
+# Data management
+cognify data show                        # View collected analytics
+cognify data export                      # Export data as JSON
+cognify data delete                      # Delete all analytics
+
+# License management
+cognify license status                   # View license tier and usage
+cognify license activate <key>           # Activate license key (Phase 2)
+cognify license check                    # Verify license validity
+
+# Authentication (Phase 2)
+cognify auth status                      # View auth status
+cognify auth login                       # Login to Cognify cloud
+cognify auth logout                      # Clear credentials
+```
+
+### Integration with Existing Commands
+
+Analytics tracking is integrated into existing commands:
+
+```python
+# In smart_chat_command()
+analytics.track_command("smart_chat", {
+    "provider": provider,
+    "model": model,
+    "has_context": bool(context)
+})
+
+# In review_command()
+analytics.track_llm_call(provider, model, tokens_used)
+
+# Usage limit enforcement
+if not license_manager.check_limit("cloud_llm_calls"):
+    console.print("[red]Daily cloud LLM limit reached[/red]")
+    return
+```
+
+### VSCode Extension Integration
+
+The VSCode extension integrates with user management through CLI JSON output:
+
+```typescript
+// Get settings via CLI
+const settings = await cognifyRunner.getSettings();
+
+// Get license status
+const license = await cognifyRunner.getLicenseStatus();
+
+// Update status bar with remaining calls
+statusBar.setLicenseInfo({
+    tier: license.tier,
+    remaining: license.remaining_cloud_calls,
+    llmCallsToday: license.usage_today.llm_calls_today
+});
+```

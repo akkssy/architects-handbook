@@ -43,6 +43,26 @@
 - Chat panel for extended conversations
 - Context-aware responses using selected code
 - Insert generated code directly into editor
+- **Multiple chat sessions** - Create and switch between sessions
+- **Specialized AI agents** - Choose from 5 agents (General, Code Reviewer, Code Generator, Documentation Writer, Test Writer)
+
+### 🤖 Multi-Agent System
+- **General Assistant** - All-purpose coding help
+- **Code Reviewer** - Security, performance, and best practices analysis
+- **Code Generator** - Optimized for code creation
+- **Documentation Writer** - Generate docs, comments, and READMEs
+- **Test Writer** - Create comprehensive test suites
+
+### ⚙️ Settings & Privacy (NEW)
+- **Configurable analytics** - Enable/disable usage tracking
+- **Configurable telemetry** - Control what data is shared
+- **License management** - View tier, usage limits, remaining calls
+- **Privacy-first** - All data stored locally by default
+
+### 📊 Usage Tracking
+- **Status bar** shows license tier and remaining cloud LLM calls
+- **Warning indicators** when approaching usage limits
+- **Usage data panel** to view your activity
 
 ## Requirements
 
@@ -92,7 +112,23 @@ Right-click on selected code to access:
 
 ### Command Palette
 
-Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Cognify" to see all commands.
+Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Cognify" to see all commands:
+
+| Command | Description |
+|---------|-------------|
+| `Cognify: Review Current File` | Review the active file for issues |
+| `Cognify: Review Selection` | Review selected code |
+| `Cognify: Generate Code` | Generate code from description |
+| `Cognify: Edit Code with AI` | Edit code using natural language |
+| `Cognify: Explain Selection` | Get explanation of selected code |
+| `Cognify: Open Chat Panel` | Open interactive chat |
+| `Cognify: Check Status` | Check Cognify CLI status |
+| `Cognify: Switch LLM Provider` | Change AI provider |
+| `Cognify: Show Settings` | View and toggle settings |
+| `Cognify: Show License Status` | View license tier and usage |
+| `Cognify: Toggle Analytics` | Enable/disable analytics |
+| `Cognify: Toggle Telemetry` | Enable/disable telemetry |
+| `Cognify: Show Usage Data` | View usage statistics |
 
 ## Configuration
 
@@ -124,6 +160,33 @@ Open Settings (`Ctrl+,`) and search for "Cognify" to configure:
 3. Describe changes: "add error handling"
 4. Preview and apply changes
 
+## Status Bar
+
+The status bar (bottom right) shows:
+- **License tier** (Free, Pro, Team, Enterprise)
+- **Remaining cloud LLM calls** for the day
+- **Warning color** when calls are running low (≤10 remaining)
+
+Click the status bar item to open the License Status panel.
+
+## User Management
+
+### Settings Panel
+Access via `Cognify: Show Settings` command:
+- Toggle **Analytics** on/off
+- Toggle **Telemetry** on/off
+- Toggle **Authentication** on/off
+- View current license tier
+
+### License Tiers
+
+| Tier | Cloud LLM Calls/Day | Features |
+|------|---------------------|----------|
+| Free | 100 | Basic features, 2 agents |
+| Pro | Unlimited | All features, all agents |
+| Team | Unlimited | Team collaboration |
+| Enterprise | Unlimited | Custom deployment |
+
 ## Troubleshooting
 
 ### "cognify not found"
@@ -143,6 +206,17 @@ cognify status
 - Use a faster provider (Groq is very fast)
 - Reduce `maxContextTokens` setting
 - Use a smaller model
+
+### Check license status
+```bash
+cognify license status
+```
+
+### View/change settings
+```bash
+cognify settings show
+cognify settings set analytics.enabled false
+```
 
 ## Contributing
 

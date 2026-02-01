@@ -35,6 +35,10 @@ A powerful CLI tool that brings AI-powered code cognition to your terminal. Revi
 | 🏷️ **Symbol Renaming** | Rename functions, classes, variables across your project |
 | 💬 **Interactive Chat** | Chat with AI about your code |
 | 📊 **Codebase Indexing** | Create searchable semantic index with RAG |
+| 🤖 **Multi-Agent System** | 5 specialized AI agents for different tasks |
+| ⚙️ **Settings & Privacy** | Fully configurable analytics, telemetry, and authentication |
+| 📜 **License Tiers** | Free (100 cloud calls/day), Pro (unlimited), Team, Enterprise |
+| 📈 **Usage Tracking** | Local SQLite database with GDPR-compliant data management |
 
 ## 🚀 Quick Start
 
@@ -126,6 +130,24 @@ Chat with AI about your code:
 ai-assist chat
 ```
 
+### Settings & Privacy
+Manage privacy settings and analytics:
+```bash
+cognify settings show                    # View all settings
+cognify settings set analytics.enabled false  # Disable analytics
+cognify settings set telemetry.enabled false  # Disable telemetry
+cognify settings privacy                 # View privacy settings
+```
+
+### Usage & License
+View license status and usage data:
+```bash
+cognify license status                   # View tier and remaining calls
+cognify data show                        # View collected analytics
+cognify data export                      # Export data as JSON
+cognify data delete                      # Delete all analytics data
+```
+
 ### All Commands
 ```bash
 ai-assist --help
@@ -182,6 +204,10 @@ cognify-ai/
 │   ├── editor/             # AI file editing
 │   ├── refactor/           # Multi-file refactoring
 │   ├── chat/               # Interactive chat
+│   ├── settings/           # Privacy settings management
+│   ├── analytics/          # Usage tracking & storage
+│   ├── licensing/          # License tiers & feature flags
+│   ├── auth/               # Authentication (Phase 1 placeholder)
 │   └── utils/              # Utilities & formatters
 ├── tests/                  # 144 unit tests
 ├── docs/                   # Documentation

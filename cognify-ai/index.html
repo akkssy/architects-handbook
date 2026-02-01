@@ -509,6 +509,7 @@
                 <li><a href="#installation">Installation</a></li>
                 <li><a href="#usage">Usage</a></li>
                 <li><a href="#knowledge">Knowledge Base</a></li>
+                <li><a href="#vscode">VSCode</a></li>
                 <li><a href="#tech">Tech Stack</a></li>
             </ul>
             <div class="nav-right">
@@ -525,13 +526,13 @@
     <section class="hero">
         <div class="container">
             <div class="hero-badge">
-                <span>✨ 100% Local & Private</span> — No API keys required
+                <span>✨ 100% Local & Private</span> — No API keys required for local LLMs
             </div>
             <h1 class="hero-title">🧠 Cognify AI</h1>
             <p class="hero-tagline">Code Cognition — Your Local AI-Powered Code Assistant</p>
             <p class="hero-description">
-                A powerful CLI tool that brings AI-powered code cognition to your terminal.<br>
-                Review code, generate functions, search semantically, and refactor projects—all running <strong>locally</strong> with Ollama.
+                A powerful CLI tool + VSCode extension that brings AI-powered code cognition to your workflow.<br>
+                Review code, generate functions, search semantically, and refactor projects—with <strong>multiple LLM providers</strong> (Ollama, OpenAI, Groq, Gemini).
             </p>
             <div class="hero-buttons">
                 <a href="#installation" class="btn btn-primary">🚀 Get Started</a>
@@ -599,6 +600,21 @@
                     <div class="feature-icon">📚</div>
                     <h3>Knowledge Base</h3>
                     <p>Build a persistent knowledge base of patterns, decisions, and learnings. Automatically searched and included in AI responses.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Multi-Agent System</h3>
+                    <p>5 specialized AI agents: General Assistant, Code Reviewer, Code Generator, Documentation Writer, and Test Writer.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Settings & Privacy</h3>
+                    <p>Fully configurable analytics and telemetry. Toggle features on/off. Local-first, privacy-respecting data collection.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📜</div>
+                    <h3>License Management</h3>
+                    <p>Free tier with 100 cloud LLM calls/day. Pro tier for unlimited access. Local Ollama always unlimited.</p>
                 </div>
             </div>
         </div>
@@ -716,6 +732,15 @@
                         <code><span class="comment"># Chat with auto-context</span><br><span class="command">cognify smart-chat</span> "How does auth work?"<br><br><span class="comment"># Uses indexed code + knowledge automatically!</span></code>
                     </div>
                 </div>
+                <div class="usage-card">
+                    <div class="usage-card-header">
+                        <span>⚙️</span>
+                        <h3>Settings & License</h3>
+                    </div>
+                    <div class="code-block">
+                        <code><span class="comment"># View and manage settings</span><br><span class="command">cognify settings show</span><br><span class="command">cognify settings set</span> analytics.enabled false<br><br><span class="comment"># Check license status</span><br><span class="command">cognify license status</span></code>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -758,6 +783,42 @@
         </div>
     </section>
 
+    <!-- VSCode Extension Section -->
+    <section id="vscode" class="installation">
+        <div class="container">
+            <h2 class="section-title">💻 VSCode Extension</h2>
+            <p class="section-subtitle">Seamless integration with Visual Studio Code for a streamlined development workflow.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">🎯</div>
+                    <div class="step-content">
+                        <h3>Key Features</h3>
+                        <p>The VSCode extension brings all Cognify AI features directly into your editor:</p>
+                        <ul style="margin-top: 1rem; margin-left: 1.5rem;">
+                            <li><strong>Multi-Agent Chat Panel</strong> — Choose from 5 specialized AI agents</li>
+                            <li><strong>Multiple Chat Sessions</strong> — Create, switch, and rename sessions</li>
+                            <li><strong>Code Review</strong> — Review files and selections with inline diagnostics</li>
+                            <li><strong>Code Generation</strong> — Generate code from natural language</li>
+                            <li><strong>License Status Bar</strong> — See remaining cloud calls at a glance</li>
+                            <li><strong>Settings Management</strong> — Toggle analytics and telemetry from VSCode</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">📦</div>
+                    <div class="step-content">
+                        <h3>Installation</h3>
+                        <p>Install from the VSCode marketplace or build from source:</p>
+                        <div class="code-block">
+                            <code><span class="comment"># From source</span><br><span class="command">cd</span> vscode-extension<br><span class="command">npm install</span><br><span class="command">npm run compile</span><br><span class="command">npx vsce package</span></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Tech Stack Section -->
     <section id="tech" class="tech-stack">
         <div class="container">
@@ -767,11 +828,15 @@
             <div class="tech-grid">
                 <div class="tech-item">🦜 LangChain</div>
                 <div class="tech-item">🦙 Ollama</div>
+                <div class="tech-item">🤖 OpenAI</div>
+                <div class="tech-item">⚡ Groq</div>
+                <div class="tech-item">💎 Gemini</div>
                 <div class="tech-item">🗄️ ChromaDB</div>
                 <div class="tech-item">🤗 Sentence Transformers</div>
                 <div class="tech-item">🖱️ Click</div>
                 <div class="tech-item">✨ Rich</div>
                 <div class="tech-item">📋 Pydantic</div>
+                <div class="tech-item">💾 SQLite</div>
                 <div class="tech-item">🧪 Pytest</div>
             </div>
         </div>

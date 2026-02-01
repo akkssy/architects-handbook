@@ -226,6 +226,7 @@
             <li><a href="#architecture">Architecture</a></li>
             <li><a href="#modules">Modules</a></li>
             <li><a href="#code-walkthrough">Code Walkthrough</a></li>
+            <li><a href="#user-management">User Management</a></li>
             <li><a href="#hands-on">Hands-On</a></li>
         </ul>
     </nav>
@@ -638,6 +639,94 @@ Analyze for bugs, security issues, and improvements."""</span>
             <div class="tip">
                 <strong>Real-World Challenge:</strong> LLMs don't always produce valid JSON.
                 That's why we have multiple extraction strategies and repair logic.
+            </div>
+        </section>
+
+        <!-- User Management Section -->
+        <section id="user-management" class="card">
+            <h2>👤 User Management System</h2>
+            <p>Cognify AI includes a comprehensive user management system with configurable settings, analytics, and licensing.</p>
+
+            <h3>Privacy-First Architecture</h3>
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>⚙️ Settings</h4>
+                    <p>All features (analytics, telemetry, auth) can be enabled/disabled. User has full control.</p>
+                </div>
+                <div class="concept-box">
+                    <h4>📊 Local Analytics</h4>
+                    <p>Usage tracked in local SQLite. No code content, file paths anonymized, GDPR compliant.</p>
+                </div>
+                <div class="concept-box">
+                    <h4>📜 License Tiers</h4>
+                    <p>Free (100 cloud calls/day), Pro (unlimited), Team, Enterprise. Local LLM always unlimited.</p>
+                </div>
+            </div>
+
+            <h3>Settings Commands</h3>
+<pre><code><span class="comment"># View all settings</span>
+<span class="command">cognify settings show</span>
+
+<span class="comment"># Toggle analytics on/off</span>
+<span class="command">cognify settings set</span> analytics.enabled false
+
+<span class="comment"># Toggle telemetry on/off</span>
+<span class="command">cognify settings set</span> telemetry.enabled false
+
+<span class="comment"># View privacy-specific settings</span>
+<span class="command">cognify settings privacy</span>
+</code></pre>
+
+            <h3>License & Usage Commands</h3>
+<pre><code><span class="comment"># Check your license tier and remaining calls</span>
+<span class="command">cognify license status</span>
+
+<span class="comment"># View collected analytics</span>
+<span class="command">cognify data show</span>
+
+<span class="comment"># Export your data (GDPR right to portability)</span>
+<span class="command">cognify data export</span>
+
+<span class="comment"># Delete all analytics (GDPR right to deletion)</span>
+<span class="command">cognify data delete</span>
+</code></pre>
+
+            <h3>License Tiers</h3>
+            <table>
+                <tr>
+                    <th>Tier</th>
+                    <th>Cloud LLM Calls/Day</th>
+                    <th>Local LLM Calls</th>
+                    <th>Max Agents</th>
+                </tr>
+                <tr>
+                    <td>Free</td>
+                    <td>100</td>
+                    <td>Unlimited</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>Pro ($15/mo)</td>
+                    <td>Unlimited</td>
+                    <td>Unlimited</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>Team</td>
+                    <td>Unlimited</td>
+                    <td>Unlimited</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>Enterprise</td>
+                    <td>Unlimited</td>
+                    <td>Unlimited</td>
+                    <td>Unlimited</td>
+                </tr>
+            </table>
+
+            <div class="tip">
+                <strong>Privacy Note:</strong> Analytics never collects your actual code content, API keys, or personally identifiable information. Use <code>cognify data show</code> to see exactly what's collected.
             </div>
         </section>
 
