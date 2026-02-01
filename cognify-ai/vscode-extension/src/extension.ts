@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
     diagnosticsManager = new DiagnosticsManager();
 
     // Register the sidebar chat view provider
-    chatViewProvider = new ChatViewProvider(context.extensionUri, cognifyRunner);
+    chatViewProvider = new ChatViewProvider(context.extensionUri, cognifyRunner, context);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(
             ChatViewProvider.viewType,

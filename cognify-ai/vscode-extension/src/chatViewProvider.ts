@@ -18,6 +18,7 @@ interface IndexState {
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cognify.chatView';
+    private static readonly HISTORY_KEY = 'cognify.conversationHistory';
 
     private _view?: vscode.WebviewView;
     private _conversationHistory: ConversationMessage[] = [];
@@ -40,10 +41,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
-        private readonly _cognifyRunner: CognifyRunner
+        private readonly _cognifyRunner: CognifyRunner,
+        private readonly _context: vscode.ExtensionContext
     ) {
         // Load current settings
         this._loadSettings();
+        // Load conversation history from persistent storage
+        this._loadConversationHistory();
+    }
+
+    private _loadConversationHistory() {
+        const savedHistory = this._context.globalState.get<ConversationMessage[]>(ChatViewProvider.HISTORY_KEY);
+        if (savedHistory && Array.isArray(savedHistory)) {
+            this._conversationHistory = savedHistory;
+        }
+    }
+
+    private _saveConversationHistory() {
+        this._context.globalState.update(ChatViewProvider.HISTORY_KEY, this._conversationHistory);
     }
 
     private _loadSettings() {
@@ -66,12 +81,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlContent();
 
-        // Send initial provider/model state
-        this._sendProviderState();
-
-        // Check index status on load
-        this._checkAndInitializeIndex();
-
+        // Message handler - webview will send 'webviewReady' when it's initialized
         webviewView.webview.onDidReceiveMessage(async (message) => {
             switch (message.command) {
                 case 'sendMessage':
@@ -113,8 +123,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 case 'checkIndexStatus':
                     await this._checkAndInitializeIndex();
                     break;
+                case 'webviewReady':
+                    // Webview is ready, now send initial state
+                    this._sendProviderState();
+                    this._checkAndInitializeIndex();
+                    this._restoreConversationToWebview();
+                    break;
             }
         });
+    }
+
+    private _restoreConversationToWebview() {
+        // Send all previous messages to the webview to restore the chat history
+        if (this._conversationHistory.length > 0) {
+            this._view?.webview.postMessage({
+                command: 'restoreHistory',
+                messages: this._conversationHistory
+            });
+        }
     }
 
     private _sendProviderState() {
@@ -350,6 +376,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             context: contextToUse,
             timestamp: Date.now()
         });
+        this._saveConversationHistory();
 
         this._view.webview.postMessage({ command: 'thinking', thinking: true });
 
@@ -409,6 +436,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 content: result.response,
                 timestamp: Date.now()
             });
+            this._saveConversationHistory();
 
             this._view.webview.postMessage({
                 command: 'response',
@@ -458,6 +486,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     private _clearHistory() {
         this._conversationHistory = [];
+        this._saveConversationHistory();
         this._view?.webview.postMessage({ command: 'historyCleared' });
     }
 
@@ -1070,6 +1099,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 case 'historyCleared':
                     messagesDiv.innerHTML = '<div class="message assistant"><p>👋 Chat cleared. How can I help?</p></div>';
                     break;
+                case 'restoreHistory':
+                    // Restore previous conversation history
+                    if (msg.messages && msg.messages.length > 0) {
+                        // Clear the default welcome message
+                        messagesDiv.innerHTML = '';
+                        // Add all previous messages
+                        msg.messages.forEach(message => {
+                            addMessage(message.content, message.role);
+                        });
+                    }
+                    break;
                 case 'providerState':
                     providers = msg.providers;
                     providerSelect.value = msg.currentProvider;
@@ -1119,8 +1159,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             }
         });
 
-        // Request initial provider state
-        vscode.postMessage({ command: 'getProviders' });
+        // Notify extension that webview is ready - this triggers all initialization
+        vscode.postMessage({ command: 'webviewReady' });
     </script>
 </body>
 </html>`;
