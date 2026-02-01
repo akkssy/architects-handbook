@@ -58,6 +58,7 @@ export interface SmartChatOptions {
     language?: string;
     history?: ChatMessage[];
     searchContext?: string;  // Semantic search context from index
+    systemPrompt?: string;   // Agent-specific system prompt
 }
 
 export interface SmartChatResult {
@@ -260,6 +261,9 @@ export class CognifyRunner {
         }
         if (options.history && options.history.length > 0) {
             args.push('--history', JSON.stringify(options.history));
+        }
+        if (options.systemPrompt) {
+            args.push('--system-prompt', options.systemPrompt);
         }
 
         const output = await this.runCommand(args);

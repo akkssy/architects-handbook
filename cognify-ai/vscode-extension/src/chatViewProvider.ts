@@ -12,6 +12,7 @@ interface ChatSession {
     id: string;
     name: string;
     messages: ConversationMessage[];
+    agentId: string;
     createdAt: number;
     updatedAt: number;
 }
@@ -23,6 +24,133 @@ interface IndexState {
     progress?: IndexProgress;
     error?: string;
 }
+
+// Agent type definitions
+type AgentId = 'general' | 'reviewer' | 'generator' | 'documenter' | 'tester';
+
+interface Agent {
+    id: AgentId;
+    name: string;
+    icon: string;
+    description: string;
+    systemPrompt: string;
+    suggestions: string[];
+}
+
+// Define all available agents with their system prompts
+const AGENTS: Record<AgentId, Agent> = {
+    general: {
+        id: 'general',
+        name: 'General Assistant',
+        icon: '💬',
+        description: 'General-purpose coding assistant for any task',
+        systemPrompt: `You are Cognify AI, a helpful and knowledgeable coding assistant. You help developers with:
+- Answering questions about code and programming concepts
+- Explaining complex topics in simple terms
+- Providing guidance on best practices
+- Helping debug issues and solve problems
+- Suggesting improvements and optimizations
+
+Be concise, accurate, and helpful. When showing code, use proper formatting with language-specific syntax highlighting.`,
+        suggestions: ['Write a function to', 'Explain this code', 'How do I...']
+    },
+    reviewer: {
+        id: 'reviewer',
+        name: 'Code Reviewer',
+        icon: '🔍',
+        description: 'Analyzes code for bugs, security issues, and best practices',
+        systemPrompt: `You are Cognify AI's Code Reviewer Agent, an expert at analyzing code quality. Your role is to:
+
+1. **Bug Detection**: Identify potential bugs, logic errors, and edge cases
+2. **Security Analysis**: Find security vulnerabilities (SQL injection, XSS, buffer overflows, etc.)
+3. **Best Practices**: Check adherence to coding standards and design patterns
+4. **Performance**: Spot performance bottlenecks and inefficiencies
+5. **Maintainability**: Assess code readability, complexity, and technical debt
+
+When reviewing code:
+- Be thorough but constructive
+- Prioritize issues by severity (Critical > High > Medium > Low)
+- Provide specific line references when possible
+- Suggest concrete fixes for each issue
+- Acknowledge good practices you observe
+
+Format your reviews clearly with sections for different issue types.`,
+        suggestions: ['Review this code', 'Find bugs in', 'Check security of']
+    },
+    generator: {
+        id: 'generator',
+        name: 'Code Generator',
+        icon: '✨',
+        description: 'Generates functions, classes, and boilerplate code',
+        systemPrompt: `You are Cognify AI's Code Generator Agent, specialized in writing high-quality code. Your role is to:
+
+1. **Generate Code**: Write functions, classes, modules, and complete implementations
+2. **Follow Patterns**: Use appropriate design patterns and architectural principles
+3. **Best Practices**: Write clean, readable, and maintainable code
+4. **Type Safety**: Include proper type hints/annotations where applicable
+5. **Error Handling**: Include appropriate error handling and edge cases
+
+When generating code:
+- Ask clarifying questions if requirements are unclear
+- Provide complete, working implementations
+- Include brief comments explaining complex logic
+- Follow the language's idiomatic style
+- Consider edge cases and input validation
+- Make code modular and reusable
+
+Always wrap code in proper markdown code blocks with language specification.`,
+        suggestions: ['Generate a function that', 'Create a class for', 'Write code to']
+    },
+    documenter: {
+        id: 'documenter',
+        name: 'Documentation Writer',
+        icon: '📝',
+        description: 'Writes docstrings, comments, and README content',
+        systemPrompt: `You are Cognify AI's Documentation Agent, an expert technical writer. Your role is to:
+
+1. **Docstrings**: Write comprehensive function/class documentation
+2. **Comments**: Add clear inline comments explaining complex logic
+3. **README Files**: Create well-structured project documentation
+4. **API Docs**: Document APIs with examples and parameter descriptions
+5. **Tutorials**: Write step-by-step guides and explanations
+
+When writing documentation:
+- Use the appropriate format for the language (JSDoc, docstrings, etc.)
+- Include parameter types, return values, and exceptions
+- Provide usage examples
+- Keep explanations clear and concise
+- Use proper markdown formatting
+- Consider the target audience (beginners vs experts)
+
+Documentation should be accurate, complete, and easy to understand.`,
+        suggestions: ['Document this function', 'Write a README for', 'Add comments to']
+    },
+    tester: {
+        id: 'tester',
+        name: 'Test Writer',
+        icon: '🧪',
+        description: 'Creates unit tests and test cases',
+        systemPrompt: `You are Cognify AI's Test Writer Agent, specialized in creating comprehensive tests. Your role is to:
+
+1. **Unit Tests**: Write thorough unit tests for functions and classes
+2. **Test Cases**: Design test cases covering edge cases and boundaries
+3. **Mocking**: Create appropriate mocks and stubs for dependencies
+4. **Assertions**: Use meaningful assertions with clear failure messages
+5. **Coverage**: Ensure high code coverage with meaningful tests
+
+When writing tests:
+- Use the appropriate testing framework for the language (Jest, pytest, JUnit, etc.)
+- Follow the Arrange-Act-Assert (AAA) pattern
+- Test both happy paths and error cases
+- Include edge cases (null, empty, boundary values)
+- Write descriptive test names that explain what's being tested
+- Keep tests independent and isolated
+- Add setup/teardown when needed
+
+Provide complete, runnable test files with all necessary imports.`,
+        suggestions: ['Write tests for', 'Create test cases for', 'Test this function']
+    }
+};
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cognify.chatView';
@@ -110,13 +238,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         this._context.globalState.update(ChatViewProvider.CURRENT_SESSION_KEY, this._currentSessionId);
     }
 
-    private _createNewSession(name?: string): ChatSession {
+    private _createNewSession(name?: string, agentId: AgentId = 'general'): ChatSession {
         const id = this._generateSessionId();
         const sessionNumber = this._sessions.size + 1;
+        const agent = AGENTS[agentId];
         const session: ChatSession = {
             id,
-            name: name || `Chat ${sessionNumber}`,
+            name: name || `${agent.icon} ${agent.name} ${sessionNumber}`,
             messages: [],
+            agentId: agentId,
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
@@ -124,6 +254,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         this._currentSessionId = id;
         this._saveSessions();
         return session;
+    }
+
+    // Get current session's agent
+    private _getCurrentAgent(): Agent {
+        const session = this._sessions.get(this._currentSessionId);
+        const agentId = (session?.agentId || 'general') as AgentId;
+        return AGENTS[agentId] || AGENTS['general'];
+    }
+
+    // Change agent for current session
+    private _changeSessionAgent(agentId: AgentId) {
+        const session = this._sessions.get(this._currentSessionId);
+        if (session && AGENTS[agentId]) {
+            session.agentId = agentId;
+            session.updatedAt = Date.now();
+            this._saveSessions();
+        }
     }
 
     private _switchSession(sessionId: string) {
@@ -167,15 +314,25 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return false;
     }
 
-    private _getSessionsList(): { id: string; name: string; messageCount: number; updatedAt: number }[] {
+    private _getSessionsList(): { id: string; name: string; messageCount: number; updatedAt: number; agentId: string }[] {
         return Array.from(this._sessions.values())
             .sort((a, b) => b.updatedAt - a.updatedAt) // Most recent first
             .map(s => ({
                 id: s.id,
                 name: s.name,
                 messageCount: s.messages.length,
-                updatedAt: s.updatedAt
+                updatedAt: s.updatedAt,
+                agentId: s.agentId || 'general'
             }));
+    }
+
+    private _getAgentsList(): { id: string; name: string; icon: string; description: string }[] {
+        return Object.values(AGENTS).map(agent => ({
+            id: agent.id,
+            name: agent.name,
+            icon: agent.icon,
+            description: agent.description
+        }));
     }
 
     private _saveConversationHistory() {
@@ -263,12 +420,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 case 'webviewReady':
                     // Webview is ready, now send initial state
                     this._sendProviderState();
+                    this._sendAgentsState();
                     this._sendSessionsState();
                     this._restoreIndexState();
                     this._restoreConversationToWebview();
                     break;
                 case 'newSession':
-                    this._handleNewSession();
+                    this._handleNewSession(message.agentId);
+                    break;
+                case 'changeAgent':
+                    this._handleChangeAgent(message.agentId);
                     break;
                 case 'switchSession':
                     this._handleSwitchSession(message.sessionId);
@@ -284,20 +445,41 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
     private _sendSessionsState() {
+        const currentAgent = this._getCurrentAgent();
         this._view?.webview.postMessage({
             command: 'sessionsState',
             sessions: this._getSessionsList(),
-            currentSessionId: this._currentSessionId
+            currentSessionId: this._currentSessionId,
+            currentAgent: {
+                id: currentAgent.id,
+                name: currentAgent.name,
+                icon: currentAgent.icon,
+                description: currentAgent.description,
+                suggestions: currentAgent.suggestions
+            }
         });
     }
 
-    private _handleNewSession() {
-        const session = this._createNewSession();
+    private _sendAgentsState() {
+        const currentAgent = this._getCurrentAgent();
+        this._view?.webview.postMessage({
+            command: 'agentsState',
+            agents: this._getAgentsList(),
+            currentAgentId: currentAgent.id
+        });
+    }
+
+    private _handleNewSession(agentId?: string) {
+        const agent = (agentId && AGENTS[agentId as AgentId]) ? agentId as AgentId : 'general';
+        const session = this._createNewSession(undefined, agent);
         this._sendSessionsState();
+        this._sendAgentsState();
         // Clear the chat display for the new session
         this._view?.webview.postMessage({
             command: 'clearMessages'
         });
+        // Send agent-specific welcome message
+        this._sendAgentWelcome();
         // Clear context
         this._currentContext = undefined;
         this._contextFileName = undefined;
@@ -307,9 +489,34 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         });
     }
 
+    private _handleChangeAgent(agentId: string) {
+        if (AGENTS[agentId as AgentId]) {
+            this._changeSessionAgent(agentId as AgentId);
+            this._sendSessionsState();
+            this._sendAgentsState();
+            // Send agent-specific welcome message
+            this._sendAgentWelcome();
+        }
+    }
+
+    private _sendAgentWelcome() {
+        const agent = this._getCurrentAgent();
+        this._view?.webview.postMessage({
+            command: 'agentWelcome',
+            agent: {
+                id: agent.id,
+                name: agent.name,
+                icon: agent.icon,
+                description: agent.description,
+                suggestions: agent.suggestions
+            }
+        });
+    }
+
     private _handleSwitchSession(sessionId: string) {
         this._switchSession(sessionId);
         this._sendSessionsState();
+        this._sendAgentsState();
         this._restoreConversationToWebview();
         // Clear context display (context is per-session interaction)
         this._currentContext = undefined;
@@ -324,6 +531,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         const deleted = this._deleteSession(sessionId);
         if (deleted) {
             this._sendSessionsState();
+            this._sendAgentsState();
             this._restoreConversationToWebview();
         } else {
             vscode.window.showWarningMessage('Cannot delete the last chat session');
@@ -647,11 +855,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 .slice(-10)
                 .map(msg => ({ role: msg.role, content: msg.content }));
 
+            // Get current agent's system prompt
+            const currentAgent = this._getCurrentAgent();
+
             const result = await this._cognifyRunner.smartChat(text, {
                 context: contextToUse,
                 searchContext: combinedSearchContext || undefined,  // Include both knowledge and codebase search
                 language,
-                history: historyForApi.slice(0, -1)
+                history: historyForApi.slice(0, -1),
+                systemPrompt: currentAgent.systemPrompt
             });
 
             this._conversationHistory.push({
@@ -1111,6 +1323,55 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         .session-bar button.new-chat:hover {
             background: var(--vscode-button-hoverBackground);
         }
+        /* Agent Selector Styles */
+        .agent-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--vscode-editor-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+        }
+        .agent-bar .agent-icon {
+            font-size: 16px;
+        }
+        .agent-bar select {
+            flex: 1;
+            padding: 4px 8px;
+            background: var(--vscode-dropdown-background);
+            color: var(--vscode-dropdown-foreground);
+            border: 1px solid var(--vscode-dropdown-border);
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--vscode-badge-background);
+            color: var(--vscode-badge-foreground);
+        }
+        .agent-welcome {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+        }
+        .agent-welcome .agent-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .agent-welcome h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .agent-welcome p {
+            font-size: 11px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -1122,6 +1383,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         <button class="new-chat" onclick="newSession()" title="New Chat">➕</button>
         <button onclick="renameCurrentSession()" title="Rename Chat">✏️</button>
         <button onclick="deleteCurrentSession()" title="Delete Chat">🗑️</button>
+    </div>
+    <!-- Agent Selector Bar -->
+    <div class="agent-bar">
+        <span class="agent-icon" id="currentAgentIcon">💬</span>
+        <select id="agentSelect" onchange="changeAgent(this.value)">
+            <option value="general">💬 General Assistant</option>
+            <option value="reviewer">🔍 Code Reviewer</option>
+            <option value="generator">✨ Code Generator</option>
+            <option value="documenter">📝 Documentation Writer</option>
+            <option value="tester">🧪 Test Writer</option>
+        </select>
     </div>
     <div class="header">
         <h3>⚛️ Cognify AI</h3>
@@ -1324,6 +1596,54 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         }
         // ==================== End Session Management ====================
 
+        // ==================== Agent Management ====================
+        const agentSelect = document.getElementById('agentSelect');
+        const currentAgentIcon = document.getElementById('currentAgentIcon');
+        let currentAgentId = 'general';
+        const agentIcons = {
+            'general': '💬',
+            'reviewer': '🔍',
+            'generator': '✨',
+            'documenter': '📝',
+            'tester': '🧪'
+        };
+
+        function changeAgent(agentId) {
+            if (agentId && agentId !== currentAgentId) {
+                vscode.postMessage({ command: 'changeAgent', agentId });
+            }
+        }
+
+        function updateAgentUI(agentId) {
+            currentAgentId = agentId;
+            agentSelect.value = agentId;
+            currentAgentIcon.textContent = agentIcons[agentId] || '💬';
+        }
+
+        function showAgentWelcome(agent) {
+            // Clear existing messages and show agent-specific welcome
+            messagesDiv.innerHTML = '';
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'message assistant';
+            welcomeDiv.innerHTML = '<p style="font-size:20px;text-align:center;margin-bottom:8px;">' + agent.icon + '</p>' +
+                '<p style="text-align:center;font-weight:bold;">' + agent.name + '</p>' +
+                '<p style="text-align:center;font-size:11px;opacity:0.8;margin-top:4px;">' + agent.description + '</p>';
+            messagesDiv.appendChild(welcomeDiv);
+
+            // Update suggestions based on agent
+            updateSuggestions(agent.suggestions || []);
+        }
+
+        function updateSuggestions(suggestions) {
+            const suggestionsDiv = document.querySelector('.suggestions');
+            if (suggestions && suggestions.length > 0) {
+                suggestionsDiv.innerHTML = suggestions.map(s =>
+                    '<button class="suggestion-chip" onclick="sendSuggestion(\\'' + escapeHtml(s) + '\\')">' + s + '</button>'
+                ).join('');
+            }
+        }
+        // ==================== End Agent Management ====================
+
         // ==================== Indexing UI ====================
         const indexStatus = document.getElementById('indexStatus');
         const indexStatusText = document.getElementById('indexStatusText');
@@ -1438,6 +1758,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 // ==================== Session Messages ====================
                 case 'sessionsState':
                     updateSessionsDropdown(msg.sessions, msg.currentSessionId);
+                    if (msg.currentAgent) {
+                        updateAgentUI(msg.currentAgent.id);
+                    }
                     break;
                 case 'clearMessages':
                     messagesDiv.innerHTML = '<div class="message assistant"><p>👋 Hi! I\\'m Cognify AI. Ask me anything about code!</p><p style="font-size:11px;margin-top:8px;opacity:0.8">Try: "write a function", "review this code", or just chat!</p></div>';
@@ -1450,6 +1773,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     }
                     break;
                 // ==================== End Session Messages ====================
+                // ==================== Agent Messages ====================
+                case 'agentsState':
+                    updateAgentUI(msg.currentAgentId);
+                    break;
+                case 'agentWelcome':
+                    showAgentWelcome(msg.agent);
+                    break;
+                // ==================== End Agent Messages ====================
                 // ==================== Indexing Messages ====================
                 case 'indexState':
                     if (msg.status === 'checking') {

@@ -731,9 +731,10 @@ def rename(ctx, old_name: str, new_name: str, symbol_type: str, files: Tuple[Pat
               help="File to use as context")
 @click.option("--language", "-l", default="python", help="Language for code generation")
 @click.option("--history", "-h", "history_json", help="JSON conversation history")
+@click.option("--system-prompt", "-s", "system_prompt", help="Custom system prompt for the AI agent")
 @click.pass_context
 def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional[Path],
-               language: str, history_json: Optional[str]):
+               language: str, history_json: Optional[str], system_prompt: Optional[str]):
     """Intelligent chat that detects intent and executes appropriate actions.
 
     Automatically detects if the user wants to:
@@ -791,16 +792,16 @@ def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional
 
     try:
         if intent == "generate":
-            result = _handle_generate(config, llm, message, language)
+            result = _handle_generate(config, llm, message, language, system_prompt)
         elif intent == "review" and context:
-            result = _handle_review(config, llm, context, language)
+            result = _handle_review(config, llm, context, language, system_prompt)
         elif intent == "edit" and context:
-            result = _handle_edit(config, llm, message, context, language)
+            result = _handle_edit(config, llm, message, context, language, system_prompt)
         elif intent == "explain" and context:
-            result = _handle_explain(config, llm, context, language)
+            result = _handle_explain(config, llm, context, language, system_prompt)
         else:
             # General chat - pass combined context with knowledge
-            result = _handle_chat(config, llm, message, combined_context if combined_context else None, history)
+            result = _handle_chat(config, llm, message, combined_context if combined_context else None, history, system_prompt)
 
         # Output result (no formatting for VSCode extension consumption)
         print(result)
@@ -867,8 +868,12 @@ def _detect_intent(message: str, context: Optional[str]) -> str:
     return "chat"
 
 
-def _handle_generate(config: Config, llm: LLMManager, message: str, language: str) -> str:
+def _handle_generate(config: Config, llm: LLMManager, message: str, language: str, system_prompt: Optional[str] = None) -> str:
     """Handle code generation request."""
+    # If custom system prompt is provided, use it directly via chat
+    if system_prompt:
+        return _handle_chat(config, llm, f"Generate code: {message} (in {language})", None, [], system_prompt)
+
     generator = CodeGenerator(config, llm)
     result = generator.generate(
         description=message,
@@ -886,8 +891,12 @@ def _handle_generate(config: Config, llm: LLMManager, message: str, language: st
     return response
 
 
-def _handle_review(config: Config, llm: LLMManager, code: str, language: str) -> str:
+def _handle_review(config: Config, llm: LLMManager, code: str, language: str, system_prompt: Optional[str] = None) -> str:
     """Handle code review request."""
+    # If custom system prompt is provided, use it directly via chat
+    if system_prompt:
+        return _handle_chat(config, llm, f"Review this {language} code:\n```{language}\n{code}\n```", None, [], system_prompt)
+
     analyzer = CodeAnalyzer(config, llm)
     result = analyzer.review_code(code, language=language)
 
@@ -919,11 +928,15 @@ def _handle_review(config: Config, llm: LLMManager, code: str, language: str) ->
     return response
 
 
-def _handle_edit(config: Config, llm: LLMManager, instruction: str, code: str, language: str) -> str:
+def _handle_edit(config: Config, llm: LLMManager, instruction: str, code: str, language: str, custom_system_prompt: Optional[str] = None) -> str:
     """Handle code edit request."""
     from langchain_core.messages import HumanMessage, SystemMessage
 
-    system_prompt = """You are an expert code editor. Given code and an instruction, modify the code accordingly.
+    # Use custom system prompt if provided, otherwise use default
+    if custom_system_prompt:
+        system_prompt = custom_system_prompt
+    else:
+        system_prompt = """You are an expert code editor. Given code and an instruction, modify the code accordingly.
 
 Rules:
 - Return ONLY the modified code in a code block
@@ -951,11 +964,15 @@ Please provide the modified code:"""
     return f"Here's the modified code:\n\n{result}"
 
 
-def _handle_explain(config: Config, llm: LLMManager, code: str, language: str) -> str:
+def _handle_explain(config: Config, llm: LLMManager, code: str, language: str, custom_system_prompt: Optional[str] = None) -> str:
     """Handle code explanation request."""
     from langchain_core.messages import HumanMessage, SystemMessage
 
-    system_prompt = """You are an expert programming teacher. Explain code clearly and concisely.
+    # Use custom system prompt if provided, otherwise use default
+    if custom_system_prompt:
+        system_prompt = custom_system_prompt
+    else:
+        system_prompt = """You are an expert programming teacher. Explain code clearly and concisely.
 
 When explaining code:
 - Start with a brief overview of what the code does
@@ -980,11 +997,15 @@ When explaining code:
 
 
 def _handle_chat(config: Config, llm: LLMManager, message: str, context: Optional[str],
-                 history: List[dict]) -> str:
+                 history: List[dict], custom_system_prompt: Optional[str] = None) -> str:
     """Handle general chat request."""
     from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-    system_prompt = """You are Cognify AI, an expert programming assistant. You help developers with:
+    # Use custom system prompt if provided (for different AI agents)
+    if custom_system_prompt:
+        system_prompt = custom_system_prompt
+    else:
+        system_prompt = """You are Cognify AI, an expert programming assistant. You help developers with:
 - Answering programming questions
 - Explaining concepts and best practices
 - Debugging help and suggestions
