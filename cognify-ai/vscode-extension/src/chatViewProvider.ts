@@ -8,6 +8,14 @@ interface ConversationMessage {
     timestamp: number;
 }
 
+interface ChatSession {
+    id: string;
+    name: string;
+    messages: ConversationMessage[];
+    createdAt: number;
+    updatedAt: number;
+}
+
 interface IndexState {
     status: 'unknown' | 'checking' | 'not_indexed' | 'indexed' | 'indexing' | 'error';
     chunkCount: number;
@@ -18,11 +26,13 @@ interface IndexState {
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cognify.chatView';
-    private static readonly HISTORY_KEY = 'cognify.conversationHistory';
+    private static readonly SESSIONS_KEY = 'cognify.chatSessions';
+    private static readonly CURRENT_SESSION_KEY = 'cognify.currentSessionId';
     private static readonly INDEX_STATE_KEY = 'cognify.indexState';
 
     private _view?: vscode.WebviewView;
-    private _conversationHistory: ConversationMessage[] = [];
+    private _sessions: Map<string, ChatSession> = new Map();
+    private _currentSessionId: string = '';
     private _currentContext: string | undefined;
     private _contextFileName: string | undefined;
     private _currentProvider: string = 'ollama';
@@ -47,21 +57,134 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     ) {
         // Load current settings
         this._loadSettings();
-        // Load conversation history from persistent storage
-        this._loadConversationHistory();
+        // Load chat sessions from persistent storage
+        this._loadSessions();
         // Load index state from persistent storage
         this._loadIndexState();
     }
 
-    private _loadConversationHistory() {
-        const savedHistory = this._context.globalState.get<ConversationMessage[]>(ChatViewProvider.HISTORY_KEY);
-        if (savedHistory && Array.isArray(savedHistory)) {
-            this._conversationHistory = savedHistory;
+    // Generate a unique ID for new sessions
+    private _generateSessionId(): string {
+        return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Get current session's conversation history
+    private get _conversationHistory(): ConversationMessage[] {
+        const session = this._sessions.get(this._currentSessionId);
+        return session ? session.messages : [];
+    }
+
+    // Set current session's conversation history
+    private set _conversationHistory(messages: ConversationMessage[]) {
+        const session = this._sessions.get(this._currentSessionId);
+        if (session) {
+            session.messages = messages;
+            session.updatedAt = Date.now();
         }
     }
 
+    private _loadSessions() {
+        const savedSessions = this._context.globalState.get<ChatSession[]>(ChatViewProvider.SESSIONS_KEY);
+        const savedCurrentId = this._context.globalState.get<string>(ChatViewProvider.CURRENT_SESSION_KEY);
+
+        if (savedSessions && Array.isArray(savedSessions) && savedSessions.length > 0) {
+            this._sessions.clear();
+            savedSessions.forEach(session => {
+                this._sessions.set(session.id, session);
+            });
+            // Restore current session or use first available
+            if (savedCurrentId && this._sessions.has(savedCurrentId)) {
+                this._currentSessionId = savedCurrentId;
+            } else {
+                this._currentSessionId = savedSessions[0].id;
+            }
+        } else {
+            // No sessions exist, create the first one
+            this._createNewSession('Chat 1');
+        }
+    }
+
+    private _saveSessions() {
+        const sessionsArray = Array.from(this._sessions.values());
+        this._context.globalState.update(ChatViewProvider.SESSIONS_KEY, sessionsArray);
+        this._context.globalState.update(ChatViewProvider.CURRENT_SESSION_KEY, this._currentSessionId);
+    }
+
+    private _createNewSession(name?: string): ChatSession {
+        const id = this._generateSessionId();
+        const sessionNumber = this._sessions.size + 1;
+        const session: ChatSession = {
+            id,
+            name: name || `Chat ${sessionNumber}`,
+            messages: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+        this._sessions.set(id, session);
+        this._currentSessionId = id;
+        this._saveSessions();
+        return session;
+    }
+
+    private _switchSession(sessionId: string) {
+        if (this._sessions.has(sessionId)) {
+            this._currentSessionId = sessionId;
+            this._saveSessions();
+            // Clear context when switching sessions
+            this._currentContext = undefined;
+            this._contextFileName = undefined;
+        }
+    }
+
+    private _deleteSession(sessionId: string) {
+        if (this._sessions.size <= 1) {
+            // Can't delete the last session
+            return false;
+        }
+
+        const deleted = this._sessions.delete(sessionId);
+        if (deleted) {
+            // If we deleted the current session, switch to another one
+            if (this._currentSessionId === sessionId) {
+                const firstSession = this._sessions.values().next().value;
+                if (firstSession) {
+                    this._currentSessionId = firstSession.id;
+                }
+            }
+            this._saveSessions();
+        }
+        return deleted;
+    }
+
+    private _renameSession(sessionId: string, newName: string) {
+        const session = this._sessions.get(sessionId);
+        if (session) {
+            session.name = newName;
+            session.updatedAt = Date.now();
+            this._saveSessions();
+            return true;
+        }
+        return false;
+    }
+
+    private _getSessionsList(): { id: string; name: string; messageCount: number; updatedAt: number }[] {
+        return Array.from(this._sessions.values())
+            .sort((a, b) => b.updatedAt - a.updatedAt) // Most recent first
+            .map(s => ({
+                id: s.id,
+                name: s.name,
+                messageCount: s.messages.length,
+                updatedAt: s.updatedAt
+            }));
+    }
+
     private _saveConversationHistory() {
-        this._context.globalState.update(ChatViewProvider.HISTORY_KEY, this._conversationHistory);
+        // Update the current session's timestamp and save all sessions
+        const session = this._sessions.get(this._currentSessionId);
+        if (session) {
+            session.updatedAt = Date.now();
+        }
+        this._saveSessions();
     }
 
     private _loadIndexState() {
@@ -140,14 +263,85 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 case 'webviewReady':
                     // Webview is ready, now send initial state
                     this._sendProviderState();
+                    this._sendSessionsState();
                     this._restoreIndexState();
                     this._restoreConversationToWebview();
+                    break;
+                case 'newSession':
+                    this._handleNewSession();
+                    break;
+                case 'switchSession':
+                    this._handleSwitchSession(message.sessionId);
+                    break;
+                case 'deleteSession':
+                    this._handleDeleteSession(message.sessionId);
+                    break;
+                case 'renameSession':
+                    this._handleRenameSession(message.sessionId, message.newName);
                     break;
             }
         });
     }
 
+    private _sendSessionsState() {
+        this._view?.webview.postMessage({
+            command: 'sessionsState',
+            sessions: this._getSessionsList(),
+            currentSessionId: this._currentSessionId
+        });
+    }
+
+    private _handleNewSession() {
+        const session = this._createNewSession();
+        this._sendSessionsState();
+        // Clear the chat display for the new session
+        this._view?.webview.postMessage({
+            command: 'clearMessages'
+        });
+        // Clear context
+        this._currentContext = undefined;
+        this._contextFileName = undefined;
+        this._view?.webview.postMessage({
+            command: 'updateContext',
+            hasContext: false
+        });
+    }
+
+    private _handleSwitchSession(sessionId: string) {
+        this._switchSession(sessionId);
+        this._sendSessionsState();
+        this._restoreConversationToWebview();
+        // Clear context display (context is per-session interaction)
+        this._currentContext = undefined;
+        this._contextFileName = undefined;
+        this._view?.webview.postMessage({
+            command: 'updateContext',
+            hasContext: false
+        });
+    }
+
+    private _handleDeleteSession(sessionId: string) {
+        const deleted = this._deleteSession(sessionId);
+        if (deleted) {
+            this._sendSessionsState();
+            this._restoreConversationToWebview();
+        } else {
+            vscode.window.showWarningMessage('Cannot delete the last chat session');
+        }
+    }
+
+    private _handleRenameSession(sessionId: string, newName: string) {
+        if (this._renameSession(sessionId, newName)) {
+            this._sendSessionsState();
+        }
+    }
+
     private _restoreConversationToWebview() {
+        // Clear messages first, then restore
+        this._view?.webview.postMessage({
+            command: 'clearMessages'
+        });
+
         // Send all previous messages to the webview to restore the chat history
         if (this._conversationHistory.length > 0) {
             this._view?.webview.postMessage({
@@ -876,9 +1070,59 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        /* Session Selector Styles */
+        .session-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--vscode-editor-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+        }
+        .session-bar select {
+            flex: 1;
+            padding: 4px 8px;
+            background: var(--vscode-dropdown-background);
+            color: var(--vscode-dropdown-foreground);
+            border: 1px solid var(--vscode-dropdown-border);
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .session-bar button {
+            background: transparent;
+            border: none;
+            color: var(--vscode-foreground);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .session-bar button:hover {
+            background: var(--vscode-toolbar-hoverBackground);
+            opacity: 1;
+        }
+        .session-bar button.new-chat {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            opacity: 1;
+        }
+        .session-bar button.new-chat:hover {
+            background: var(--vscode-button-hoverBackground);
+        }
     </style>
 </head>
 <body>
+    <!-- Session Selector Bar -->
+    <div class="session-bar">
+        <select id="sessionSelect" onchange="switchSession(this.value)">
+            <option value="">Loading...</option>
+        </select>
+        <button class="new-chat" onclick="newSession()" title="New Chat">➕</button>
+        <button onclick="renameCurrentSession()" title="Rename Chat">✏️</button>
+        <button onclick="deleteCurrentSession()" title="Delete Chat">🗑️</button>
+    </div>
     <div class="header">
         <h3>⚛️ Cognify AI</h3>
         <button onclick="clearHistory()">Clear Chat</button>
@@ -1033,6 +1277,53 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             vscode.postMessage({ command: 'clearHistory' });
         }
 
+        // ==================== Session Management ====================
+        const sessionSelect = document.getElementById('sessionSelect');
+        let currentSessionId = '';
+
+        function newSession() {
+            vscode.postMessage({ command: 'newSession' });
+        }
+
+        function switchSession(sessionId) {
+            if (sessionId && sessionId !== currentSessionId) {
+                vscode.postMessage({ command: 'switchSession', sessionId });
+            }
+        }
+
+        function deleteCurrentSession() {
+            if (currentSessionId) {
+                vscode.postMessage({ command: 'deleteSession', sessionId: currentSessionId });
+            }
+        }
+
+        function renameCurrentSession() {
+            if (currentSessionId) {
+                const currentOption = sessionSelect.options[sessionSelect.selectedIndex];
+                const currentName = currentOption ? currentOption.text.split(' (')[0] : 'Chat';
+                const newName = prompt('Enter new name for this chat:', currentName);
+                if (newName && newName.trim()) {
+                    vscode.postMessage({ command: 'renameSession', sessionId: currentSessionId, newName: newName.trim() });
+                }
+            }
+        }
+
+        function updateSessionsDropdown(sessions, activeId) {
+            sessionSelect.innerHTML = '';
+            sessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session.id;
+                const msgCount = session.messageCount > 0 ? ' (' + session.messageCount + ')' : '';
+                option.textContent = session.name + msgCount;
+                if (session.id === activeId) {
+                    option.selected = true;
+                }
+                sessionSelect.appendChild(option);
+            });
+            currentSessionId = activeId;
+        }
+        // ==================== End Session Management ====================
+
         // ==================== Indexing UI ====================
         const indexStatus = document.getElementById('indexStatus');
         const indexStatusText = document.getElementById('indexStatusText');
@@ -1144,6 +1435,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     providerSelect.value = msg.currentProvider;
                     updateModelDropdown(providers[msg.currentProvider] || [], msg.currentModel);
                     break;
+                // ==================== Session Messages ====================
+                case 'sessionsState':
+                    updateSessionsDropdown(msg.sessions, msg.currentSessionId);
+                    break;
+                case 'clearMessages':
+                    messagesDiv.innerHTML = '<div class="message assistant"><p>👋 Hi! I\\'m Cognify AI. Ask me anything about code!</p><p style="font-size:11px;margin-top:8px;opacity:0.8">Try: "write a function", "review this code", or just chat!</p></div>';
+                    break;
+                case 'updateContext':
+                    if (msg.hasContext) {
+                        contextBar.classList.add('active');
+                    } else {
+                        contextBar.classList.remove('active');
+                    }
+                    break;
+                // ==================== End Session Messages ====================
                 // ==================== Indexing Messages ====================
                 case 'indexState':
                     if (msg.status === 'checking') {
