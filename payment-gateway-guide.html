@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway System - Comprehensive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --secondary: #8b5cf6; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { @apply bg-white rounded-xl shadow-lg p-6 mb-6; }
+        .nav-link { @apply px-4 py-2 rounded-lg transition-all duration-200 hover:bg-indigo-100; }
+        .nav-link.active { @apply bg-indigo-600 text-white; }
+        .section { @apply py-12 px-4; }
+        .mermaid { background: #f8fafc; border-radius: 12px; padding: 20px; }
+        pre[class*="language-"] { border-radius: 12px; margin: 1rem 0; }
+        .tab-btn { @apply px-4 py-2 rounded-t-lg border-b-2 border-transparent; }
+        .tab-btn.active { @apply border-indigo-600 text-indigo-600 bg-indigo-50; }
+        .timeline-item::before { content: ''; @apply absolute left-0 top-0 w-4 h-4 bg-indigo-600 rounded-full -translate-x-1/2; }
+        .cost-card { @apply bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100; }
+        details summary { cursor: pointer; }
+        details summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 4v10h16V8H4zm2 2h4v2H6v-2zm6 0h6v2h-6v-2zm-6 4h4v2H6v-2z"/>
+                    </svg>
+                    <span class="font-bold text-xl">Payment Gateway Guide</span>
+                </div>
+                <div class="hidden md:flex space-x-1" id="nav-links">
+                    <a href="#architecture" class="nav-link">Architecture</a>
+                    <a href="#tech-stack" class="nav-link">Tech Stack</a>
+                    <a href="#compliance" class="nav-link">Compliance</a>
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#gtm" class="nav-link">Go-to-Market</a>
+                    <a href="#timeline" class="nav-link">Timeline</a>
+                    <a href="#costs" class="nav-link">Costs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="gradient-bg text-white pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold mb-4">Production-Ready Payment Gateway</h1>
+            <p class="text-xl opacity-90 mb-8">Comprehensive guide to building a Stripe-like payment processing system</p>
+            <div class="flex justify-center space-x-4">
+                <span class="bg-white/20 px-4 py-2 rounded-full">PCI DSS Compliant</span>
+                <span class="bg-white/20 px-4 py-2 rounded-full">Multi-Currency</span>
+                <span class="bg-white/20 px-4 py-2 rounded-full">Fraud Detection</span>
+                <span class="bg-white/20 px-4 py-2 rounded-full">Real-time Processing</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Table of Contents -->
+    <section class="max-w-7xl mx-auto px-4 -mt-8 relative z-10">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6">📋 Table of Contents</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <a href="#architecture" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">🏗️</span>
+                    <div><h3 class="font-semibold">1. System Architecture</h3><p class="text-sm text-gray-600">Components, microservices, database design</p></div>
+                </a>
+                <a href="#tech-stack" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">⚙️</span>
+                    <div><h3 class="font-semibold">2. Technical Stack</h3><p class="text-sm text-gray-600">Languages, databases, infrastructure</p></div>
+                </a>
+                <a href="#compliance" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">🔒</span>
+                    <div><h3 class="font-semibold">3. Compliance & Legal</h3><p class="text-sm text-gray-600">PCI DSS, regulations, KYC/AML</p></div>
+                </a>
+                <a href="#features" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">💳</span>
+                    <div><h3 class="font-semibold">4. Core Features</h3><p class="text-sm text-gray-600">Payment flow, fraud, webhooks</p></div>
+                </a>
+                <a href="#gtm" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">🚀</span>
+                    <div><h3 class="font-semibold">5. Go-to-Market</h3><p class="text-sm text-gray-600">Pricing, onboarding, SDKs</p></div>
+                </a>
+                <a href="#timeline" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
+                    <span class="text-3xl mr-4">📅</span>
+                    <div><h3 class="font-semibold">6. Timeline & Costs</h3><p class="text-sm text-gray-600">Milestones, team, budget</p></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 1: System Architecture -->
+    <section id="architecture" class="section bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">🏗️ 1. System Architecture</h2>
+            <p class="text-gray-600 mb-8">High-level architecture showing all components of a production payment gateway</p>
+
+            <!-- High-Level Architecture Diagram -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">High-Level Architecture</h3>
+                <div class="mermaid">
+flowchart TB
+    subgraph External["External Clients"]
+        MerchantApp["Merchant Applications"]
+        MobileSDK["Mobile SDKs"]
+        WebSDK["Web SDKs/JS"]
+    end
+
+    subgraph Edge["Edge Layer"]
+        CDN["CDN / WAF"]
+        APIGateway["API Gateway"]
+        LB["Load Balancer"]
+    end
+
+    subgraph Core["Core Services"]
+        PaymentOrchestrator["Payment Orchestrator"]
+        AuthService["Auth Service"]
+        MerchantService["Merchant Service"]
+        TokenService["Tokenization"]
+    end
+
+    subgraph Processing["Payment Processing"]
+        PaymentProcessor["Payment Processor"]
+        FraudEngine["Fraud Engine"]
+        RoutingEngine["Smart Router"]
+    end
+
+    subgraph Settlement["Settlement"]
+        SettlementEngine["Settlement Engine"]
+        LedgerService["Ledger Service"]
+    end
+
+    subgraph Integrations["External"]
+        CardNetworks["Card Networks"]
+        Banks["Banks"]
+    end
+
+    External --> Edge
+    Edge --> Core
+    Core --> Processing
+    Processing --> Integrations
+    Processing --> Settlement
+                </div>
+            </div>
+
+            <!-- Microservices Breakdown -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Microservices Breakdown</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <h4 class="font-bold text-indigo-700 mb-2">🚪 API Gateway</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Request routing</li>
+                            <li>• Rate limiting</li>
+                            <li>• API key validation</li>
+                            <li>• Request/response logging</li>
+                        </ul>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h4 class="font-bold text-purple-700 mb-2">🔐 Identity Service</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Merchant authentication</li>
+                            <li>• API key management</li>
+                            <li>• OAuth 2.0 / JWT</li>
+                            <li>• RBAC permissions</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h4 class="font-bold text-blue-700 mb-2">🏪 Merchant Service</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Merchant onboarding</li>
+                            <li>• KYC/KYB processing</li>
+                            <li>• Configuration management</li>
+                            <li>• Fee structure</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="font-bold text-green-700 mb-2">💳 Payment Orchestrator</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Payment intent creation</li>
+                            <li>• State machine management</li>
+                            <li>• Idempotency handling</li>
+                            <li>• Multi-step coordination</li>
+                        </ul>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h4 class="font-bold text-yellow-700 mb-2">🔒 Tokenization Service</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Card tokenization</li>
+                            <li>• PAN vault</li>
+                            <li>• Token lifecycle</li>
+                            <li>• Network tokenization</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4">
+                        <h4 class="font-bold text-red-700 mb-2">🛡️ Fraud Engine</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Rule engine</li>
+                            <li>• ML scoring</li>
+                            <li>• Velocity checks</li>
+                            <li>• Device fingerprinting</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Schema -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Database Schema Design</h3>
+                <div class="mb-4">
+                    <div class="flex space-x-2 border-b">
+                        <button class="tab-btn active" onclick="showTab('merchants')">Merchants</button>
+                        <button class="tab-btn" onclick="showTab('transactions')">Transactions</button>
+                        <button class="tab-btn" onclick="showTab('payment_methods')">Payment Methods</button>
+                        <button class="tab-btn" onclick="showTab('settlements')">Settlements</button>
+                    </div>
+                </div>
+                <div id="tab-merchants" class="tab-content">
+                    <pre><code class="language-sql">CREATE TABLE merchants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    external_id VARCHAR(50) UNIQUE NOT NULL,  -- "acct_xxx"
+    business_name VARCHAR(255) NOT NULL,
+    business_type VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    country_code CHAR(2) NOT NULL,
+
+    -- Verification & Compliance
+    kyc_status VARCHAR(20) DEFAULT 'pending',
+    risk_tier VARCHAR(20) DEFAULT 'standard',
+    status VARCHAR(20) DEFAULT 'pending',
+
+    -- Configuration
+    default_currency CHAR(3) DEFAULT 'USD',
+    statement_descriptor VARCHAR(22),
+    metadata JSONB DEFAULT '{}',
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_merchants_external_id ON merchants(external_id);
+CREATE INDEX idx_merchants_status ON merchants(status);</code></pre>
+                </div>
+                <div id="tab-transactions" class="tab-content hidden">
+                    <pre><code class="language-sql">CREATE TABLE transactions (
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
+    external_id VARCHAR(50) NOT NULL,  -- "ch_xxx"
+    merchant_id UUID NOT NULL,
+    payment_intent_id UUID,
+
+    -- Transaction Type & Amounts
+    type VARCHAR(30) NOT NULL,  -- 'charge', 'refund', 'capture'
+    amount BIGINT NOT NULL,  -- In cents
+    currency CHAR(3) NOT NULL,
+    fee_amount BIGINT DEFAULT 0,
+    net_amount BIGINT DEFAULT 0,
+
+    -- Status & Processor
+    status VARCHAR(30) NOT NULL,
+    processor_transaction_id VARCHAR(100),
+    processor_auth_code VARCHAR(20),
+
+    -- Risk & Fraud
+    risk_score DECIMAL(5,2),
+    risk_level VARCHAR(20),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, created_at)
+) PARTITION BY RANGE (created_at);</code></pre>
+                </div>
+                <div id="tab-payment_methods" class="tab-content hidden">
+                    <pre><code class="language-sql">CREATE TABLE payment_methods (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    external_id VARCHAR(50) UNIQUE NOT NULL,  -- "pm_xxx"
+    merchant_id UUID NOT NULL,
+    customer_id UUID,
+
+    type VARCHAR(30) NOT NULL,  -- 'card', 'bank_account'
+
+    -- Card Details (tokenized)
+    card_token_id UUID,  -- References secure vault
+    card_brand VARCHAR(20),
+    card_last_four CHAR(4),
+    card_exp_month SMALLINT,
+    card_exp_year SMALLINT,
+    card_fingerprint VARCHAR(64),
+
+    -- 3D Secure
+    three_d_secure_supported BOOLEAN DEFAULT FALSE,
+
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                </div>
+                <div id="tab-settlements" class="tab-content hidden">
+                    <pre><code class="language-sql">CREATE TABLE settlements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    external_id VARCHAR(50) UNIQUE NOT NULL,  -- "stl_xxx"
+    merchant_id UUID NOT NULL,
+
+    period_start TIMESTAMPTZ NOT NULL,
+    period_end TIMESTAMPTZ NOT NULL,
+
+    -- Amounts
+    gross_amount BIGINT NOT NULL,
+    fee_amount BIGINT NOT NULL,
+    net_amount BIGINT NOT NULL,
+    currency CHAR(3) NOT NULL,
+
+    -- Counts
+    transaction_count INT NOT NULL,
+    refund_count INT DEFAULT 0,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    expected_arrival_date DATE,
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                </div>
+            </div>
+
+            <!-- Security Architecture -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Security Architecture (PCI DSS Layers)</h3>
+                <div class="mermaid">
+flowchart TB
+    subgraph Public["Public Zone"]
+        WAF["WAF + DDoS Protection"]
+    end
+
+    subgraph App["Application Zone"]
+        API["API Gateway - TLS 1.3"]
+        AppServers["App Servers"]
+    end
+
+    subgraph CDE["Cardholder Data Environment"]
+        Token["Tokenization Service"]
+        Vault["Card Vault - AES-256"]
+        HSM["HSM - FIPS 140-2"]
+    end
+
+    subgraph Data["Data Zone"]
+        DB["Database - TDE"]
+        Audit["Audit Logs"]
+    end
+
+    Public --> App
+    App -->|Token Only| CDE
+    CDE --> HSM
+    App --> Data
+
+    style CDE fill:#fee2e2,stroke:#dc2626
+    style HSM fill:#fecaca,stroke:#dc2626
+                </div>
+                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h4 class="font-bold text-red-700">🔴 CDE Zone (Level 1)</h4>
+                        <p class="text-sm">Cardholder data environment with HSM, encrypted vault, and tokenization. Most restricted access.</p>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-bold text-yellow-700">🟡 Application Zone (Level 2)</h4>
+                        <p class="text-sm">Application servers handle tokens only, never raw card data. mTLS between services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Technical Stack -->
+    <section id="tech-stack" class="section bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">⚙️ 2. Technical Stack Recommendations</h2>
+            <p class="text-gray-600 mb-8">Recommended technologies for building a scalable payment gateway</p>
+
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Technology Stack Overview</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th class="p-3 rounded-tl-lg">Layer</th>
+                                <th class="p-3">Technology</th>
+                                <th class="p-3 rounded-tr-lg">Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr><td class="p-3 font-medium">API Gateway</td><td class="p-3">Kong / AWS API Gateway</td><td class="p-3 text-gray-600">Rate limiting, auth, transformation</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">Backend</td><td class="p-3">Go (primary) + Python (ML)</td><td class="p-3 text-gray-600">Performance, concurrency, ML ecosystem</td></tr>
+                            <tr><td class="p-3 font-medium">Framework</td><td class="p-3">Go: gin/echo, Python: FastAPI</td><td class="p-3 text-gray-600">Production-proven, async support</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">Primary Database</td><td class="p-3">PostgreSQL 15+</td><td class="p-3 text-gray-600">ACID, JSON support, partitioning</td></tr>
+                            <tr><td class="p-3 font-medium">Cache</td><td class="p-3">Redis Cluster</td><td class="p-3 text-gray-600">Session, rate limiting, idempotency</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">Message Queue</td><td class="p-3">Apache Kafka</td><td class="p-3 text-gray-600">Event sourcing, high throughput</td></tr>
+                            <tr><td class="p-3 font-medium">Search</td><td class="p-3">Elasticsearch</td><td class="p-3 text-gray-600">Transaction search, analytics</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">Data Warehouse</td><td class="p-3">Snowflake / BigQuery</td><td class="p-3 text-gray-600">Analytics, reporting</td></tr>
+                            <tr><td class="p-3 font-medium">Container Orchestration</td><td class="p-3">Kubernetes (EKS/GKE)</td><td class="p-3 text-gray-600">Auto-scaling, deployment</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">HSM</td><td class="p-3">AWS CloudHSM / Thales</td><td class="p-3 text-gray-600">PCI DSS key management</td></tr>
+                            <tr><td class="p-3 font-medium">Secrets</td><td class="p-3">HashiCorp Vault</td><td class="p-3 text-gray-600">Encryption keys, credentials</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3 font-medium">Monitoring</td><td class="p-3">Datadog / Prometheus</td><td class="p-3 text-gray-600">APM, metrics, alerting</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- API Design -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">REST API Design</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2">Payment Intent Endpoints</h4>
+                        <div class="bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-100">
+                            <div class="text-green-400">POST</div> /v1/payment_intents<br>
+                            <div class="text-blue-400">GET</div> /v1/payment_intents/{id}<br>
+                            <div class="text-yellow-400">POST</div> /v1/payment_intents/{id}/confirm<br>
+                            <div class="text-yellow-400">POST</div> /v1/payment_intents/{id}/capture<br>
+                            <div class="text-red-400">POST</div> /v1/payment_intents/{id}/cancel
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Other Endpoints</h4>
+                        <div class="bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-100">
+                            <div class="text-green-400">POST</div> /v1/payment_methods<br>
+                            <div class="text-green-400">POST</div> /v1/refunds<br>
+                            <div class="text-green-400">POST</div> /v1/customers<br>
+                            <div class="text-blue-400">GET</div> /v1/charges<br>
+                            <div class="text-green-400">POST</div> /v1/webhook_endpoints
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="font-semibold mt-6 mb-2">Create Payment Intent - Request/Response</h4>
+                <pre><code class="language-javascript">// Request
+POST /v1/payment_intents
+{
+  "amount": 2000,           // $20.00 in cents
+  "currency": "usd",
+  "payment_method_types": ["card"],
+  "capture_method": "automatic",
+  "metadata": {
+    "order_id": "order_12345"
+  }
+}
+
+// Response
+{
+  "id": "pi_3MtwBwLkdIwHu7ix28a3tqPa",
+  "object": "payment_intent",
+  "amount": 2000,
+  "currency": "usd",
+  "status": "requires_payment_method",
+  "client_secret": "pi_3MtwBw...secret_YrKJUKribcBjcG8HV8mM",
+  "created": 1680800504,
+  "livemode": true
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Compliance & Legal -->
+    <section id="compliance" class="section bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">🔒 3. Compliance & Legal Requirements</h2>
+            <p class="text-gray-600 mb-8">PCI DSS compliance, regional regulations, and KYC/AML requirements</p>
+
+            <!-- PCI DSS Checklist -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">PCI DSS 4.0 Compliance Checklist</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">1</span>
+                            Network Security Controls
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Define firewall/router config standards</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Restrict traffic to CDE</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> No direct public access to CDE</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Document all firewall rules</li>
+                        </ul>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">3</span>
+                            Protect Stored Data
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Minimize data storage</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> No sensitive auth data post-auth</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Mask PAN (first 6 / last 4)</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Encrypt PAN with strong crypto</li>
+                        </ul>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">8</span>
+                            Authentication
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Unique user IDs</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> MFA for all CDE access</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Strong password policies</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> No shared accounts</li>
+                        </ul>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">10</span>
+                            Logging & Monitoring
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Implement audit trails</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Sync all system clocks</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Secure logs from tampering</li>
+                            <li class="flex items-center"><input type="checkbox" class="mr-2"> Retain logs for 1 year</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 class="font-bold text-yellow-800 mb-2">⚠️ Certification Process</h4>
+                    <div class="grid md:grid-cols-5 gap-2 text-sm">
+                        <div class="text-center p-2 bg-white rounded">
+                            <div class="font-bold">1. Scope</div>
+                            <div class="text-gray-600">2-4 weeks</div>
+                        </div>
+                        <div class="text-center p-2 bg-white rounded">
+                            <div class="font-bold">2. Gap Analysis</div>
+                            <div class="text-gray-600">4-6 weeks</div>
+                        </div>
+                        <div class="text-center p-2 bg-white rounded">
+                            <div class="font-bold">3. Remediation</div>
+                            <div class="text-gray-600">8-16 weeks</div>
+                        </div>
+                        <div class="text-center p-2 bg-white rounded">
+                            <div class="font-bold">4. Assessment</div>
+                            <div class="text-gray-600">4-8 weeks</div>
+                        </div>
+                        <div class="text-center p-2 bg-white rounded">
+                            <div class="font-bold">5. AOC</div>
+                            <div class="text-gray-600">Certification</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Regulations -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Regional Regulations Matrix</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3">Region</th>
+                                <th class="p-3">Regulation</th>
+                                <th class="p-3">Key Requirements</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr>
+                                <td class="p-3 font-medium">🇪🇺 Europe</td>
+                                <td class="p-3">PSD2/SCA</td>
+                                <td class="p-3">Strong Customer Auth (3DS2), Open Banking APIs</td>
+                                <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Active</span></td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 font-medium">🇪🇺 Europe</td>
+                                <td class="p-3">GDPR</td>
+                                <td class="p-3">Data protection, consent, right to erasure</td>
+                                <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">🇮🇳 India</td>
+                                <td class="p-3">RBI PA/PG Guidelines</td>
+                                <td class="p-3">Registration, net worth ₹25Cr, data localization</td>
+                                <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Active</span></td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 font-medium">🇺🇸 USA</td>
+                                <td class="p-3">State MTL</td>
+                                <td class="p-3">Per-state licensing (47 states + DC)</td>
+                                <td class="p-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">Required</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">🇺🇸 USA</td>
+                                <td class="p-3">CCPA/CPRA</td>
+                                <td class="p-3">Consumer privacy rights (California)</td>
+                                <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Active</span></td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 font-medium">🇬🇧 UK</td>
+                                <td class="p-3">FCA Authorization</td>
+                                <td class="p-3">E-money or payment institution license</td>
+                                <td class="p-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">Required</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- KYC/AML -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">KYC/AML Requirements</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3">Individual Merchants</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Government ID (Passport, Driver's License)
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Proof of Address (< 3 months)
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Selfie with ID (Liveness check)
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Source of Funds (Enhanced)
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3">Business Merchants</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Certificate of Incorporation
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Articles of Association
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> UBO Declaration (> 25% ownership)
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Director IDs & Proof of Address
+                            </div>
+                            <div class="flex items-center p-2 bg-gray-50 rounded">
+                                <span class="text-green-500 mr-2">✓</span> Financial Statements (2 years)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid md:grid-cols-2 gap-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h4 class="font-bold text-red-700 mb-2">🚫 Prohibited Industries</h4>
+                        <p class="text-sm text-red-600">Illegal drugs, counterfeit goods, human trafficking, terrorism financing, pyramid schemes</p>
+                    </div>
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 class="font-bold text-orange-700 mb-2">⚠️ High-Risk Industries</h4>
+                        <p class="text-sm text-orange-600">Gambling, adult content, cryptocurrency, forex, weapons, pharmaceuticals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Core Features -->
+    <section id="features" class="section bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">💳 4. Core Features to Implement</h2>
+            <p class="text-gray-600 mb-8">Payment processing flow, fraud detection, webhooks, and more</p>
+
+            <!-- Payment Flow Diagram -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Payment Processing Flow</h3>
+                <div class="mermaid">
+sequenceDiagram
+    participant M as Merchant
+    participant API as Payment API
+    participant F as Fraud Engine
+    participant P as Processor
+    participant N as Card Network
+    participant B as Bank
+
+    M->>API: Create PaymentIntent
+    API-->>M: client_secret
+    M->>API: Confirm with card
+    API->>F: Analyze risk
+    F-->>API: Risk score
+    alt High Risk
+        API-->>M: requires_action (3DS)
+    end
+    API->>P: Authorization
+    P->>N: Auth request
+    N->>B: Verify funds
+    B-->>N: Approved
+    N-->>P: Auth code
+    P-->>API: Success
+    API-->>M: succeeded
+                </div>
+            </div>
+
+            <!-- Payment States -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Payment Intent State Machine</h3>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-gray-200 rounded-full text-sm">requires_payment_method</span>
+                    <span class="text-gray-400">→</span>
+                    <span class="px-3 py-1 bg-yellow-200 rounded-full text-sm">requires_confirmation</span>
+                    <span class="text-gray-400">→</span>
+                    <span class="px-3 py-1 bg-orange-200 rounded-full text-sm">requires_action</span>
+                    <span class="text-gray-400">→</span>
+                    <span class="px-3 py-1 bg-blue-200 rounded-full text-sm">processing</span>
+                    <span class="text-gray-400">→</span>
+                    <span class="px-3 py-1 bg-green-200 rounded-full text-sm">succeeded</span>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="p-3 bg-gray-50 rounded">
+                        <span class="font-bold">requires_payment_method</span>
+                        <p class="text-gray-600">Initial state, waiting for card details</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded">
+                        <span class="font-bold">requires_action</span>
+                        <p class="text-gray-600">3D Secure authentication needed</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded">
+                        <span class="font-bold">requires_capture</span>
+                        <p class="text-gray-600">Auth successful, manual capture needed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Detection -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Fraud Detection Engine</h3>
+                <div class="grid md:grid-cols-4 gap-4 mb-6">
+                    <div class="text-center p-4 bg-indigo-50 rounded-lg">
+                        <div class="text-3xl mb-2">📋</div>
+                        <h4 class="font-bold">Rule Engine</h4>
+                        <p class="text-sm text-gray-600">Velocity, blacklists, BIN checks</p>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <div class="text-3xl mb-2">🤖</div>
+                        <h4 class="font-bold">ML Model</h4>
+                        <p class="text-sm text-gray-600">Fraud probability scoring</p>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-3xl mb-2">📱</div>
+                        <h4 class="font-bold">Device Fingerprint</h4>
+                        <p class="text-sm text-gray-600">Emulator, VPN detection</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="text-3xl mb-2">📊</div>
+                        <h4 class="font-bold">Behavioral</h4>
+                        <p class="text-sm text-gray-600">Pattern analysis</p>
+                    </div>
+                </div>
+
+                <h4 class="font-semibold mb-2">Fraud Signals & Scoring</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-2 text-left">Signal</th>
+                                <th class="p-2 text-left">Score Impact</th>
+                                <th class="p-2 text-left">Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr><td class="p-2">Country mismatch (card vs IP)</td><td class="p-2">+40</td><td class="p-2">1.0x</td></tr>
+                            <tr><td class="p-2">High-risk BIN</td><td class="p-2">+60</td><td class="p-2">1.2x</td></tr>
+                            <tr><td class="p-2">CVV mismatch</td><td class="p-2">+70</td><td class="p-2">1.3x</td></tr>
+                            <tr><td class="p-2">Velocity exceeded (24h)</td><td class="p-2">+75</td><td class="p-2">1.2x</td></tr>
+                            <tr><td class="p-2">Blacklisted device</td><td class="p-2">+95</td><td class="p-2">2.0x</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex gap-4">
+                    <div class="flex-1 p-3 bg-green-50 rounded text-center">
+                        <div class="font-bold text-green-700">Score &lt; 30</div>
+                        <div class="text-sm">Auto-approve</div>
+                    </div>
+                    <div class="flex-1 p-3 bg-yellow-50 rounded text-center">
+                        <div class="font-bold text-yellow-700">30-60</div>
+                        <div class="text-sm">Review</div>
+                    </div>
+                    <div class="flex-1 p-3 bg-orange-50 rounded text-center">
+                        <div class="font-bold text-orange-700">60-80</div>
+                        <div class="text-sm">3DS Challenge</div>
+                    </div>
+                    <div class="flex-1 p-3 bg-red-50 rounded text-center">
+                        <div class="font-bold text-red-700">Score ≥ 80</div>
+                        <div class="text-sm">Reject</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhook System -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Webhook System</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2">Key Events</h4>
+                        <div class="space-y-1 text-sm font-mono bg-gray-900 text-gray-100 p-4 rounded-lg">
+                            <div><span class="text-green-400">payment_intent.succeeded</span></div>
+                            <div><span class="text-yellow-400">payment_intent.payment_failed</span></div>
+                            <div><span class="text-blue-400">charge.refunded</span></div>
+                            <div><span class="text-red-400">charge.dispute.created</span></div>
+                            <div><span class="text-purple-400">payout.paid</span></div>
+                            <div><span class="text-cyan-400">customer.subscription.created</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Webhook Payload</h4>
+                        <pre><code class="language-javascript">{
+  "id": "evt_1234567890",
+  "type": "payment_intent.succeeded",
+  "created": 1680800504,
+  "data": {
+    "object": {
+      "id": "pi_xxx",
+      "amount": 2000,
+      "status": "succeeded"
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-700 mb-2">🔄 Retry Schedule</h4>
+                    <p class="text-sm">5 min → 1 hour → 6 hours → 24 hours → 48 hours → 72 hours (then fail)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Go-to-Market -->
+    <section id="gtm" class="section bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">🚀 5. Go-to-Market Strategy</h2>
+            <p class="text-gray-600 mb-8">Pricing, merchant onboarding, SDKs, and support</p>
+
+            <!-- Pricing Tiers -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Pricing Tiers</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="border-2 border-gray-200 rounded-xl p-6">
+                        <h4 class="text-xl font-bold mb-2">Standard</h4>
+                        <p class="text-gray-600 text-sm mb-4">Self-service, up to $500K/month</p>
+                        <div class="text-3xl font-bold mb-4">2.9% <span class="text-lg font-normal">+ $0.30</span></div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> No monthly fees</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> No setup fees</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Standard payouts (T+2)</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Email support</li>
+                            <li class="flex items-center text-gray-400"><span class="mr-2">✗</span> Dedicated support</li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-indigo-500 rounded-xl p-6 relative">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white px-3 py-1 rounded-full text-xs">POPULAR</div>
+                        <h4 class="text-xl font-bold mb-2">Professional</h4>
+                        <p class="text-gray-600 text-sm mb-4">$500K+ monthly volume</p>
+                        <div class="text-3xl font-bold mb-4">2.5% <span class="text-lg font-normal">+ $0.25</span></div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> $99/month</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Dedicated support</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Advanced fraud rules</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Priority webhooks</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Phone support</li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-indigo-50">
+                        <h4 class="text-xl font-bold mb-2">Enterprise</h4>
+                        <p class="text-gray-600 text-sm mb-4">Custom pricing</p>
+                        <div class="text-3xl font-bold mb-4">IC++ <span class="text-lg font-normal">pricing</span></div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Interchange++ pricing</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Volume discounts</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Custom settlements</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 24/7 phone support</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 99.99% SLA</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold mb-2">Additional Fees</h4>
+                    <div class="grid md:grid-cols-4 gap-4 text-sm">
+                        <div><span class="font-medium">International:</span> +1.0%</div>
+                        <div><span class="font-medium">Chargebacks:</span> $15.00</div>
+                        <div><span class="font-medium">Instant Payout:</span> 1.5%</div>
+                        <div><span class="font-medium">ACH:</span> 0.8% (max $5)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SDK Requirements -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">SDK Requirements</h3>
+                <div class="grid md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-yellow-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">🌐</div>
+                        <h4 class="font-bold">JavaScript</h4>
+                        <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">P0 - Critical</span>
+                        <p class="text-xs text-gray-600 mt-2">Tokenization, 3DS, Payment Element</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">🐍</div>
+                        <h4 class="font-bold">Python</h4>
+                        <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">P0 - Critical</span>
+                        <p class="text-xs text-gray-600 mt-2">Full API, Django/Flask helpers</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">📦</div>
+                        <h4 class="font-bold">Node.js</h4>
+                        <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">P0 - Critical</span>
+                        <p class="text-xs text-gray-600 mt-2">Full API, Webhooks</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">📱</div>
+                        <h4 class="font-bold">iOS/Android</h4>
+                        <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">P0 - Critical</span>
+                        <p class="text-xs text-gray-600 mt-2">Apple Pay, Google Pay, 3DS</p>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-4 gap-4 mt-4">
+                    <div class="p-4 bg-purple-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">🐘</div>
+                        <h4 class="font-bold">PHP</h4>
+                        <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">P1</span>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">💎</div>
+                        <h4 class="font-bold">Ruby</h4>
+                        <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">P1</span>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">☕</div>
+                        <h4 class="font-bold">Java</h4>
+                        <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">P1</span>
+                    </div>
+                    <div class="p-4 bg-cyan-50 rounded-lg text-center">
+                        <div class="text-2xl mb-2">🐹</div>
+                        <h4 class="font-bold">Go</h4>
+                        <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">P1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLA -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Support & SLA Commitments</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">Priority</th>
+                                <th class="p-3 text-left">Standard</th>
+                                <th class="p-3 text-left">Professional</th>
+                                <th class="p-3 text-left">Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr>
+                                <td class="p-3 font-medium">🔴 Critical</td>
+                                <td class="p-3">4 hours</td>
+                                <td class="p-3">1 hour</td>
+                                <td class="p-3 font-bold text-green-600">15 minutes</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 font-medium">🟠 High</td>
+                                <td class="p-3">8 hours</td>
+                                <td class="p-3">2 hours</td>
+                                <td class="p-3 font-bold text-green-600">30 minutes</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">🟡 Medium</td>
+                                <td class="p-3">24 hours</td>
+                                <td class="p-3">8 hours</td>
+                                <td class="p-3">2 hours</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 font-medium">🟢 Low</td>
+                                <td class="p-3">48 hours</td>
+                                <td class="p-3">24 hours</td>
+                                <td class="p-3">8 hours</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 grid md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-indigo-600">99.9%</div>
+                        <div class="text-sm text-gray-600">Standard Uptime</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-indigo-600">99.95%</div>
+                        <div class="text-sm text-gray-600">Professional Uptime</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-indigo-600">99.99%</div>
+                        <div class="text-sm text-gray-600">Enterprise Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Timeline & Milestones -->
+    <section id="timeline" class="section bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">📅 6. Timeline & Milestones</h2>
+            <p class="text-gray-600 mb-8">Development phases and key milestones for building a production payment gateway</p>
+
+            <!-- Timeline Overview -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Development Timeline (18 Months)</h3>
+                <div class="mermaid">
+gantt
+    title Payment Gateway Development Timeline
+    dateFormat  YYYY-MM
+    section Foundation
+    Infrastructure Setup     :2024-01, 2m
+    Core Architecture       :2024-02, 2m
+    section Core Services
+    Identity & Auth         :2024-03, 2m
+    Merchant Service        :2024-04, 2m
+    Payment Orchestrator    :2024-05, 3m
+    section Security
+    Tokenization Service    :2024-06, 2m
+    PCI DSS Prep           :2024-07, 3m
+    section Integration
+    Processor Integration   :2024-08, 2m
+    Testing & QA           :2024-09, 2m
+    section Launch
+    MVP Launch             :milestone, 2024-10, 0d
+    section Scale
+    Fraud Engine           :2024-10, 3m
+    Settlement Engine      :2024-11, 2m
+    Full Production        :milestone, 2025-06, 0d
+                </div>
+            </div>
+
+            <!-- Development Phases -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Development Phases</h3>
+                <div class="space-y-4">
+                    <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg">Phase 1: Foundation (Months 1-3)</h4>
+                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">$180K</span>
+                        </div>
+                        <ul class="mt-2 text-sm text-gray-600 grid md:grid-cols-2 gap-1">
+                            <li>• Infrastructure setup (K8s, CI/CD)</li>
+                            <li>• Core database schema design</li>
+                            <li>• API Gateway configuration</li>
+                            <li>• Identity & authentication service</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-4 border-purple-500 pl-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg">Phase 2: Core Payment (Months 4-6)</h4>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">$300K</span>
+                        </div>
+                        <ul class="mt-2 text-sm text-gray-600 grid md:grid-cols-2 gap-1">
+                            <li>• Payment orchestrator service</li>
+                            <li>• Tokenization & card vault</li>
+                            <li>• First processor integration</li>
+                            <li>• Basic merchant dashboard</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-4 border-blue-500 pl-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg">Phase 3: Security & Compliance (Months 7-9)</h4>
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">$350K</span>
+                        </div>
+                        <ul class="mt-2 text-sm text-gray-600 grid md:grid-cols-2 gap-1">
+                            <li>• PCI DSS Level 1 certification</li>
+                            <li>• HSM integration</li>
+                            <li>• Security audit & penetration testing</li>
+                            <li>• 3D Secure implementation</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-4 border-green-500 pl-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg">Phase 4: MVP Launch (Month 10)</h4>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">MVP 🚀</span>
+                        </div>
+                        <ul class="mt-2 text-sm text-gray-600 grid md:grid-cols-2 gap-1">
+                            <li>• Limited beta with 5-10 merchants</li>
+                            <li>• Card payments (Visa, Mastercard)</li>
+                            <li>• USD only, single processor</li>
+                            <li>• Basic fraud rules</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-4 border-orange-500 pl-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg">Phase 5: Scale (Months 11-18)</h4>
+                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm">$600K</span>
+                        </div>
+                        <ul class="mt-2 text-sm text-gray-600 grid md:grid-cols-2 gap-1">
+                            <li>• ML-based fraud detection</li>
+                            <li>• Multi-processor smart routing</li>
+                            <li>• International expansion (50+ currencies)</li>
+                            <li>• Settlement & reconciliation engine</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MVP vs Full Production -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">MVP vs Full Production Features</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="text-2xl mr-2">🎯</span> MVP (Month 10)
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Card payments (Visa, MC)</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Single processor</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> USD only</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Basic fraud rules</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Manual settlement</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Email support</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> JS + Python SDK</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 flex items-center">
+                            <span class="text-2xl mr-2">🏆</span> Full Production (Month 18)
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All card networks + ACH</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Multi-processor failover</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 50+ currencies</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> ML fraud detection</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Automated settlement</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 24/7 support</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 8+ SDKs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Costs -->
+    <section id="costs" class="section bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">💰 7. Cost Estimates</h2>
+            <p class="text-gray-600 mb-8">Comprehensive breakdown of development, infrastructure, and operational costs</p>
+
+            <!-- Team Structure -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Development Team Structure</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th class="p-3 text-left">Role</th>
+                                <th class="p-3 text-center">Count</th>
+                                <th class="p-3 text-right">Annual Cost</th>
+                                <th class="p-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr><td class="p-3">Engineering Manager</td><td class="p-3 text-center">1</td><td class="p-3 text-right">$200K</td><td class="p-3 text-right font-medium">$200K</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3">Staff Engineer</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$250K</td><td class="p-3 text-right font-medium">$500K</td></tr>
+                            <tr><td class="p-3">Senior Backend Engineer</td><td class="p-3 text-center">4</td><td class="p-3 text-right">$180K</td><td class="p-3 text-right font-medium">$720K</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3">Backend Engineer</td><td class="p-3 text-center">4</td><td class="p-3 text-right">$140K</td><td class="p-3 text-right font-medium">$560K</td></tr>
+                            <tr><td class="p-3">Frontend Engineer</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$150K</td><td class="p-3 text-right font-medium">$300K</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3">ML Engineer</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$200K</td><td class="p-3 text-right font-medium">$400K</td></tr>
+                            <tr><td class="p-3">Security Engineer</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$180K</td><td class="p-3 text-right font-medium">$360K</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3">DevOps/SRE</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$170K</td><td class="p-3 text-right font-medium">$340K</td></tr>
+                            <tr><td class="p-3">QA Engineer</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$120K</td><td class="p-3 text-right font-medium">$240K</td></tr>
+                            <tr class="bg-gray-50"><td class="p-3">Product Manager</td><td class="p-3 text-center">2</td><td class="p-3 text-right">$180K</td><td class="p-3 text-right font-medium">$360K</td></tr>
+                        </tbody>
+                        <tfoot class="bg-indigo-100">
+                            <tr><td class="p-3 font-bold">TOTAL TEAM</td><td class="p-3 text-center font-bold">23</td><td class="p-3"></td><td class="p-3 text-right font-bold text-indigo-700">$3.98M/year</td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Infrastructure Costs -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Infrastructure Costs (Monthly)</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="cost-card">
+                        <h4 class="font-bold text-lg mb-3 flex items-center justify-between">
+                            MVP
+                            <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs">Month 10</span>
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex justify-between"><span>Compute (K8s)</span><span>$8K</span></li>
+                            <li class="flex justify-between"><span>Database (RDS)</span><span>$3K</span></li>
+                            <li class="flex justify-between"><span>Redis Cluster</span><span>$1.5K</span></li>
+                            <li class="flex justify-between"><span>CloudHSM</span><span>$5K</span></li>
+                            <li class="flex justify-between"><span>Monitoring</span><span>$2K</span></li>
+                            <li class="flex justify-between"><span>Other</span><span>$2.5K</span></li>
+                            <li class="flex justify-between border-t pt-2 font-bold"><span>Total</span><span class="text-indigo-600">$22K/mo</span></li>
+                        </ul>
+                    </div>
+                    <div class="cost-card border-2 border-indigo-300">
+                        <h4 class="font-bold text-lg mb-3 flex items-center justify-between">
+                            Production
+                            <span class="bg-green-200 text-green-800 px-2 py-1 rounded text-xs">Month 18</span>
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex justify-between"><span>Compute (Multi-AZ)</span><span>$25K</span></li>
+                            <li class="flex justify-between"><span>Database (HA)</span><span>$12K</span></li>
+                            <li class="flex justify-between"><span>Redis Cluster</span><span>$5K</span></li>
+                            <li class="flex justify-between"><span>CloudHSM (HA)</span><span>$10K</span></li>
+                            <li class="flex justify-between"><span>Kafka</span><span>$8K</span></li>
+                            <li class="flex justify-between"><span>Monitoring + Security</span><span>$10K</span></li>
+                            <li class="flex justify-between border-t pt-2 font-bold"><span>Total</span><span class="text-indigo-600">$70K/mo</span></li>
+                        </ul>
+                    </div>
+                    <div class="cost-card bg-gradient-to-br from-purple-50 to-indigo-50">
+                        <h4 class="font-bold text-lg mb-3 flex items-center justify-between">
+                            Scale
+                            <span class="bg-purple-200 text-purple-800 px-2 py-1 rounded text-xs">Year 2+</span>
+                        </h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex justify-between"><span>Compute (Multi-Region)</span><span>$80K</span></li>
+                            <li class="flex justify-between"><span>Database (Global)</span><span>$40K</span></li>
+                            <li class="flex justify-between"><span>Data Warehouse</span><span>$15K</span></li>
+                            <li class="flex justify-between"><span>ML Infrastructure</span><span>$20K</span></li>
+                            <li class="flex justify-between"><span>Security & Compliance</span><span>$25K</span></li>
+                            <li class="flex justify-between"><span>Reserved Capacity</span><span>-30%</span></li>
+                            <li class="flex justify-between border-t pt-2 font-bold"><span>Total</span><span class="text-indigo-600">$150K/mo</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance & Third-Party Costs -->
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4">Compliance & Third-Party Costs</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3">One-Time Costs</h4>
+                        <ul class="space-y-2">
+                            <li class="flex justify-between p-2 bg-gray-50 rounded"><span>PCI DSS Level 1 (QSA)</span><span class="font-medium">$150K-250K</span></li>
+                            <li class="flex justify-between p-2 rounded"><span>SOC 2 Type II</span><span class="font-medium">$50K-100K</span></li>
+                            <li class="flex justify-between p-2 bg-gray-50 rounded"><span>State MTL (all states)</span><span class="font-medium">$500K-1M</span></li>
+                            <li class="flex justify-between p-2 rounded"><span>Legal & Contracts</span><span class="font-medium">$100K-200K</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3">Annual Recurring</h4>
+                        <ul class="space-y-2">
+                            <li class="flex justify-between p-2 bg-gray-50 rounded"><span>PCI DSS Re-certification</span><span class="font-medium">$75K-150K</span></li>
+                            <li class="flex justify-between p-2 rounded"><span>Pen Testing (quarterly)</span><span class="font-medium">$80K-120K</span></li>
+                            <li class="flex justify-between p-2 bg-gray-50 rounded"><span>Insurance (cyber + E&O)</span><span class="font-medium">$100K-200K</span></li>
+                            <li class="flex justify-between p-2 rounded"><span>License Renewals</span><span class="font-medium">$100K-150K</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Cost Summary -->
+            <div class="card bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <h3 class="text-2xl font-semibold mb-4">💵 Total Investment Summary</h3>
+                <div class="grid md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white/10 rounded-lg p-4 text-center">
+                        <div class="text-sm opacity-75">Year 1 Development</div>
+                        <div class="text-3xl font-bold">$4.5M</div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-4 text-center">
+                        <div class="text-sm opacity-75">Infrastructure (Y1)</div>
+                        <div class="text-3xl font-bold">$500K</div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-4 text-center">
+                        <div class="text-sm opacity-75">Compliance (Y1)</div>
+                        <div class="text-3xl font-bold">$1M</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-4 text-center border-2 border-white/30">
+                        <div class="text-sm opacity-75">Total Year 1</div>
+                        <div class="text-3xl font-bold">$6M</div>
+                    </div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <h4 class="font-semibold mb-2">Break-Even Analysis</h4>
+                    <p class="text-sm opacity-90">At 2.9% + $0.30 pricing with average transaction of $100:</p>
+                    <div class="mt-2 flex items-center gap-4">
+                        <div><span class="font-bold">$2M</span> monthly volume = Break-even on operations</div>
+                        <div><span class="font-bold">$10M</span> monthly volume = Full profitability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Key Takeaways</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>✓ Start with compliance from day 1</li>
+                        <li>✓ Tokenization reduces PCI scope</li>
+                        <li>✓ Plan for 18-month timeline minimum</li>
+                        <li>✓ Budget $6M+ for Year 1</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Critical Success Factors</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>✓ PCI DSS Level 1 certification</li>
+                        <li>✓ 99.99% uptime SLA</li>
+                        <li>✓ Sub-200ms latency</li>
+                        <li>✓ Comprehensive fraud detection</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Recommended Approach</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>✓ Start as PayFac partner</li>
+                        <li>✓ Use existing tokenization (VGS)</li>
+                        <li>✓ Focus on single market first</li>
+                        <li>✓ Build orchestration layer</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                <p>Payment Gateway System Guide • Generated for educational purposes</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Active navigation on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('#nav-links a');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

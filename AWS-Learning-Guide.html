@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Complete Learning Guide - Step by Step</title>
+    <style>
+        :root {
+            --aws-orange: #ff9900;
+            --aws-dark: #232f3e;
+            --aws-light: #f5f5f5;
+            --primary: #0f766e;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(180deg, #fff7ed 0%, #f0f9ff 50%, #f5f5f5 100%);
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+        .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+        header {
+            background: linear-gradient(135deg, var(--aws-dark) 0%, #37475a 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 60%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 153, 0, 0.15), transparent);
+            transform: rotate(30deg);
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; position: relative; }
+        header .subtitle { opacity: 0.9; font-size: 1.1rem; position: relative; }
+        .stats-bar { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--aws-orange); }
+        .stat-label { font-size: 0.85rem; opacity: 0.7; }
+        section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        section h2 {
+            color: var(--aws-dark);
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--aws-orange);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        h3 { color: var(--text-dark); margin: 1.5rem 0 1rem; font-size: 1.2rem; }
+        h4 { color: var(--aws-dark); margin: 1rem 0 0.5rem; }
+        p { margin-bottom: 1rem; color: var(--text-muted); }
+        .phase {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+            border-left: 5px solid var(--aws-orange);
+        }
+        .phase-number {
+            position: absolute;
+            top: -0.75rem;
+            left: 1.5rem;
+            background: var(--aws-orange);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .phase h3 { margin-top: 0.75rem; color: var(--aws-dark); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.25rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .card h4 { margin-top: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .video-link {
+            display: block;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 1px solid #fed7aa;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+        .video-link:hover { background: #ffedd5; transform: translateX(5px); border-color: var(--aws-orange); }
+        .video-link .title { font-weight: 600; color: var(--aws-dark); }
+        .video-link .meta { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-beginner { background: #dcfce7; color: #166534; }
+        .badge-intermediate { background: #fef3c7; color: #92400e; }
+        .badge-advanced { background: #fee2e2; color: #991b1b; }
+        .badge-cert { background: #dbeafe; color: #1e40af; }
+        .badge-duration { background: #f3e8ff; color: #7c3aed; }
+        .highlight {
+            background: linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%);
+            border-left: 4px solid var(--aws-orange);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1rem 0;
+        }
+        ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.4rem; color: var(--text-muted); }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .emoji { font-size: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; font-weight: 600; }
+        tr:hover { background: #fafafa; }
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            header h1 { font-size: 1.75rem; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☁️ AWS Complete Learning Guide</h1>
+            <p class="subtitle">Step-by-Step Path from Beginner to AWS Professional with Curated YouTube Tutorials</p>
+            <div class="stats-bar">
+                <div class="stat"><div class="stat-value">6</div><div class="stat-label">Learning Phases</div></div>
+                <div class="stat"><div class="stat-value">15+</div><div class="stat-label">Core Services</div></div>
+                <div class="stat"><div class="stat-value">50+</div><div class="stat-label">Video Tutorials</div></div>
+                <div class="stat"><div class="stat-value">6-12</div><div class="stat-label">Months Timeline</div></div>
+            </div>
+        </header>
+
+        <!-- Learning Path Overview -->
+        <section>
+            <h2><span class="emoji">🎯</span> Learning Path Overview</h2>
+            <p>This guide organizes AWS learning into 6 progressive phases. Each phase builds on the previous one, taking you from complete beginner to AWS professional.</p>
+            <div class="highlight">
+                <strong>💡 Pro Tip:</strong> Don't skip phases! AWS services are interconnected. Understanding IAM before EC2, and EC2 before Lambda, will make your learning much smoother.
+            </div>
+            <table>
+                <tr><th>Phase</th><th>Focus</th><th>Duration</th><th>Key Services</th></tr>
+                <tr><td>1️⃣ Foundation</td><td>Cloud Concepts & IAM</td><td>1-2 weeks</td><td>IAM, AWS Console</td></tr>
+                <tr><td>2️⃣ Compute</td><td>Virtual Servers</td><td>2-3 weeks</td><td>EC2, Auto Scaling</td></tr>
+                <tr><td>3️⃣ Storage</td><td>Data Storage</td><td>1-2 weeks</td><td>S3, EBS, EFS</td></tr>
+                <tr><td>4️⃣ Networking</td><td>VPC & Connectivity</td><td>2-3 weeks</td><td>VPC, Route 53, CloudFront</td></tr>
+                <tr><td>5️⃣ Databases</td><td>Managed Databases</td><td>2-3 weeks</td><td>RDS, DynamoDB</td></tr>
+                <tr><td>6️⃣ Advanced</td><td>Serverless & DevOps</td><td>3-4 weeks</td><td>Lambda, API Gateway, CloudFormation</td></tr>
+            </table>
+        </section>
+
+        <!-- Phase 1: Foundation -->
+        <div class="phase">
+            <span class="phase-number">Phase 1</span>
+            <h3>🔐 Foundation: Cloud Concepts & IAM (Identity and Access Management)</h3>
+            <p><strong>Duration:</strong> 1-2 weeks | <strong>Prerequisite:</strong> None</p>
+            <p>Start here! IAM is the foundation of AWS security. Every other service depends on proper IAM configuration.</p>
+
+            <h4>📺 Recommended Video Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=hAk-7ImN6iM" target="_blank" class="video-link">
+                <div class="title">🎬 AWS IAM Basics - Updated 2024</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Complete IAM fundamentals for beginners</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=MKhkLqN0AyY" target="_blank" class="video-link">
+                <div class="title">🎬 IAM Policy Power Hour (AWS re:Inforce 2024)</div>
+                <div class="meta"><span class="badge badge-intermediate">Intermediate</span> Deep dive into IAM policies from AWS official conference</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Understand AWS account structure and root user security</li>
+                <li>Create IAM users, groups, and roles</li>
+                <li>Write and attach IAM policies</li>
+                <li>Enable MFA (Multi-Factor Authentication)</li>
+                <li>Understand the principle of least privilege</li>
+            </ul>
+        </div>
+
+        <!-- Phase 2: Compute -->
+        <div class="phase">
+            <span class="phase-number">Phase 2</span>
+            <h3>💻 Compute: EC2 (Elastic Compute Cloud)</h3>
+            <p><strong>Duration:</strong> 2-3 weeks | <strong>Prerequisite:</strong> Phase 1 (IAM)</p>
+            <p>EC2 is the backbone of AWS compute. Learn to launch, configure, and manage virtual servers in the cloud.</p>
+
+            <h4>📺 Recommended Video Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=8SQnGqp3YZM" target="_blank" class="video-link">
+                <div class="title">🎬 AWS EC2 Full Course - Beginners to Advanced</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner to Advanced</span> <span class="badge badge-duration">Comprehensive</span> Complete hands-on course with theory</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=iHX-jtKIVNA" target="_blank" class="video-link">
+                <div class="title">🎬 Amazon EC2 Basics & Instances Tutorial</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Quick introduction to EC2 concepts</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=t5Ee67IGfSc" target="_blank" class="video-link">
+                <div class="title">🎬 Beginners Guide to AWS EC2</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Theory-focused guide before hands-on</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=4dscVzCaXCU" target="_blank" class="video-link">
+                <div class="title">🎬 AWS EC2 Full Course 2024 - Deploy Real-Time Apps</div>
+                <div class="meta"><span class="badge badge-intermediate">Intermediate</span> Listeners, target groups, and configurations</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Launch EC2 instances with different instance types</li>
+                <li>Configure Security Groups (firewall rules)</li>
+                <li>Create and use Key Pairs for SSH access</li>
+                <li>Understand EC2 pricing models (On-Demand, Reserved, Spot)</li>
+                <li>Create AMIs (Amazon Machine Images)</li>
+                <li>Set up Auto Scaling Groups and Load Balancers</li>
+            </ul>
+        </div>
+
+        <!-- Phase 3: Storage -->
+        <div class="phase">
+            <span class="phase-number">Phase 3</span>
+            <h3>📦 Storage: S3 (Simple Storage Service)</h3>
+            <p><strong>Duration:</strong> 1-2 weeks | <strong>Prerequisite:</strong> Phase 1 (IAM)</p>
+            <p>S3 is AWS's oldest and most popular service. Master object storage, versioning, and lifecycle policies.</p>
+
+            <h4>📺 Recommended Video Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=tfU0JEZjcsg" target="_blank" class="video-link">
+                <div class="title">🎬 AWS S3 Tutorial For Beginners</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Popular beginner-friendly S3 overview</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=A2N9OIun9dU" target="_blank" class="video-link">
+                <div class="title">🎬 AWS S3 Full Course - Beginner to Expert (2024)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner to Expert</span> <span class="badge badge-duration">Full Course</span> Storage classes, CLI commands, and more</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=PcrcBGcMN3U" target="_blank" class="video-link">
+                <div class="title">🎬 Beginners Guide To AWS S3</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Theory + console walkthrough</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Create and configure S3 buckets</li>
+                <li>Understand S3 storage classes (Standard, IA, Glacier)</li>
+                <li>Configure bucket policies and ACLs</li>
+                <li>Enable versioning and lifecycle rules</li>
+                <li>Set up static website hosting</li>
+                <li>Use S3 with CloudFront for CDN</li>
+            </ul>
+        </div>
+
+
+        <!-- Phase 4: Networking -->
+        <div class="phase">
+            <span class="phase-number">Phase 4</span>
+            <h3>🌐 Networking: VPC, Route 53 & CloudFront</h3>
+            <p><strong>Duration:</strong> 2-3 weeks | <strong>Prerequisite:</strong> Phase 2 (EC2)</p>
+            <p>Networking is crucial for building secure, scalable architectures. Master VPC design and DNS management.</p>
+
+            <h4>📺 VPC (Virtual Private Cloud) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=3FumWkHSusY" target="_blank" class="video-link">
+                <div class="title">🎬 Introduction to Amazon VPC (with Console Tutorial) - 2024</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Essential VPC concepts for Cloud Practitioner</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=7_NNlnH7sAg" target="_blank" class="video-link">
+                <div class="title">🎬 Amazon VPC Basics | VPC Tutorial</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> AWS global infrastructure and VPC fundamentals</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=2doSoMN2xvI" target="_blank" class="video-link">
+                <div class="title">🎬 AWS Networking Basics For Programmers | Hands On</div>
+                <div class="meta"><span class="badge badge-intermediate">Intermediate</span> VPCs, subnets, CIDR ranges explained</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=TUTqYEZZUdc" target="_blank" class="video-link">
+                <div class="title">🎬 AWS VPC & Subnets For Beginners</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Practical VPC and subnet configuration</div>
+            </a>
+
+            <h4>📺 Route 53 (DNS) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=H6_VyaYjTYI" target="_blank" class="video-link">
+                <div class="title">🎬 AWS Route 53 Tutorial</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Domain setup from start to finish</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=JRZiQFVWpi8" target="_blank" class="video-link">
+                <div class="title">🎬 Amazon Route 53 Basics - Domain Registration & A Records</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> DNS management and traffic routing</div>
+            </a>
+
+            <h4>📺 CloudFront (CDN) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=akwAv_L1XQ4" target="_blank" class="video-link">
+                <div class="title">🎬 AWS CloudFront Tutorial for Beginners (2024)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Step-by-step CDN setup guide</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=GUfAQUjA3a0" target="_blank" class="video-link">
+                <div class="title">🎬 Create CloudFront Distribution & Website</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> CDN tutorial for beginners</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Design and create VPCs with public/private subnets</li>
+                <li>Configure Internet Gateways and NAT Gateways</li>
+                <li>Set up Route Tables and Network ACLs</li>
+                <li>Register domains and configure DNS records in Route 53</li>
+                <li>Create CloudFront distributions for content delivery</li>
+                <li>Understand VPC peering and Transit Gateway</li>
+            </ul>
+        </div>
+
+        <!-- Phase 5: Databases -->
+        <div class="phase">
+            <span class="phase-number">Phase 5</span>
+            <h3>🗄️ Databases: RDS & DynamoDB</h3>
+            <p><strong>Duration:</strong> 2-3 weeks | <strong>Prerequisite:</strong> Phase 3 (Storage), Phase 4 (Networking)</p>
+            <p>Learn managed database services - both relational (RDS) and NoSQL (DynamoDB).</p>
+
+            <h4>📺 RDS (Relational Database Service) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=QwXXvFK68cs" target="_blank" class="video-link">
+                <div class="title">🎬 Amazon RDS Full Course</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner to Advanced</span> <span class="badge badge-duration">Full Course</span> Theory and hands-on labs</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=-p0P12HboA0" target="_blank" class="video-link">
+                <div class="title">🎬 Introduction to Amazon RDS</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> RDS overview and concepts</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=Ng_zi11N4_c" target="_blank" class="video-link">
+                <div class="title">🎬 AWS RDS MySQL Database Setup | Step by Step</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Practical MySQL setup tutorial</div>
+            </a>
+
+            <h4>📺 DynamoDB (NoSQL) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=2k2GINpO308" target="_blank" class="video-link">
+                <div class="title">🎬 AWS DynamoDB Tutorial For Beginners</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Core concepts and console walkthrough</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=FQrN5aJWa_U" target="_blank" class="video-link">
+                <div class="title">🎬 Amazon DynamoDB Tutorial - Create Your First Table</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Hands-on DynamoDB basics</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=wc2jf3sbgkQ" target="_blank" class="video-link">
+                <div class="title">🎬 AWS DynamoDB Tutorial for Beginners (2023)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Solutions Architect perspective</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Create RDS instances (MySQL, PostgreSQL, Aurora)</li>
+                <li>Configure Multi-AZ deployments and Read Replicas</li>
+                <li>Understand RDS backup and restore options</li>
+                <li>Create DynamoDB tables with partition and sort keys</li>
+                <li>Design efficient DynamoDB data models</li>
+                <li>Use DynamoDB Streams and Global Tables</li>
+            </ul>
+        </div>
+
+
+        <!-- Phase 6: Advanced -->
+        <div class="phase">
+            <span class="phase-number">Phase 6</span>
+            <h3>⚡ Advanced: Serverless, Monitoring & Infrastructure as Code</h3>
+            <p><strong>Duration:</strong> 3-4 weeks | <strong>Prerequisite:</strong> All previous phases</p>
+            <p>Master serverless computing, monitoring, and infrastructure automation to become AWS-proficient.</p>
+
+            <h4>📺 Lambda (Serverless) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=8I3SlARnvTg" target="_blank" class="video-link">
+                <div class="title">🎬 AWS Lambdas 101: A Beginner's Guide to Serverless</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Introduction to serverless computing</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=woqLi6NEW58" target="_blank" class="video-link">
+                <div class="title">🎬 Serverless Framework with AWS Lambda Crash Course</div>
+                <div class="meta"><span class="badge badge-intermediate">Intermediate</span> Build serverless applications</div>
+            </a>
+
+            <h4>📺 API Gateway Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=c3J5uvdfSfE" target="_blank" class="video-link">
+                <div class="title">🎬 AWS API Gateway Full Course</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner to Advanced</span> <span class="badge badge-duration">Full Course</span> Basic to advanced concepts with demos</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=jgpRAiar2LQ" target="_blank" class="video-link">
+                <div class="title">🎬 Create REST API with API Gateway & Lambda</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Hands-on REST API tutorial</div>
+            </a>
+
+            <h4>📺 CloudWatch (Monitoring) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=Yxl7e88cTAQ" target="_blank" class="video-link">
+                <div class="title">🎬 Basics of Amazon CloudWatch and Metrics</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Metrics, logs, alarms, dashboards</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=HRJnhzSSFtk" target="_blank" class="video-link">
+                <div class="title">🎬 AWS CloudWatch Logs Core Concepts (2024)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Log management fundamentals</div>
+            </a>
+
+            <h4>📺 CloudFormation (Infrastructure as Code) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=2gT1dvbppg8" target="_blank" class="video-link">
+                <div class="title">🎬 AWS CloudFormation for Beginners (2024)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Hands-on IaC guide</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=JmjXWKO7hWg" target="_blank" class="video-link">
+                <div class="title">🎬 AWS CloudFormation Tutorial - Automate Your Cloud</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Comprehensive 2024 guide</div>
+            </a>
+
+            <h4>📺 SNS/SQS (Messaging) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=9CCFv6BAyjI" target="_blank" class="video-link">
+                <div class="title">🎬 Beginners Guide To AWS SQS</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Queue basics and console demo</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=E2-nbtdKZ-4" target="_blank" class="video-link">
+                <div class="title">🎬 How to use AWS SNS and SQS (Python Tutorial)</div>
+                <div class="meta"><span class="badge badge-intermediate">Intermediate</span> Practical messaging implementation</div>
+            </a>
+
+            <h4>📺 Elastic Beanstalk (App Deployment) Tutorials:</h4>
+            <a href="https://www.youtube.com/watch?v=Ht1COADOsNI" target="_blank" class="video-link">
+                <div class="title">🎬 Deploy Web App Using Elastic Beanstalk (2025)</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Updated UI tutorial</div>
+            </a>
+            <a href="https://www.youtube.com/watch?v=aTQbyBUNoms" target="_blank" class="video-link">
+                <div class="title">🎬 AWS Elastic Beanstalk for Absolute Beginners</div>
+                <div class="meta"><span class="badge badge-beginner">Beginner</span> Hands-on deployment guide</div>
+            </a>
+
+            <h4>🎯 Learning Objectives:</h4>
+            <ul>
+                <li>Create and deploy Lambda functions</li>
+                <li>Build REST APIs with API Gateway</li>
+                <li>Set up CloudWatch alarms and dashboards</li>
+                <li>Write CloudFormation templates</li>
+                <li>Implement event-driven architectures with SNS/SQS</li>
+                <li>Deploy applications with Elastic Beanstalk</li>
+            </ul>
+        </div>
+
+
+        <!-- AWS Certifications -->
+        <section>
+            <h2><span class="emoji">🏆</span> AWS Certification Paths</h2>
+            <p>Validate your AWS skills with official certifications. Here are the recommended paths and preparation resources.</p>
+
+            <div class="grid-2">
+                <div class="card" style="border-left: 4px solid #16a34a;">
+                    <h4>🟢 Cloud Practitioner (CLF-C02)</h4>
+                    <p><strong>Level:</strong> Entry | <strong>Duration:</strong> 1-2 months | <strong>Cost:</strong> $100</p>
+                    <p>Perfect starting point for AWS beginners. Covers cloud concepts, AWS services overview, security, and pricing.</p>
+
+                    <h5>📺 Preparation Courses:</h5>
+                    <a href="https://www.youtube.com/watch?v=NhDYbskXRgc" target="_blank" class="video-link">
+                        <div class="title">🎬 AWS Cloud Practitioner Full Course (freeCodeCamp)</div>
+                        <div class="meta"><span class="badge badge-cert">Certification Prep</span> <span class="badge badge-duration">12+ hours</span> Complete exam prep by ExamPro</div>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=Uq5w1lnKzlk" target="_blank" class="video-link">
+                        <div class="title">🎬 FREE AWS Cloud Practitioner Training 2025</div>
+                        <div class="meta"><span class="badge badge-cert">Certification Prep</span> Comprehensive free course</div>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=JsmhEgIV1mQ" target="_blank" class="video-link">
+                        <div class="title">🎬 Cloud Practitioner Complete Study Guide 2024</div>
+                        <div class="meta"><span class="badge badge-cert">Certification Prep</span> Exam-focused guide</div>
+                    </a>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #ca8a04;">
+                    <h4>🟡 Solutions Architect Associate (SAA-C03)</h4>
+                    <p><strong>Level:</strong> Associate | <strong>Duration:</strong> 2-3 months | <strong>Cost:</strong> $150</p>
+                    <p>Most popular AWS certification. Covers designing resilient, high-performing, secure architectures.</p>
+
+                    <h5>📺 Preparation Courses:</h5>
+                    <a href="https://www.youtube.com/watch?v=c3Cn4xYfxJY" target="_blank" class="video-link">
+                        <div class="title">🎬 AWS Solutions Architect Associate Full Course (SAA-C03)</div>
+                        <div class="meta"><span class="badge badge-cert">Certification Prep</span> <span class="badge badge-duration">Full Course</span> Complete exam preparation</div>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=FoBcdIsDzww" target="_blank" class="video-link">
+                        <div class="title">🎬 AWS Solutions Architect Associate 2024 Bootcamp</div>
+                        <div class="meta"><span class="badge badge-cert">Certification Prep</span> Free full course</div>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=DIeP3Y5VdV8" target="_blank" class="video-link">
+                        <div class="title">🎬 How to PASS AWS Solutions Architect 2024</div>
+                        <div class="meta"><span class="badge badge-cert">Exam Tips</span> Strategies and tips</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>📋 Certification Roadmap:</strong><br>
+                <span style="font-size: 1.1rem;">
+                    Cloud Practitioner → Solutions Architect Associate → Developer Associate → DevOps Engineer Professional
+                </span>
+            </div>
+        </section>
+
+        <!-- Quick Start Guide -->
+        <section style="background: linear-gradient(135deg, var(--aws-dark) 0%, #37475a 100%); color: white;">
+            <h2 style="color: white; border-color: var(--aws-orange);"><span class="emoji">🚀</span> Quick Start: Your First Week</h2>
+
+            <div class="grid-3">
+                <div style="background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 0.75rem;">
+                    <h4 style="color: var(--aws-orange); margin-top: 0;">Day 1-2: Setup</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Create AWS Free Tier account</li>
+                        <li>Set up MFA on root account</li>
+                        <li>Create IAM admin user</li>
+                        <li>Install AWS CLI</li>
+                    </ul>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 0.75rem;">
+                    <h4 style="color: var(--aws-orange); margin-top: 0;">Day 3-4: First Services</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Launch your first EC2 instance</li>
+                        <li>SSH into the instance</li>
+                        <li>Create an S3 bucket</li>
+                        <li>Upload files to S3</li>
+                    </ul>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 0.75rem;">
+                    <h4 style="color: var(--aws-orange); margin-top: 0;">Day 5-7: Explore</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Set up CloudWatch alarm</li>
+                        <li>Create a simple Lambda function</li>
+                        <li>Explore the AWS console</li>
+                        <li>Watch Phase 1 videos</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section>
+            <h2><span class="emoji">📌</span> Summary & Next Steps</h2>
+
+            <div class="highlight">
+                <h4 style="margin-top: 0;">Your AWS Learning Journey:</h4>
+                <p style="font-size: 1.1rem; margin-bottom: 0;">
+                    <strong>Phase 1 (IAM)</strong> → <strong>Phase 2 (EC2)</strong> → <strong>Phase 3 (S3)</strong> → <strong>Phase 4 (VPC)</strong> → <strong>Phase 5 (Databases)</strong> → <strong>Phase 6 (Serverless)</strong> → <span style="color: var(--aws-orange);">AWS Certified!</span>
+                </p>
+            </div>
+
+            <h4>Key Takeaways:</h4>
+            <ul>
+                <li>✅ <strong>Start with IAM</strong> - Security is foundational to everything in AWS</li>
+                <li>✅ <strong>Use the Free Tier</strong> - Practice hands-on without spending money</li>
+                <li>✅ <strong>Follow the phases in order</strong> - Each builds on the previous</li>
+                <li>✅ <strong>Watch videos + practice</strong> - Don't just watch, do!</li>
+                <li>✅ <strong>Get certified</strong> - Start with Cloud Practitioner, then Solutions Architect</li>
+                <li>✅ <strong>Build projects</strong> - Apply what you learn to real-world scenarios</li>
+            </ul>
+
+            <h4>Recommended Learning Schedule:</h4>
+            <table>
+                <tr><th>Time Commitment</th><th>Timeline to Proficiency</th><th>Certification Target</th></tr>
+                <tr><td>1-2 hours/day</td><td>6-9 months</td><td>Cloud Practitioner + SAA</td></tr>
+                <tr><td>3-4 hours/day</td><td>3-4 months</td><td>Cloud Practitioner + SAA</td></tr>
+                <tr><td>Full-time</td><td>6-8 weeks</td><td>Cloud Practitioner + SAA</td></tr>
+            </table>
+        </section>
+
+        <footer style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <p>AWS Complete Learning Guide | Step-by-Step Path to AWS Mastery</p>
+            <p style="margin-top: 0.5rem;"><strong>Start your cloud journey today! ☁️🚀</strong></p>
+            <p style="font-size: 0.85rem; margin-top: 1rem;">Last Updated: January 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

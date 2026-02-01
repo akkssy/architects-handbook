@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Lead Resume</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 850px; margin: 0 auto; padding: 40px; background: #f5f5f5; }
+        .resume { background: #fff; padding: 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid #2c5282; padding-bottom: 20px; margin-bottom: 25px; }
+        .header h1 { font-size: 32px; color: #1a365d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        .header .title { font-size: 16px; color: #4a5568; margin-bottom: 15px; font-weight: 500; }
+        .contact-info { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; font-size: 13px; color: #4a5568; }
+        .contact-info span { display: flex; align-items: center; gap: 5px; }
+        section { margin-bottom: 25px; }
+        h2 { font-size: 16px; color: #2c5282; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px; }
+        .summary { font-size: 14px; color: #4a5568; text-align: justify; }
+        .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .skill-category h3 { font-size: 13px; color: #2d3748; margin-bottom: 8px; border-left: 3px solid #2c5282; padding-left: 10px; }
+        .skill-category ul { list-style: none; font-size: 12px; color: #4a5568; }
+        .skill-category li { margin-bottom: 4px; padding-left: 15px; position: relative; }
+        .skill-category li::before { content: "•"; position: absolute; left: 0; color: #2c5282; }
+        .tech-skills { margin-bottom: 20px; }
+        .tech-row { margin-bottom: 12px; }
+        .tech-row strong { color: #2d3748; font-size: 13px; }
+        .tech-row span { font-size: 12px; color: #4a5568; }
+        .job { margin-bottom: 25px; page-break-inside: avoid; }
+        .job-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+        .job-title { font-size: 15px; font-weight: 600; color: #1a365d; }
+        .job-date { font-size: 12px; color: #718096; }
+        .job-company { font-size: 13px; color: #4a5568; margin-bottom: 10px; font-style: italic; }
+        .job-section { margin-bottom: 12px; }
+        .job-section h4 { font-size: 12px; color: #2c5282; margin-bottom: 6px; }
+        .job ul { list-style: none; }
+        .job li { font-size: 12px; color: #4a5568; margin-bottom: 6px; padding-left: 18px; position: relative; text-align: justify; }
+        .job li::before { content: "▸"; position: absolute; left: 0; color: #2c5282; font-size: 10px; }
+        .achievements { background: #f7fafc; padding: 15px; border-radius: 5px; }
+        .achievement { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 12px; }
+        .achievement-icon { margin-right: 10px; font-size: 14px; }
+        .achievement-text { color: #4a5568; }
+        .education-item, .cert-item { font-size: 13px; margin-bottom: 8px; }
+        .education-item strong, .cert-item strong { color: #2d3748; }
+        .cert-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        @media print { body { background: #fff; padding: 0; } .resume { box-shadow: none; padding: 30px; } }
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <header class="header">
+            <h1>[Your Name]</h1>
+            <div class="title">Development Lead | Technical Leadership | Full-Stack Architecture</div>
+            <div class="contact-info">
+                <span>📍 [City, State]</span>
+                <span>📧 [email@domain.com]</span>
+                <span>📱 [Phone]</span>
+                <span>🔗 [LinkedIn]</span>
+                <span>💻 [GitHub]</span>
+            </div>
+        </header>
+
+        <section>
+            <h2>Professional Summary</h2>
+            <p class="summary">Results-driven Developer Lead with <strong>[X]+ years</strong> of experience leading high-performing development teams and delivering end-to-end enterprise solutions. Proven track record of managing development teams while architecting scalable applications across modern and legacy technology stacks. Expert in bridging business requirements and technical execution, with deep expertise in <strong>.NET ecosystem, business process automation, and DevOps practices</strong>. Adept at modernizing legacy systems while maintaining operational continuity and driving Agile transformation initiatives.</p>
+        </section>
+
+        <section>
+            <h2>Core Competencies</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Leadership & Management</h3>
+                    <ul>
+                        <li>Leadership</li>
+                        <li>End-to-End Product Delivery</li>
+                        <li>Cross-Functional Collaboration</li>
+                        <li>Stakeholder Management</li>
+                        <li>Technical Mentoring</li>
+                        <li>Resource Planning & Estimation</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Technical Expertise</h3>
+                    <ul>
+                        <li>ASP.NET / .NET Core / C#</li>
+                        <li>ReactJS / JavaScript</li>
+                        <li>C/C++ Development</li>
+                        <li>Microsoft SQL Server</li>
+                        <li>SharePoint Development</li>
+                        <li>Delphi / UCSD Pascal</li>
+                        <li>BPMN / Camunda / Bizflow / Skelta</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Methodologies & Practices</h3>
+                    <ul>
+                        <li>Agile / Scrum / Kanban</li>
+                        <li>CI/CD Pipeline Design</li>
+                        <li>Code Review & Quality Gates</li>
+                        <li>Technical Debt Management</li>
+                        <li>Release Management</li>
+                        <li>DevSecOps Practices</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Technical Skills</h2>
+            <div class="tech-skills">
+                <div class="tech-row"><strong>Languages & Frameworks:</strong> <span>C#, ASP.NET Core, .NET 6/7/8, Web API, Entity Framework Core, LINQ, ReactJS, JavaScript (ES6+), HTML5, CSS3, Blazor, Delphi, UCSD Pascal, C/C++</span></div>
+                <div class="tech-row"><strong>Databases:</strong> <span>Microsoft SQL Server (T-SQL, Stored Procedures, Performance Tuning, SSIS, SSRS), Database Design & Optimization</span></div>
+                <div class="tech-row"><strong>BPM & Workflow:</strong> <span>BPMN 2.0, Camunda BPM, Bizflow BPM Suite, Skelta BPM, Workflow Automation, Process Orchestration</span></div>
+                <div class="tech-row"><strong>DevOps & Cloud:</strong> <span>Azure DevOps (Repos, Pipelines, Boards, Artifacts), CI/CD Architecture, Azure Cloud Services, Git, TFS</span></div>
+                <div class="tech-row"><strong>Collaboration:</strong> <span>SharePoint (Development & Administration), Jira, Confluence, Microsoft 365</span></div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Professional Experience</h2>
+            <div class="job">
+                <div class="job-header"><span class="job-title">Development Lead</span><span class="job-date">[Month Year] – Present</span></div>
+                <div class="job-company">[Company Name] | [City, State]</div>
+                <div class="job-section"><h4>Team Leadership & Delivery</h4>
+                    <ul>
+                        <li>Lead a high-performing development team, providing technical direction, mentorship, and career development guidance</li>
+                        <li>Own <strong>end-to-end product delivery</strong> lifecycle from requirements gathering through production deployment and post-release support</li>
+                        <li>Conduct regular 1:1s, sprint planning, and retrospectives, fostering a culture of continuous improvement</li>
+                        <li>Reduced release cycle time by <strong>[X]%</strong> through implementation of streamlined CI/CD pipelines in Azure DevOps</li>
+                    </ul>
+                </div>
+                <div class="job-section"><h4>Technical Architecture & Development</h4>
+                    <ul>
+                        <li>Architect and deliver enterprise-grade solutions using <strong>ASP.NET Core</strong> and <strong>.NET 6+</strong>, serving [X]+ concurrent users</li>
+                        <li>Design and optimize <strong>Microsoft SQL Server</strong> databases, improving query performance by <strong>[X]%</strong></li>
+                        <li>Lead <strong>legacy system modernization</strong> initiatives, migrating Delphi applications to .NET Core while maintaining business continuity</li>
+                        <li>Implement <strong>BPMN-based workflow solutions</strong> using Camunda, Bizflow, and Skelta, automating [X]+ business processes</li>
+                    </ul>
+                </div>
+                <div class="job-section"><h4>Process Improvement & DevOps</h4>
+                    <ul>
+                        <li>Established <strong>Azure DevOps pipelines</strong> with automated testing, code quality gates, and deployment automation</li>
+                        <li>Implemented <strong>Agile practices</strong> across the team, including sprint ceremonies, backlog grooming, and velocity tracking</li>
+                        <li>Reduced production incidents by <strong>[X]%</strong> through comprehensive testing strategies and monitoring</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="job">
+                <div class="job-header"><span class="job-title">Delivery Lead – BPM Implementations</span><span class="job-date">[Month Year] – [Month Year]</span></div>
+                <div class="job-company">[Company Name] | [City, State]</div>
+                <div class="job-section"><h4>Program & Delivery Management</h4>
+                    <ul>
+                        <li>Led end-to-end delivery of <strong>[X]+ BPM implementation projects</strong> using Camunda, Bizflow, Skelta, and BPMN 2.0 methodologies</li>
+                        <li>Managed cross-functional teams including developers, business analysts, and process consultants</li>
+                        <li>Owned delivery timelines, risk management, and stakeholder communications for enterprise workflow automation</li>
+                        <li>Achieved <strong>[X]% on-time delivery rate</strong> across all BPM projects with client satisfaction scores of [X]/5</li>
+                    </ul>
+                </div>
+                <div class="job-section"><h4>Business Process Automation</h4>
+                    <ul>
+                        <li>Collaborated with business stakeholders to analyze and optimize <strong>[X]+ business processes</strong> using BPMN notation</li>
+                        <li>Designed workflow automation solutions reducing manual processing time by <strong>[X]%</strong></li>
+                        <li>Established BPM best practices, reusable templates, and governance frameworks</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="job">
+                <div class="job-header"><span class="job-title">Senior Software Developer</span><span class="job-date">[Month Year] – [Month Year]</span></div>
+                <div class="job-company">[Company Name] | [City, State]</div>
+                <ul>
+                    <li>Developed and maintained enterprise applications using <strong>ASP.NET, C#, and SQL Server</strong></li>
+                    <li>Designed and implemented <strong>SharePoint solutions</strong> for document management and collaboration</li>
+                    <li>Mentored <strong>[X] junior developers</strong>, conducting code reviews and knowledge transfer sessions</li>
+                    <li>Contributed to <strong>C/C++ legacy system maintenance</strong> and incremental modernization efforts</li>
+                </ul>
+            </div>
+            <div class="job">
+                <div class="job-header"><span class="job-title">Software Developer</span><span class="job-date">[Month Year] – [Month Year]</span></div>
+                <div class="job-company">[Company Name] | [City, State]</div>
+                <ul>
+                    <li>Built and maintained applications using <strong>Delphi</strong> and <strong>UCSD Pascal</strong> for enterprise clients</li>
+                    <li>Developed stored procedures, triggers, and reports in <strong>Microsoft SQL Server</strong></li>
+                    <li>Participated in full SDLC activities including design, development, testing, and deployment</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Key Achievements</h2>
+            <div class="achievements">
+                <div class="achievement"><span class="achievement-icon">🏆</span><span class="achievement-text"><strong>Legacy Modernization:</strong> Successfully led migration of [X] Delphi applications to .NET Core, reducing maintenance costs by <strong>[X]%</strong> and improving system performance by <strong>[X]%</strong></span></div>
+                <div class="achievement"><span class="achievement-icon">🏆</span><span class="achievement-text"><strong>Team Growth:</strong> Built and scaled development team, establishing hiring processes, onboarding programs, and technical competency frameworks</span></div>
+                <div class="achievement"><span class="achievement-icon">🏆</span><span class="achievement-text"><strong>Process Automation:</strong> Implemented BPM solutions that automated <strong>[X]+ manual workflows</strong>, saving <strong>[X] hours/month</strong> in operational overhead</span></div>
+                <div class="achievement"><span class="achievement-icon">🏆</span><span class="achievement-text"><strong>DevOps Transformation:</strong> Pioneered Azure DevOps adoption, achieving <strong>[X]% test coverage</strong> and reducing deployment time from [X] days to [X] hours</span></div>
+                <div class="achievement"><span class="achievement-icon">🏆</span><span class="achievement-text"><strong>Quality Excellence:</strong> Maintained <strong>[X]% on-time delivery rate</strong> while reducing production defects by <strong>[X]%</strong> year-over-year</span></div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Education</h2>
+            <div class="education-item"><strong>[Degree] in Computer Science / Software Engineering</strong><br>[University Name] | [City, State] | [Graduation Year]</div>
+        </section>
+
+        <section>
+            <h2>Certifications</h2>
+            <div class="cert-list">
+                <div class="cert-item">• Microsoft Certified: Azure Developer Associate</div>
+                <div class="cert-item">• Microsoft Certified: .NET Developer</div>
+                <div class="cert-item">• Professional Scrum Master (PSM I/II)</div>
+                <div class="cert-item">• Azure DevOps Engineer Expert</div>
+                <div class="cert-item">• BPMN 2.0 Professional</div>
+                <div class="cert-item">• ITIL Foundation (if applicable)</div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+

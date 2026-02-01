@@ -105,6 +105,26 @@
       {
         "command": "cognify.switchProvider",
         "title": "Cognify: Switch LLM Provider"
+      },
+      {
+        "command": "cognify.showSettings",
+        "title": "Cognify: Show Settings"
+      },
+      {
+        "command": "cognify.showLicenseStatus",
+        "title": "Cognify: Show License Status"
+      },
+      {
+        "command": "cognify.toggleAnalytics",
+        "title": "Cognify: Toggle Analytics"
+      },
+      {
+        "command": "cognify.toggleTelemetry",
+        "title": "Cognify: Toggle Telemetry"
+      },
+      {
+        "command": "cognify.showUsageData",
+        "title": "Cognify: Show Usage Data"
       }
     ],
     "menus": {

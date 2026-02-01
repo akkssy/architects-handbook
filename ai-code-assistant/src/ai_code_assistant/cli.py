@@ -1,13 +1,24 @@
 """Command-line interface for AI Code Assistant."""
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import click
+from dotenv import load_dotenv
 from rich.console import Console
+
+# Load environment variables from .env file
+# First try current directory, then home directory
+if Path(".env").exists():
+    load_dotenv(Path(".env"))
+elif Path.home().joinpath(".cognify.env").exists():
+    load_dotenv(Path.home().joinpath(".cognify.env"))
+elif Path.home().joinpath(".env").exists():
+    load_dotenv(Path.home().joinpath(".env"))
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
@@ -23,10 +34,10 @@ from ai_code_assistant.utils import FileHandler, get_formatter
 console = Console()
 
 
-def get_components(config_path: Optional[Path] = None):
-    """Initialize and return all components."""
+def get_components(config_path: Optional[Path] = None, provider: Optional[str] = None, model: Optional[str] = None):
+    """Initialize and return all components with optional provider/model override."""
     config = load_config(config_path)
-    llm = LLMManager(config)
+    llm = LLMManager(config, provider=provider, model=model)
     return config, llm
 
 
@@ -44,7 +55,7 @@ def main(ctx, config: Optional[Path], verbose: bool):
 
 @main.command()
 @click.argument("files", nargs=-1, type=click.Path(exists=True, path_type=Path))
-@click.option("--type", "-t", "review_type", default="full", 
+@click.option("--type", "-t", "review_type", default="full",
               type=click.Choice(["full", "quick", "security"]), help="Review type")
 @click.option("--format", "-f", "output_format", default="console",
               type=click.Choice(["console", "markdown", "json"]), help="Output format")
@@ -54,55 +65,70 @@ def main(ctx, config: Optional[Path], verbose: bool):
 def review(ctx, files: Tuple[Path, ...], review_type: str, output_format: str,
            output: Optional[Path], recursive: bool):
     """Review code files for issues and improvements."""
+    import time
+    from ai_code_assistant.analytics import get_collector
+
+    collector = get_collector()
+    start_time = time.time()
+    success = True
+
     if not files:
         console.print("[red]Error:[/red] No files specified")
         sys.exit(1)
 
-    config, llm = get_components(ctx.obj.get("config_path"))
-    analyzer = CodeAnalyzer(config, llm)
-    file_handler = FileHandler(config)
-    formatter = get_formatter(output_format, config.output.use_colors)
+    try:
+        config, llm = get_components(ctx.obj.get("config_path"))
+        analyzer = CodeAnalyzer(config, llm)
+        file_handler = FileHandler(config)
+        formatter = get_formatter(output_format, config.output.use_colors)
 
-    # Collect all files to review
-    all_files = []
-    for file_path in files:
-        if file_path.is_dir():
-            all_files.extend(file_handler.find_code_files(file_path, recursive=recursive))
-        else:
-            all_files.append(file_path)
+        # Collect all files to review
+        all_files = []
+        for file_path in files:
+            if file_path.is_dir():
+                all_files.extend(file_handler.find_code_files(file_path, recursive=recursive))
+            else:
+                all_files.append(file_path)
 
-    if not all_files:
-        console.print("[yellow]No code files found to review[/yellow]")
-        return
+        if not all_files:
+            console.print("[yellow]No code files found to review[/yellow]")
+            return
 
-    console.print(f"\n[bold]Reviewing {len(all_files)} file(s)...[/bold]\n")
-    
-    all_output = []
-    
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-    ) as progress:
-        task = progress.add_task("Analyzing...", total=len(all_files))
-        
-        for file_path in all_files:
-            progress.update(task, description=f"Reviewing {file_path.name}...")
-            
-            result = analyzer.review_file(file_path, review_type=review_type)
-            formatted = formatter.format_review(result)
-            all_output.append(formatted)
-            
-            progress.advance(task)
+        console.print(f"\n[bold]Reviewing {len(all_files)} file(s)...[/bold]\n")
 
-    # Save or display output
-    if output:
-        combined = "\n\n---\n\n".join(all_output) if output_format != "json" else all_output
-        if output_format == "json":
-            import json
-            combined = json.dumps([json.loads(o) for o in all_output], indent=2)
-        output.write_text(combined)
-        console.print(f"\n[green]Report saved to:[/green] {output}")
+        all_output = []
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Analyzing...", total=len(all_files))
+
+            for file_path in all_files:
+                progress.update(task, description=f"Reviewing {file_path.name}...")
+
+                result = analyzer.review_file(file_path, review_type=review_type)
+                formatted = formatter.format_review(result)
+                all_output.append(formatted)
+
+                progress.advance(task)
+
+        # Save or display output
+        if output:
+            combined = "\n\n---\n\n".join(all_output) if output_format != "json" else all_output
+            if output_format == "json":
+                import json
+                combined = json.dumps([json.loads(o) for o in all_output], indent=2)
+            output.write_text(combined)
+            console.print(f"\n[green]Report saved to:[/green] {output}")
+    except Exception as e:
+        success = False
+        collector.track_error(type(e).__name__, str(e)[:200], "review", "cli")
+        raise
+    finally:
+        duration_ms = int((time.time() - start_time) * 1000)
+        collector.track_command("review", duration_ms, success, "cli", {"files": len(files), "type": review_type})
 
 
 @main.command()
@@ -122,41 +148,56 @@ def generate(ctx, description: str, mode: str, language: str, name: Optional[str
              params: Optional[str], output: Optional[Path], output_format: str,
              source: Optional[Path]):
     """Generate code from natural language description."""
-    config, llm = get_components(ctx.obj.get("config_path"))
-    generator = CodeGenerator(config, llm)
-    formatter = get_formatter(output_format, config.output.use_colors)
+    import time
+    from ai_code_assistant.analytics import get_collector
 
-    console.print(f"\n[bold]Generating {mode} in {language}...[/bold]\n")
+    collector = get_collector()
+    start_time = time.time()
+    success = True
 
-    with console.status("[bold green]Generating code..."):
-        if mode == "function":
-            result = generator.generate_function(
-                description=description, name=name or "generated_function",
-                language=language, parameters=params or "",
-            )
-        elif mode == "class":
-            result = generator.generate_class(
-                description=description, name=name or "GeneratedClass", language=language,
-            )
-        elif mode == "script":
-            result = generator.generate_script(
-                description=description, requirements=[description], language=language,
-            )
-        elif mode == "test":
-            if not source:
-                console.print("[red]Error:[/red] --source required for test mode")
-                sys.exit(1)
-            source_code = source.read_text()
-            result = generator.generate_tests(source_code=source_code, language=language)
-        else:
-            result = generator.generate(description=description, language=language)
+    try:
+        config, llm = get_components(ctx.obj.get("config_path"))
+        generator = CodeGenerator(config, llm)
+        formatter = get_formatter(output_format, config.output.use_colors)
 
-    formatted = formatter.format_generation(result)
+        console.print(f"\n[bold]Generating {mode} in {language}...[/bold]\n")
 
-    if output and result.success:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(result.code)
-        console.print(f"\n[green]Code saved to:[/green] {output}")
+        with console.status("[bold green]Generating code..."):
+            if mode == "function":
+                result = generator.generate_function(
+                    description=description, name=name or "generated_function",
+                    language=language, parameters=params or "",
+                )
+            elif mode == "class":
+                result = generator.generate_class(
+                    description=description, name=name or "GeneratedClass", language=language,
+                )
+            elif mode == "script":
+                result = generator.generate_script(
+                    description=description, requirements=[description], language=language,
+                )
+            elif mode == "test":
+                if not source:
+                    console.print("[red]Error:[/red] --source required for test mode")
+                    sys.exit(1)
+                source_code = source.read_text()
+                result = generator.generate_tests(source_code=source_code, language=language)
+            else:
+                result = generator.generate(description=description, language=language)
+
+        formatted = formatter.format_generation(result)
+
+        if output and result.success:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(result.code)
+            console.print(f"\n[green]Code saved to:[/green] {output}")
+    except Exception as e:
+        success = False
+        collector.track_error(type(e).__name__, str(e)[:200], "generate", "cli")
+        raise
+    finally:
+        duration_ms = int((time.time() - start_time) * 1000)
+        collector.track_command("generate", duration_ms, success, "cli", {"mode": mode, "language": language})
 
 
 @main.command()
@@ -732,9 +773,12 @@ def rename(ctx, old_name: str, new_name: str, symbol_type: str, files: Tuple[Pat
 @click.option("--language", "-l", default="python", help="Language for code generation")
 @click.option("--history", "-h", "history_json", help="JSON conversation history")
 @click.option("--system-prompt", "-s", "system_prompt", help="Custom system prompt for the AI agent")
+@click.option("--provider", "-p", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", "-m", help="Model name to use (e.g., gpt-4, gemini-1.5-flash, llama3)")
 @click.pass_context
 def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional[Path],
-               language: str, history_json: Optional[str], system_prompt: Optional[str]):
+               language: str, history_json: Optional[str], system_prompt: Optional[str],
+               provider: Optional[str], model: Optional[str]):
     """Intelligent chat that detects intent and executes appropriate actions.
 
     Automatically detects if the user wants to:
@@ -748,11 +792,35 @@ def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional
         cognify smart-chat "write a binary search function"
         cognify smart-chat "review this code" -c "def foo(): pass"
         cognify smart-chat "what's the difference between let and const"
+        cognify smart-chat "explain recursion" --provider google --model gemini-1.5-flash
     """
     import json
     import re
+    import time
 
-    config, llm = get_components(ctx.obj.get("config_path"))
+    # Import analytics and licensing modules
+    from ai_code_assistant.analytics import get_collector
+    from ai_code_assistant.licensing import get_license_manager
+
+    collector = get_collector()
+    license_mgr = get_license_manager()
+
+    # Check license/usage limits for cloud providers
+    effective_provider = provider or "ollama"
+    if effective_provider != "ollama":
+        usage_check = license_mgr.check_usage_limit(effective_provider)
+        if not usage_check["allowed"]:
+            console.print(f"[yellow]⚠ {usage_check['message']}[/yellow]")
+            console.print("[dim]Tip: Use Ollama for unlimited local LLM calls, or upgrade your plan.[/dim]")
+            sys.exit(1)
+
+    start_time = time.time()
+    success = True
+
+    config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
+
+    # Get effective model name for tracking
+    effective_model = model or (config.llm.model if hasattr(config.llm, 'model') else "unknown")
 
     # Load context from file if provided
     if context_file and not context:
@@ -776,6 +844,8 @@ def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional
         from ai_code_assistant.knowledge import KnowledgeManager
         knowledge_mgr = KnowledgeManager()
         knowledge_context = knowledge_mgr.get_context_for_query(message, max_entries=3)
+        if knowledge_context:
+            collector.track_feature("knowledge_base", client="cli")
     except Exception:
         pass  # Knowledge base is optional enhancement
 
@@ -791,6 +861,8 @@ def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional
     intent = _detect_intent(message, context)
 
     try:
+        llm_start = time.time()
+
         if intent == "generate":
             result = _handle_generate(config, llm, message, language, system_prompt)
         elif intent == "review" and context:
@@ -803,12 +875,39 @@ def smart_chat(ctx, message: str, context: Optional[str], context_file: Optional
             # General chat - pass combined context with knowledge
             result = _handle_chat(config, llm, message, combined_context if combined_context else None, history, system_prompt)
 
+        llm_latency = int((time.time() - llm_start) * 1000)
+
+        # Track LLM call (we don't have exact token counts without parsing the response)
+        collector.track_llm_call(
+            provider=effective_provider,
+            model=effective_model,
+            latency_ms=llm_latency,
+            client="cli",
+        )
+
         # Output result (no formatting for VSCode extension consumption)
         print(result)
 
     except Exception as e:
+        success = False
+        collector.track_error(
+            error_type=type(e).__name__,
+            error_message=str(e)[:200],
+            command="smart-chat",
+            client="cli",
+        )
         console.print(f"[red]Error:[/red] {e}")
         sys.exit(1)
+    finally:
+        # Track command execution
+        duration_ms = int((time.time() - start_time) * 1000)
+        collector.track_command(
+            command="smart-chat",
+            duration_ms=duration_ms,
+            success=success,
+            client="cli",
+            metadata={"intent": intent, "provider": effective_provider},
+        )
 
 
 def _detect_intent(message: str, context: Optional[str]) -> str:
@@ -1205,6 +1304,356 @@ def knowledge_stats(ctx, output_format: str):
             click.echo("\n   Tags:")
             for tag, count in sorted(stats['tags'].items(), key=lambda x: -x[1])[:10]:
                 click.echo(f"      - {tag}: {count}")
+
+
+# ==================== Settings Commands ====================
+
+@main.group()
+@click.pass_context
+def settings(ctx):
+    """Manage Cognify AI settings and preferences."""
+    pass
+
+
+@settings.command("show")
+@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.pass_context
+def settings_show(ctx, output_format: str):
+    """Show current settings."""
+    from ai_code_assistant.settings import get_settings_manager
+
+    manager = get_settings_manager()
+    all_settings = manager.get_all_settings()
+
+    if output_format == "json":
+        click.echo(json.dumps(all_settings, indent=2))
+    else:
+        click.echo("⚙️  Cognify AI Settings\n")
+        click.echo(f"   Config file: {manager.config_path}")
+        click.echo(f"   Device ID: {manager.device_id[:8]}...\n")
+
+        def print_settings(settings_dict, indent=0):
+            for key, value in settings_dict.items():
+                prefix = "   " * (indent + 1)
+                if isinstance(value, dict):
+                    click.echo(f"{prefix}[{key}]")
+                    print_settings(value, indent + 1)
+                else:
+                    status = "✓" if value is True else ("✗" if value is False else "")
+                    click.echo(f"{prefix}{key}: {value} {status}")
+
+        print_settings(all_settings)
+
+
+@settings.command("set")
+@click.argument("key")
+@click.argument("value")
+@click.pass_context
+def settings_set(ctx, key: str, value: str):
+    """Set a configuration value (use dot notation, e.g., telemetry.enabled)."""
+    from ai_code_assistant.settings import get_settings_manager
+
+    manager = get_settings_manager()
+
+    # Convert string value to appropriate type
+    if value.lower() == "true":
+        typed_value = True
+    elif value.lower() == "false":
+        typed_value = False
+    elif value.isdigit():
+        typed_value = int(value)
+    else:
+        try:
+            typed_value = float(value)
+        except ValueError:
+            typed_value = value
+
+    old_value = manager.get(key)
+    manager.set(key, typed_value)
+
+    click.echo(f"✅ Updated {key}")
+    click.echo(f"   Old: {old_value}")
+    click.echo(f"   New: {typed_value}")
+
+
+@settings.command("privacy")
+@click.option("--telemetry/--no-telemetry", default=None, help="Enable/disable telemetry")
+@click.option("--analytics/--no-analytics", default=None, help="Enable/disable local analytics")
+@click.option("--show", is_flag=True, help="Show current privacy settings")
+@click.pass_context
+def settings_privacy(ctx, telemetry, analytics, show):
+    """Configure privacy and telemetry settings."""
+    from ai_code_assistant.settings import PrivacySettings
+
+    privacy = PrivacySettings()
+
+    if show or (telemetry is None and analytics is None):
+        consent = privacy.get_consent_status()
+        click.echo("🔒 Privacy Settings\n")
+        for key, value in consent.items():
+            status = "✓ Enabled" if value else "✗ Disabled"
+            click.echo(f"   {key}: {status}")
+        click.echo("\nUse --telemetry/--no-telemetry or --analytics/--no-analytics to change.")
+        return
+
+    privacy.update_consent(
+        telemetry_enabled=telemetry,
+        analytics_enabled=analytics,
+    )
+
+    click.echo("✅ Privacy settings updated")
+    if telemetry is not None:
+        click.echo(f"   Telemetry: {'Enabled' if telemetry else 'Disabled'}")
+    if analytics is not None:
+        click.echo(f"   Analytics: {'Enabled' if analytics else 'Disabled'}")
+
+
+# ==================== Data Commands ====================
+
+@main.group()
+@click.pass_context
+def data(ctx):
+    """Manage your usage data and analytics."""
+    pass
+
+
+@data.command("show")
+@click.option("--days", "-d", default=7, help="Number of days to show")
+@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.pass_context
+def data_show(ctx, days: int, output_format: str):
+    """Show usage analytics summary."""
+    from ai_code_assistant.analytics import get_collector
+    from ai_code_assistant.settings import PrivacySettings
+
+    collector = get_collector()
+    privacy = PrivacySettings()
+
+    summary = collector.get_summary()
+    daily_stats = collector.get_daily_stats(days)
+    data_summary = privacy.get_data_summary()
+
+    if output_format == "json":
+        click.echo(json.dumps({
+            "summary": summary,
+            "daily_stats": daily_stats,
+            "data_info": data_summary,
+        }, indent=2))
+    else:
+        if not summary.get("analytics_enabled", True):
+            click.echo("📊 Analytics is disabled. Enable with: cognify settings set analytics.enabled true")
+            return
+
+        click.echo("📊 Usage Analytics\n")
+        click.echo(f"   Total events: {summary.get('total_events', 0)}")
+
+        if summary.get('date_range'):
+            dr = summary['date_range']
+            click.echo(f"   Data range: {dr.get('from', 'N/A')} to {dr.get('to', 'N/A')}")
+
+        if summary.get('top_commands'):
+            click.echo("\n   Top commands:")
+            for cmd in summary['top_commands'][:5]:
+                click.echo(f"      - {cmd['event_name']}: {cmd['count']} times")
+
+        if daily_stats:
+            click.echo(f"\n   Last {days} days:")
+            for day in daily_stats[:7]:
+                click.echo(f"      {day.get('date', 'N/A')}: {day.get('total_events', 0)} events")
+
+
+@data.command("export")
+@click.option("--output", "-o", type=click.Path(), help="Output file path")
+@click.pass_context
+def data_export(ctx, output: str):
+    """Export all your data to JSON (GDPR data portability)."""
+    from ai_code_assistant.settings import PrivacySettings
+
+    privacy = PrivacySettings()
+    output_path = Path(output) if output else None
+
+    export_file = privacy.export_user_data(output_path)
+    click.echo(f"✅ Data exported to: {export_file}")
+    click.echo("   This file contains all your Cognify AI data including settings and analytics.")
+
+
+@data.command("delete")
+@click.option("--confirm", is_flag=True, help="Confirm deletion")
+@click.pass_context
+def data_delete(ctx, confirm: bool):
+    """Delete all your local data (GDPR right to be forgotten)."""
+    from ai_code_assistant.settings import PrivacySettings
+
+    privacy = PrivacySettings()
+
+    if not confirm:
+        summary = privacy.get_data_summary()
+        click.echo("⚠️  This will delete ALL your Cognify AI data:")
+        click.echo(f"   - Analytics database ({summary.get('total_events', 0)} events)")
+        click.echo("   - Cached credentials")
+        click.echo("   - License information")
+        click.echo("   - Device ID (will be regenerated)")
+        click.echo("\nSettings will be reset to defaults.\n")
+        click.echo("Run with --confirm to proceed:")
+        click.echo("   cognify data delete --confirm")
+        return
+
+    if privacy.delete_all_data(confirm=True):
+        click.echo("✅ All data deleted successfully")
+        click.echo("   Your settings have been reset to defaults.")
+    else:
+        click.echo("❌ Failed to delete data", err=True)
+
+
+# ==================== Auth Commands ====================
+
+@main.group()
+@click.pass_context
+def auth(ctx):
+    """Manage authentication (optional)."""
+    pass
+
+
+@auth.command("status")
+@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.pass_context
+def auth_status(ctx, output_format: str):
+    """Show authentication status."""
+    from ai_code_assistant.auth import get_auth_manager
+
+    manager = get_auth_manager()
+    status = manager.get_auth_status()
+
+    if output_format == "json":
+        click.echo(json.dumps(status, indent=2))
+    else:
+        click.echo("🔐 Authentication Status\n")
+        click.echo(f"   Auth enabled: {'Yes' if status['auth_enabled'] else 'No'}")
+        click.echo(f"   Authenticated: {'Yes' if status['is_authenticated'] else 'No'}")
+        click.echo(f"   Device ID: {status['device_id'][:8]}...")
+
+        if status.get('user'):
+            user = status['user']
+            click.echo(f"\n   User: {user.get('name', 'N/A')}")
+            click.echo(f"   Email: {user.get('email', 'N/A')}")
+        elif status.get('message'):
+            click.echo(f"\n   {status['message']}")
+
+
+@auth.command("login")
+@click.option("--api-key", "-k", help="API key for authentication")
+@click.option("--provider", "-p", type=click.Choice(["github", "google"]), default="github",
+              help="OAuth provider (future feature)")
+@click.pass_context
+def auth_login(ctx, api_key: str, provider: str):
+    """Login to Cognify AI (optional for cloud features)."""
+    from ai_code_assistant.auth import get_auth_manager
+
+    manager = get_auth_manager()
+
+    if api_key:
+        result = manager.login_with_api_key(api_key)
+    else:
+        result = manager.login_oauth(provider)
+
+    if result['success']:
+        click.echo(f"✅ {result['message']}")
+    else:
+        click.echo(f"❌ {result['message']}", err=True)
+
+
+@auth.command("logout")
+@click.pass_context
+def auth_logout(ctx):
+    """Logout from Cognify AI."""
+    from ai_code_assistant.auth import get_auth_manager
+
+    manager = get_auth_manager()
+    result = manager.logout()
+
+    if result['success']:
+        click.echo(f"✅ {result['message']}")
+    else:
+        click.echo(f"❌ {result['message']}", err=True)
+
+
+# ==================== License Commands ====================
+
+@main.group()
+@click.pass_context
+def license(ctx):
+    """Manage license and subscription."""
+    pass
+
+
+@license.command("status")
+@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.pass_context
+def license_status(ctx, output_format: str):
+    """Show license status and usage limits."""
+    from ai_code_assistant.licensing import get_license_manager
+
+    manager = get_license_manager()
+    status = manager.get_license_status()
+
+    if output_format == "json":
+        click.echo(json.dumps(status, indent=2))
+    else:
+        click.echo("📜 License Status\n")
+        click.echo(f"   Tier: {status['tier_display']}")
+        click.echo(f"   Is Paid: {'Yes' if status['is_paid'] else 'No'}")
+
+        # Usage today
+        usage = status.get('usage_today', {})
+        click.echo(f"\n   Usage Today:")
+        click.echo(f"      Commands: {usage.get('commands_today', 0)}")
+        click.echo(f"      LLM calls: {usage.get('llm_calls_today', 0)}")
+
+        # Remaining calls
+        remaining = status.get('remaining_cloud_calls')
+        if remaining is not None:
+            click.echo(f"      Remaining cloud calls: {remaining}")
+        else:
+            click.echo(f"      Cloud calls: Unlimited")
+
+        # Limits
+        limits = status.get('limits', {})
+        click.echo(f"\n   Limits:")
+        for key, value in limits.items():
+            display_value = "Unlimited" if value == -1 else value
+            click.echo(f"      {key}: {display_value}")
+
+
+@license.command("activate")
+@click.argument("license_key")
+@click.pass_context
+def license_activate(ctx, license_key: str):
+    """Activate a license key."""
+    from ai_code_assistant.licensing import get_license_manager
+
+    manager = get_license_manager()
+    result = manager.activate_license(license_key)
+
+    if result['success']:
+        click.echo(f"✅ {result['message']}")
+    else:
+        click.echo(f"❌ {result['message']}", err=True)
+
+
+@license.command("check")
+@click.option("--provider", "-p", default="cloud", help="Provider to check (cloud/local)")
+@click.pass_context
+def license_check(ctx, provider: str):
+    """Check if you can make an API call."""
+    from ai_code_assistant.licensing import get_license_manager
+
+    manager = get_license_manager()
+    result = manager.check_usage_limit(provider)
+
+    if result['allowed']:
+        click.echo(f"✅ {result['message']}")
+    else:
+        click.echo(f"⚠️  {result['message']}")
 
 
 if __name__ == "__main__":

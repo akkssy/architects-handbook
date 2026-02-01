@@ -1,11 +1,15 @@
 """
-AI Code Assistant - An AI-powered code reviewer and generator.
+AI Code Assistant (Cognify AI) - An AI-powered code reviewer and generator.
 
-Uses LangChain for orchestration and Ollama for local LLM inference.
+Uses LangChain for orchestration and supports multiple LLM providers:
+- Ollama (local)
+- OpenAI
+- Google Gemini
+- Groq
 """
 
-__version__ = "0.1.0"
-__author__ = "Developer"
+__version__ = "0.4.0"
+__author__ = "Ashok"
 
 from ai_code_assistant.config import Config, load_config
 from ai_code_assistant.llm import LLMManager

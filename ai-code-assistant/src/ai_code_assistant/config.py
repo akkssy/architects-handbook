@@ -10,6 +10,7 @@ from pydantic_settings import BaseSettings
 
 class LLMConfig(BaseModel):
     """LLM configuration settings."""
+    provider: str = "ollama"  # ollama, openai, google, groq
     model: str = "deepseek-coder:6.7b"
     base_url: str = "http://localhost:11434"
     temperature: float = 0.1

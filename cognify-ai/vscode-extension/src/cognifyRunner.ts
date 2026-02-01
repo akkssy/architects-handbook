@@ -59,6 +59,8 @@ export interface SmartChatOptions {
     history?: ChatMessage[];
     searchContext?: string;  // Semantic search context from index
     systemPrompt?: string;   // Agent-specific system prompt
+    provider?: string;       // LLM provider (ollama, openai, google, groq)
+    model?: string;          // Model name to use
 }
 
 export interface SmartChatResult {
@@ -98,6 +100,75 @@ export interface KnowledgeEntry {
 export interface KnowledgeSearchResult {
     entries: KnowledgeEntry[];
     query: string;
+}
+
+// ==================== Settings & License Interfaces ====================
+
+export interface CognifySettings {
+    version: string;
+    telemetry: {
+        enabled: boolean;
+        share_usage_stats: boolean;
+        share_error_reports: boolean;
+        share_feature_usage: boolean;
+    };
+    analytics: {
+        enabled: boolean;
+        local_only: boolean;
+        retention_days: number;
+    };
+    authentication: {
+        enabled: boolean;
+        auto_login: boolean;
+    };
+    licensing: {
+        tier: string;
+        offline_mode: boolean;
+    };
+    privacy: {
+        anonymize_paths: boolean;
+        collect_code_metrics: boolean;
+    };
+}
+
+export interface LicenseStatus {
+    tier: string;
+    tier_display: string;
+    is_paid: boolean;
+    usage_today: {
+        commands_today: number;
+        llm_calls_today: number;
+    };
+    remaining_cloud_calls: number | null;
+    limits: {
+        daily_cloud_llm_calls: number;
+        daily_local_llm_calls: number;
+        max_agents: number;
+        history_retention_days: number;
+    };
+    license_key_active: boolean;
+}
+
+export interface UsageData {
+    total_events: number;
+    commands_today: number;
+    llm_calls_today: number;
+    daily_stats?: Array<{
+        date: string;
+        commands: number;
+        llm_calls: number;
+    }>;
+}
+
+export interface AuthStatus {
+    enabled: boolean;
+    authenticated: boolean;
+    user?: {
+        id: string;
+        email: string;
+        name: string;
+    };
+    device_id: string;
 }
 
 export class CognifyRunner {
@@ -264,6 +335,13 @@ export class CognifyRunner {
         }
         if (options.systemPrompt) {
             args.push('--system-prompt', options.systemPrompt);
+        }
+        // Pass provider and model from VSCode settings
+        if (options.provider) {
+            args.push('--provider', options.provider);
+        }
+        if (options.model) {
+            args.push('--model', options.model);
         }
 
         const output = await this.runCommand(args);
@@ -587,6 +665,112 @@ export class CognifyRunner {
         }
         const output = await this.runCommand(args);
         return JSON.parse(output);
+    }
+
+    // ==================== Settings & User Management Methods ====================
+
+    /**
+     * Get current Cognify settings
+     */
+    async getSettings(): Promise<CognifySettings> {
+        try {
+            const output = await this.runCommand(['settings', 'show', '--format', 'json']);
+            return JSON.parse(output);
+        } catch (error) {
+            // Return default settings if command fails
+            return {
+                version: '1.0.0',
+                telemetry: { enabled: true, share_usage_stats: true, share_error_reports: true, share_feature_usage: true },
+                analytics: { enabled: true, local_only: true, retention_days: 90 },
+                authentication: { enabled: false, auto_login: false },
+                licensing: { tier: 'free', offline_mode: true },
+                privacy: { anonymize_paths: true, collect_code_metrics: false }
+            };
+        }
+    }
+
+    /**
+     * Update a setting
+     */
+    async updateSetting(key: string, value: string | boolean | number): Promise<boolean> {
+        try {
+            const valueStr = typeof value === 'boolean' ? (value ? 'true' : 'false') : String(value);
+            await this.runCommand(['settings', 'set', key, valueStr]);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Get license status
+     */
+    async getLicenseStatus(): Promise<LicenseStatus> {
+        try {
+            const output = await this.runCommand(['license', 'status', '--format', 'json']);
+            return JSON.parse(output);
+        } catch (error) {
+            // Return default free tier status if command fails
+            return {
+                tier: 'free',
+                tier_display: 'Free',
+                is_paid: false,
+                usage_today: { commands_today: 0, llm_calls_today: 0 },
+                remaining_cloud_calls: 100,
+                limits: { daily_cloud_llm_calls: 100, daily_local_llm_calls: -1, max_agents: 2, history_retention_days: 7 },
+                license_key_active: false
+            };
+        }
+    }
+
+    /**
+     * Check if user can make cloud LLM calls (within limits)
+     */
+    async checkUsageLimit(): Promise<{ allowed: boolean; remaining: number | null; message?: string }> {
+        try {
+            const output = await this.runCommand(['license', 'check', '--format', 'json']);
+            return JSON.parse(output);
+        } catch {
+            return { allowed: true, remaining: null };
+        }
+    }
+
+    /**
+     * Get usage analytics data
+     */
+    async getUsageData(): Promise<UsageData> {
+        try {
+            const output = await this.runCommand(['data', 'show', '--format', 'json']);
+            return JSON.parse(output);
+        } catch {
+            return { total_events: 0, commands_today: 0, llm_calls_today: 0 };
+        }
+    }
+
+    /**
+     * Get authentication status
+     */
+    async getAuthStatus(): Promise<AuthStatus> {
+        try {
+            const output = await this.runCommand(['auth', 'status', '--format', 'json']);
+            return JSON.parse(output);
+        } catch {
+            return { enabled: false, authenticated: false, device_id: 'unknown' };
+        }
+    }
+
+    /**
+     * Toggle analytics on/off
+     */
+    async toggleAnalytics(enabled: boolean): Promise<boolean> {
+        return this.updateSetting('analytics.enabled', enabled);
+    }
+
+    /**
+     * Toggle telemetry on/off
+     */
+    async toggleTelemetry(enabled: boolean): Promise<boolean> {
+        return this.updateSetting('telemetry.enabled', enabled);
     }
 }
 

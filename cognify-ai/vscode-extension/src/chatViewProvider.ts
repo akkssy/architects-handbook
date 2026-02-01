@@ -863,7 +863,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 searchContext: combinedSearchContext || undefined,  // Include both knowledge and codebase search
                 language,
                 history: historyForApi.slice(0, -1),
-                systemPrompt: currentAgent.systemPrompt
+                systemPrompt: currentAgent.systemPrompt,
+                provider: this._currentProvider,  // Pass selected provider to CLI
+                model: this._currentModel          // Pass selected model to CLI
             });
 
             this._conversationHistory.push({
