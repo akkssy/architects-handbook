@@ -508,11 +508,12 @@
                 <li><a href="#features">Features</a></li>
                 <li><a href="#installation">Installation</a></li>
                 <li><a href="#usage">Usage</a></li>
+                <li><a href="#knowledge">Knowledge Base</a></li>
                 <li><a href="#tech">Tech Stack</a></li>
             </ul>
             <div class="nav-right">
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
-                <a href="https://github.com/akkssy/cognify-ai" class="github-btn" target="_blank">
+                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" class="github-btn" target="_blank">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     GitHub
                 </a>
@@ -534,7 +535,7 @@
             </p>
             <div class="hero-buttons">
                 <a href="#installation" class="btn btn-primary">🚀 Get Started</a>
-                <a href="https://github.com/akkssy/cognify-ai" class="btn btn-secondary" target="_blank">
+                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" class="btn btn-secondary" target="_blank">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     View on GitHub
                 </a>
@@ -589,6 +590,16 @@
                     <h3>Codebase Indexing</h3>
                     <p>Create a searchable semantic index of your codebase. Enables fast, intelligent code discovery and context retrieval.</p>
                 </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Automatic Context</h3>
+                    <p>AI automatically retrieves relevant code from your indexed codebase. No manual context selection needed—like Augment Code's context engine.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Knowledge Base</h3>
+                    <p>Build a persistent knowledge base of patterns, decisions, and learnings. Automatically searched and included in AI responses.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -623,10 +634,20 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
+                        <h3>Install from PyPI</h3>
+                        <p>Or install directly from PyPI (recommended).</p>
+                        <div class="code-block">
+                            <code><span class="command">pip install</span> ai-code-assistant</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
                         <h3>Verify Installation</h3>
                         <p>Check that everything is working correctly.</p>
                         <div class="code-block">
-                            <code><span class="command">ai-assist</span> status</code>
+                            <code><span class="command">cognify</span> --help</code>
                         </div>
                     </div>
                 </div>
@@ -647,7 +668,7 @@
                         <h3>Code Review</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Review a single file</span><br><span class="command">ai-assist review</span> path/to/file.py<br><br><span class="comment"># Review with JSON output</span><br><span class="command">ai-assist review</span> src/ --format json</code>
+                        <code><span class="comment"># Review a single file</span><br><span class="command">cognify review</span> path/to/file.py<br><br><span class="comment"># Review with JSON output</span><br><span class="command">cognify review</span> src/ --format json</code>
                     </div>
                 </div>
                 <div class="usage-card">
@@ -656,7 +677,7 @@
                         <h3>Code Generation</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Generate a function</span><br><span class="command">ai-assist generate</span> "binary search" --language python<br><br><span class="comment"># Generate a class</span><br><span class="command">ai-assist generate</span> "REST client" --mode class</code>
+                        <code><span class="comment"># Generate a function</span><br><span class="command">cognify generate</span> "binary search" --language python<br><br><span class="comment"># Generate a class</span><br><span class="command">cognify generate</span> "REST client" --mode class</code>
                     </div>
                 </div>
                 <div class="usage-card">
@@ -665,7 +686,7 @@
                         <h3>Semantic Search</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Index your codebase first</span><br><span class="command">ai-assist index</span> .<br><br><span class="comment"># Search with natural language</span><br><span class="command">ai-assist search</span> "error handling"</code>
+                        <code><span class="comment"># Index your codebase first</span><br><span class="command">cognify index</span> .<br><br><span class="comment"># Search with natural language</span><br><span class="command">cognify search</span> "error handling"</code>
                     </div>
                 </div>
                 <div class="usage-card">
@@ -674,25 +695,63 @@
                         <h3>File Editing</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Preview changes before applying</span><br><span class="command">ai-assist edit</span> config.py "add logging" --preview<br><br><span class="comment"># Edit with backup</span><br><span class="command">ai-assist edit</span> utils.py "add type hints" --backup</code>
+                        <code><span class="comment"># Preview changes before applying</span><br><span class="command">cognify edit</span> config.py "add logging" --preview<br><br><span class="comment"># Edit with backup</span><br><span class="command">cognify edit</span> utils.py "add type hints" --backup</code>
                     </div>
                 </div>
                 <div class="usage-card">
                     <div class="usage-card-header">
-                        <span>🔄</span>
-                        <h3>Multi-File Refactoring</h3>
+                        <span>📚</span>
+                        <h3>Knowledge Base</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Dry run to preview changes</span><br><span class="command">ai-assist refactor</span> "add docstrings" -p "**/*.py" --dry-run<br><br><span class="comment"># Apply with confirmation</span><br><span class="command">ai-assist refactor</span> "convert print to logging" --confirm</code>
+                        <code><span class="comment"># Save patterns & learnings</span><br><span class="command">cognify knowledge save</span> "API Pattern" --content "..." --tags api<br><br><span class="comment"># Search knowledge</span><br><span class="command">cognify knowledge search</span> "authentication"</code>
                     </div>
                 </div>
                 <div class="usage-card">
                     <div class="usage-card-header">
-                        <span>🏷️</span>
-                        <h3>Symbol Renaming</h3>
+                        <span>💬</span>
+                        <h3>Smart Chat</h3>
                     </div>
                     <div class="code-block">
-                        <code><span class="comment"># Rename a function</span><br><span class="command">ai-assist rename</span> old_func new_func --type function<br><br><span class="comment"># Rename a class</span><br><span class="command">ai-assist rename</span> MyClass BetterClass --type class</code>
+                        <code><span class="comment"># Chat with auto-context</span><br><span class="command">cognify smart-chat</span> "How does auth work?"<br><br><span class="comment"># Uses indexed code + knowledge automatically!</span></code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Knowledge Base Section -->
+    <section id="knowledge" class="installation">
+        <div class="container">
+            <h2 class="section-title">📚 Knowledge Base</h2>
+            <p class="section-subtitle">Build a persistent knowledge base that grows smarter over time. Automatically included in AI responses.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">💡</div>
+                    <div class="step-content">
+                        <h3>How It Works</h3>
+                        <p>Knowledge is stored as markdown files in <code>.cognify/knowledge/</code> organized by category. When you chat with the AI, relevant knowledge is automatically retrieved and included in the context.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">📝</div>
+                    <div class="step-content">
+                        <h3>Save Knowledge</h3>
+                        <p>Save patterns, architectural decisions, or important code snippets.</p>
+                        <div class="code-block">
+                            <code><span class="command">cognify knowledge save</span> "Repository Pattern" \<br>  --content "Use repository pattern for data access..." \<br>  --tags architecture --tags patterns \<br>  --category architecture</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">🔍</div>
+                    <div class="step-content">
+                        <h3>Search & List</h3>
+                        <p>Find relevant knowledge or list all entries.</p>
+                        <div class="code-block">
+                            <code><span class="command">cognify knowledge search</span> "authentication" --limit 5<br><span class="command">cognify knowledge list</span> --category patterns<br><span class="command">cognify knowledge stats</span></code>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -725,10 +784,10 @@
             <p>Code Cognition — Your Local AI-Powered Code Assistant</p>
             <p style="font-size: 0.9rem;">Made with ❤️ for developers who value privacy and local AI</p>
             <div class="links">
-                <a href="https://github.com/akkssy/cognify-ai" target="_blank">GitHub</a>
-                <a href="https://github.com/akkssy/cognify-ai#installation" target="_blank">Documentation</a>
-                <a href="https://github.com/akkssy/cognify-ai/issues" target="_blank">Issues</a>
-                <a href="https://github.com/akkssy/cognify-ai/blob/main/LICENSE" target="_blank">MIT License</a>
+                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" target="_blank">GitHub</a>
+                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant#readme" target="_blank">Documentation</a>
+                <a href="https://github.com/akkssy/architects-handbook/issues" target="_blank">Issues</a>
+                <a href="https://pypi.org/project/ai-code-assistant/" target="_blank">PyPI</a>
             </div>
         </div>
     </footer>
