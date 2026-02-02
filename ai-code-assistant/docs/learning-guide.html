@@ -225,6 +225,7 @@
             <li><a href="#concepts">AI Concepts</a></li>
             <li><a href="#architecture">Architecture</a></li>
             <li><a href="#modules">Modules</a></li>
+            <li><a href="#rag">RAG & Vector DB</a></li>
             <li><a href="#code-walkthrough">Code Walkthrough</a></li>
             <li><a href="#user-management">User Management</a></li>
             <li><a href="#hands-on">Hands-On</a></li>
@@ -470,6 +471,77 @@
                     <td>Click library, subcommands, dependency injection</td>
                 </tr>
             </table>
+        </section>
+
+        <!-- RAG & Vector DB Section -->
+        <section id="rag" class="card">
+            <h2>🔍 RAG & Vector Database</h2>
+
+            <p>Cognify AI uses <strong>Retrieval-Augmented Generation (RAG)</strong> to provide context-aware responses by searching your codebase.</p>
+
+            <div class="flow-diagram">
+                <div class="flow-box">Code Files</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="border-color: var(--secondary);">Chunker</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="border-color: var(--warning);">Embeddings</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="border-color: var(--danger);">ChromaDB</div>
+            </div>
+
+            <h3>Key Components</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>File</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>CodeChunker</code></td>
+                        <td>retrieval/chunker.py</td>
+                        <td>Splits code into semantic units (classes, functions)</td>
+                    </tr>
+                    <tr>
+                        <td><code>CodebaseIndexer</code></td>
+                        <td>retrieval/indexer.py</td>
+                        <td>Generates embeddings & stores in ChromaDB</td>
+                    </tr>
+                    <tr>
+                        <td><code>CodebaseSearch</code></td>
+                        <td>retrieval/search.py</td>
+                        <td>Performs semantic similarity search</td>
+                    </tr>
+                    <tr>
+                        <td><code>SentenceTransformer</code></td>
+                        <td>External Library</td>
+                        <td>Generates 384-dimensional embeddings</td>
+                    </tr>
+                    <tr>
+                        <td><code>ChromaDB</code></td>
+                        <td>External Library</td>
+                        <td>Vector database with HNSW indexing</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>CLI Commands</h3>
+<pre><code><span class="comment"># Index your codebase</span>
+$ cognify index .
+
+<span class="comment"># Search for code semantically</span>
+$ cognify search <span class="string">"authentication logic"</span>
+
+<span class="comment"># Smart chat with auto-context</span>
+$ cognify smart-chat <span class="string">"How does user login work?"</span></code></pre>
+
+            <div class="callout info">
+                <strong>📚 Deep Dive Guide</strong><br>
+                For comprehensive learning material on RAG, Vector Databases, Embeddings, Cosine Similarity, and more, see the
+                <a href="RAG_DEEP_DIVE.html" style="color: var(--primary); font-weight: bold;">RAG Deep Dive Guide →</a>
+            </div>
         </section>
 
         <!-- Code Walkthrough Section -->
@@ -806,6 +878,7 @@ PYTHONPATH=src python -m ai_code_assistant.cli review src/ai_code_assistant/conf
 
             <h3>Resources</h3>
             <ul style="margin: 1rem 0 1rem 2rem;">
+                <li><a href="RAG_DEEP_DIVE.html" style="color: var(--primary); font-weight: bold;">📚 RAG Deep Dive Guide</a> — Comprehensive guide on RAG, Vector DBs, Embeddings</li>
                 <li><a href="https://python.langchain.com/docs/" style="color: var(--primary);">LangChain Docs</a></li>
                 <li><a href="https://ollama.ai/library" style="color: var(--primary);">Ollama Models</a></li>
                 <li><a href="https://www.promptingguide.ai/" style="color: var(--primary);">Prompt Engineering Guide</a></li>
