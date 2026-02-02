@@ -1,32 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cognify AI — Your Local AI-Powered Code Assistant</title>
-    <meta name="description" content="A powerful CLI tool that brings AI-powered code cognition to your terminal. Review, generate, search, and refactor code locally with complete privacy.">
+    <title>Cognify AI — AI Code Assistant for CLI & VSCode | Local or Cloud LLMs</title>
+    <meta name="description" content="AI-powered code assistant for your favorite development tools. Review, generate, and refactor code with CLI or VSCode extension. Choose local (Ollama) or cloud (OpenAI, Groq, Gemini) LLMs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
+            --primary-light: #818cf8;
             --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0a0a0f;
+            --bg-alt: #12121a;
+            --bg-card: #1a1a2e;
+            --bg-glass: rgba(26, 26, 46, 0.7);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #2d2d44;
+            --border-glow: rgba(99, 102, 241, 0.3);
+            --code-bg: #0d0d14;
+            --code-text: #e2e8f0;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --glow-primary: 0 0 40px rgba(99, 102, 241, 0.3);
+            --glow-secondary: 0 0 40px rgba(16, 185, 129, 0.3);
+        }
+
+        [data-theme="light"] {
             --bg: #ffffff;
             --bg-alt: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.8);
             --text: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
             --code-bg: #1e293b;
-            --code-text: #e2e8f0;
-            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        }
-
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --bg-alt: #1e293b;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --code-bg: #0f172a;
-            --code-text: #e2e8f0;
         }
 
         * {
@@ -40,17 +55,64 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow-1 {
+            top: -200px;
+            left: -200px;
+            background: var(--primary);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-glow-2 {
+            bottom: -200px;
+            right: -200px;
+            background: #8b5cf6;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px;
+            position: relative;
+            z-index: 1;
         }
 
         /* Navigation */
@@ -59,37 +121,53 @@
             top: 0;
             left: 0;
             right: 0;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
             z-index: 1000;
-            backdrop-filter: blur(10px);
-            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: var(--bg-glass);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
 
-        [data-theme="dark"] nav {
-            background: rgba(15,23,42,0.9);
+        nav.scrolled {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         nav .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 64px;
+            height: 70px;
         }
 
         .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.3rem;
+            font-weight: 800;
             color: var(--text);
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 8px;
             list-style: none;
         }
 
@@ -98,107 +176,189 @@
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
-            transition: color 0.2s;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--text);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 60%;
         }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .theme-toggle {
-            background: none;
-            border: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             cursor: pointer;
-            font-size: 1.25rem;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background 0.2s;
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .theme-toggle:hover {
-            background: var(--bg-alt);
+            border-color: var(--primary);
+            transform: rotate(15deg);
         }
 
         .github-btn {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--text);
-            color: var(--bg);
-            padding: 8px 16px;
-            border-radius: 8px;
+            background: var(--gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
             text-decoration: none;
             font-size: 0.9rem;
-            font-weight: 500;
-            transition: opacity 0.2s;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .github-btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
 
         .mobile-menu {
             display: none;
-            background: none;
-            border: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             font-size: 1.5rem;
             cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--text);
         }
 
         /* Hero Section */
         .hero {
-            padding: 160px 0 100px;
+            padding: 180px 0 120px;
             text-align: center;
-            background: var(--bg-alt);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: var(--bg);
+            gap: 10px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 50px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
-            margin-bottom: 24px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
         }
 
         .hero-badge span {
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 600;
         }
 
+        .hero-badge .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
         .hero-title {
-            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-size: clamp(3rem, 8vw, 5rem);
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero-title .gradient-text {
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 5s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .hero-tagline {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
             color: var(--text-muted);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             font-weight: 500;
+            animation: fadeInUp 0.8s ease 0.2s both;
         }
 
         .hero-description {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: var(--text-muted);
-            max-width: 600px;
+            max-width: 650px;
+            margin: 0 auto 24px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        .hero-manifesto {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
             margin: 0 auto 40px;
+            animation: fadeInUp 0.8s ease 0.35s both;
+            letter-spacing: 0.5px;
         }
 
         .hero-buttons {
@@ -206,58 +366,192 @@
             gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.4s both;
         }
 
         .btn {
-            padding: 14px 28px;
-            border-radius: 10px;
+            padding: 16px 32px;
+            border-radius: 14px;
             font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
             background: var(--gradient);
             color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
         }
 
         .btn-secondary {
-            background: var(--bg);
+            background: var(--bg-card);
             color: var(--text);
             border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
             border-color: var(--primary);
-            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Hero Terminal Preview */
+        .hero-terminal {
+            max-width: 700px;
+            margin: 60px auto 0;
+            animation: fadeInUp 0.8s ease 0.5s both;
+        }
+
+        .terminal-window {
+            background: var(--code-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: var(--bg-card);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ef4444; }
+        .terminal-dot.yellow { background: #f59e0b; }
+        .terminal-dot.green { background: #10b981; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .terminal-prompt {
+            color: var(--secondary);
+            margin-right: 10px;
+            user-select: none;
+        }
+
+        .terminal-command {
+            color: var(--text);
+        }
+
+        .terminal-output {
+            color: var(--text-muted);
+            padding-left: 20px;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--primary);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Section Styles */
         section {
-            padding: 100px 0;
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .section-title {
-            font-size: clamp(1.75rem, 4vw, 2.5rem);
-            font-weight: 700;
-            text-align: center;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
             margin-bottom: 16px;
         }
 
         .section-subtitle {
-            text-align: center;
             color: var(--text-muted);
             max-width: 600px;
-            margin: 0 auto 60px;
+            margin: 0 auto;
             font-size: 1.1rem;
         }
 
@@ -268,43 +562,168 @@
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
         }
 
         .feature-card {
-            background: var(--bg-alt);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 32px;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
         }
 
         .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transform: translateY(-8px);
             border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
+            width: 60px;
+            height: 60px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--gradient);
+            transform: scale(1.1) rotate(5deg);
         }
 
         .feature-card h3 {
             font-size: 1.25rem;
             margin-bottom: 12px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .feature-card p {
             color: var(--text-muted);
             font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            background: var(--bg-alt);
+            overflow: hidden;
+        }
+
+        .flow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 60px;
+        }
+
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            animation: flowFadeIn 0.6s ease forwards;
+        }
+
+        .flow-step:nth-child(1) { animation-delay: 0.1s; }
+        .flow-step:nth-child(2) { animation-delay: 0.2s; }
+        .flow-step:nth-child(3) { animation-delay: 0.3s; }
+        .flow-step:nth-child(4) { animation-delay: 0.4s; }
+        .flow-step:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes flowFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .flow-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .flow-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 28px;
+            background: var(--gradient);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .flow-step:hover .flow-icon {
+            transform: scale(1.1);
+            border-color: transparent;
+        }
+
+        .flow-step:hover .flow-icon::after {
+            opacity: 1;
+        }
+
+        .flow-step h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .flow-step p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 150px;
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { transform: translateX(0); opacity: 0.5; }
+            50% { transform: translateX(5px); opacity: 1; }
         }
 
         /* Installation Section */
         .installation {
-            background: var(--bg-alt);
+            background: var(--bg);
         }
 
         .steps {
@@ -316,25 +735,39 @@
             display: flex;
             gap: 24px;
             margin-bottom: 40px;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: stepSlideIn 0.6s ease forwards;
+        }
+
+        .step:nth-child(1) { animation-delay: 0.1s; }
+        .step:nth-child(2) { animation-delay: 0.2s; }
+        .step:nth-child(3) { animation-delay: 0.3s; }
+        .step:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes stepSlideIn {
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .step-number {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             background: var(--gradient);
             color: white;
-            border-radius: 50%;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             flex-shrink: 0;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
         .step-content h3 {
-            font-size: 1.25rem;
-            margin-bottom: 8px;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .step-content p {
@@ -347,41 +780,66 @@
             background: var(--code-bg);
             color: var(--code-text);
             padding: 20px 24px;
-            border-radius: 12px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            border-radius: 16px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
             overflow-x: auto;
             position: relative;
+            border: 1px solid var(--border);
         }
 
         .code-block code {
             color: var(--code-text);
         }
 
-        .code-block .comment {
-            color: #6b7280;
+        .code-block .comment { color: #6b7280; }
+        .code-block .command { color: #67e8f9; }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .code-block .command {
-            color: #a5f3fc;
+        .copy-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: var(--secondary);
+            color: white;
         }
 
         /* Usage Section */
-        .usage {
-            background: var(--bg);
-        }
+        .usage { background: var(--bg-alt); }
 
         .usage-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
             gap: 24px;
         }
 
         .usage-card {
-            background: var(--bg-alt);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .usage-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .usage-card-header {
@@ -389,134 +847,685 @@
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+            background: rgba(99, 102, 241, 0.05);
         }
 
-        .usage-card-header span {
-            font-size: 1.5rem;
-        }
-
-        .usage-card-header h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+        .usage-card-header span { font-size: 1.6rem; }
+        .usage-card-header h3 { font-size: 1.15rem; font-weight: 700; }
 
         .usage-card .code-block {
             border-radius: 0;
             margin: 0;
+            border: none;
         }
 
-        /* Tech Stack Section */
-        .tech-stack {
-            background: var(--bg-alt);
-        }
+        /* Tech Stack */
+        .tech-stack { background: var(--bg); }
 
         .tech-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            max-width: 900px;
+            gap: 16px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
         .tech-item {
-            background: var(--bg);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 500;
-            transition: all 0.2s;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .tech-item:hover {
             border-color: var(--primary);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
         }
 
         /* Footer */
         footer {
             background: var(--code-bg);
             color: var(--code-text);
-            padding: 60px 0;
-            text-align: center;
+            padding: 80px 0 40px;
+            position: relative;
         }
 
-        footer .logo {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 16px;
-            display: inline-flex;
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient);
         }
 
-        footer p {
-            color: #94a3b8;
-            margin-bottom: 24px;
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
         }
 
-        footer .links {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
+        .footer-brand .logo { color: white; font-size: 1.5rem; margin-bottom: 16px; }
+        .footer-brand p { color: var(--text-muted); margin-bottom: 20px; max-width: 300px; }
 
-        footer .links a {
-            color: #94a3b8;
+        .footer-links h4 { font-size: 1rem; margin-bottom: 20px; color: white; }
+        .footer-links a {
+            display: block;
+            color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.2s;
+            padding: 8px 0;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover { color: var(--primary-light); }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
         }
 
-        footer .links a:hover {
-            color: white;
-        }
+        .footer-bottom p { color: var(--text-muted); font-size: 0.9rem; }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-            }
-
-            .github-btn span {
-                display: none;
-            }
-
-            .step {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .usage-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
+            .nav-links { display: none; }
+            .mobile-menu { display: block; }
+            .github-btn span { display: none; }
+            .step { flex-direction: column; }
+            .usage-grid { grid-template-columns: 1fr; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .flow-container { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .features-grid { grid-template-columns: 1fr; }
         }
-</style>
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            z-index: 999;
+        }
+
+        .mobile-nav.active { display: block; }
+        .mobile-nav a {
+            display: block;
+            padding: 12px 16px;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .mobile-nav a:hover { background: rgba(99, 102, 241, 0.1); }
+
+        /* ===============================
+           NEW SECTIONS: Platform Parity
+           =============================== */
+
+        /* Hero Dual Preview */
+        .hero-previews {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 40px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 900px) {
+            .hero-previews { grid-template-columns: 1fr; }
+        }
+
+        .preview-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .preview-label .badge {
+            background: var(--gradient);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* VSCode Preview */
+        .vscode-window {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--glow-primary), 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+        }
+
+        .vscode-header {
+            background: #323233;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vscode-header .terminal-dot { width: 12px; height: 12px; }
+        .vscode-header .title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .vscode-body {
+            display: flex;
+            min-height: 200px;
+        }
+
+        .vscode-sidebar {
+            width: 48px;
+            background: #252526;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            gap: 16px;
+        }
+
+        .vscode-sidebar-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            font-size: 1rem;
+        }
+
+        .vscode-sidebar-icon.active {
+            opacity: 1;
+            border-left: 2px solid var(--primary);
+            margin-left: -2px;
+        }
+
+        .vscode-content {
+            flex: 1;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #d4d4d4;
+            line-height: 1.5;
+        }
+
+        .vscode-chat {
+            background: #252526;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .vscode-chat-msg {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .vscode-chat-msg.user { justify-content: flex-end; }
+        .vscode-chat-msg .bubble {
+            background: #3c3c3c;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 85%;
+            font-size: 0.75rem;
+        }
+        .vscode-chat-msg.user .bubble {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Platforms Section */
+        .platforms { padding: 100px 0; }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 900px) {
+            .platforms-grid { grid-template-columns: 1fr; }
+        }
+
+        .platform-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .platform-card:hover::before { transform: scaleX(1); }
+        .platform-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--glow-primary);
+            border-color: var(--primary);
+        }
+
+        .platform-card.coming-soon {
+            opacity: 0.7;
+            background: var(--bg-card);
+        }
+
+        .platform-card.coming-soon::before {
+            background: var(--gradient-accent);
+        }
+
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .platform-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .platform-card p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .platform-features {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .platform-features li {
+            list-style: none;
+            padding: 8px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .platform-features li::before {
+            content: '✓';
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .platform-card .btn {
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .coming-badge {
+            background: var(--gradient-accent);
+            color: white;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        /* LLM Providers Section */
+        .providers {
+            padding: 100px 0;
+            background: var(--bg-alt);
+        }
+
+        .providers-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 50px;
+            color: var(--text-muted);
+        }
+
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .providers-grid { grid-template-columns: 1fr; }
+        }
+
+        .provider-group {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .provider-group h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .provider-group .icon {
+            font-size: 1.5rem;
+        }
+
+        .provider-group p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .provider-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .provider-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .provider-item .name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .provider-item .tag {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .provider-item .tag.free { background: var(--secondary); }
+        .provider-item .tag.fast { background: var(--accent); }
+
+        /* Platform Badges on Feature Cards */
+        .platform-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .platform-badge {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .platform-badge.vscode {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--secondary);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .platform-badge.na {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        /* Comparison Table */
+        .comparison { padding: 100px 0; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 50px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table thead {
+            background: var(--bg-card);
+        }
+
+        .comparison-table th {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .comparison-table th:not(:first-child) {
+            text-align: center;
+        }
+
+        .comparison-table td:not(:first-child) {
+            text-align: center;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .comparison-table .check { color: var(--secondary); font-size: 1.25rem; }
+        .comparison-table .cross { color: var(--text-muted); opacity: 0.5; }
+
+        .comparison-table .feature-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-table .category-row {
+            background: var(--bg-alt);
+            font-weight: 600;
+        }
+
+        /* Tabbed Getting Started */
+        .tabs-container {
+            margin-top: 40px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .tab-btn {
+            padding: 16px 32px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover { color: var(--text); }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .tab-content.active { display: block; }
+
+        /* Roadmap Section */
+        .roadmap {
+            padding: 100px 0;
+            background: var(--bg-alt);
+        }
+
+        .roadmap-timeline {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .roadmap-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .roadmap-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            right: -30px;
+            width: 60px;
+            height: 2px;
+            background: var(--border);
+        }
+
+        .roadmap-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-item.available .roadmap-icon {
+            background: var(--gradient);
+            border-color: transparent;
+        }
+
+        .roadmap-item.coming .roadmap-icon {
+            border-color: var(--accent);
+            border-style: dashed;
+        }
+
+        .roadmap-item h4 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .roadmap-item .status {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .roadmap-item.available .status { color: var(--secondary); }
+        .roadmap-item.coming .status { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .roadmap-timeline { flex-direction: column; align-items: center; }
+            .roadmap-item:not(:last-child)::after { display: none; }
+        }
+    </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#platforms" onclick="toggleMenu()">Platforms</a>
+        <a href="#providers" onclick="toggleMenu()">LLM Providers</a>
+        <a href="#features" onclick="toggleMenu()">Features</a>
+        <a href="#comparison" onclick="toggleMenu()">Compare</a>
+        <a href="#getting-started" onclick="toggleMenu()">Get Started</a>
+        <a href="#roadmap" onclick="toggleMenu()">Roadmap</a>
+    </div>
+
     <nav>
         <div class="container">
-            <a href="#" class="logo">🧠 Cognify AI</a>
+            <a href="#" class="logo"><span class="logo-icon">🧠</span> Cognify AI</a>
             <ul class="nav-links">
+                <li><a href="#platforms">Platforms</a></li>
+                <li><a href="#providers">Providers</a></li>
                 <li><a href="#features">Features</a></li>
-                <li><a href="#installation">Installation</a></li>
-                <li><a href="#usage">Usage</a></li>
-                <li><a href="#knowledge">Knowledge Base</a></li>
-                <li><a href="#vscode">VSCode</a></li>
-                <li><a href="#tech">Tech Stack</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="#getting-started">Get Started</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
             </ul>
             <div class="nav-right">
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
                 <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" class="github-btn" target="_blank">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    GitHub
+                    <span>GitHub</span>
                 </a>
                 <button class="mobile-menu" onclick="toggleMenu()">☰</button>
             </div>
@@ -526,20 +1535,203 @@
     <section class="hero">
         <div class="container">
             <div class="hero-badge">
-                <span>✨ 100% Local & Private</span> — No API keys required for local LLMs
+                <div class="pulse-dot"></div>
+                <span>Model-Agnostic</span> — Local or Cloud, Your Choice
             </div>
-            <h1 class="hero-title">🧠 Cognify AI</h1>
-            <p class="hero-tagline">Code Cognition — Your Local AI-Powered Code Assistant</p>
+            <h1 class="hero-title"><span class="gradient-text">Cognify AI</span></h1>
+            <p class="hero-tagline">A model-agnostic AI code assistant for VS Code and the CLI</p>
             <p class="hero-description">
-                A powerful CLI tool + VSCode extension that brings AI-powered code cognition to your workflow.<br>
-                Review code, generate functions, search semantically, and refactor projects—with <strong>multiple LLM providers</strong> (Ollama, OpenAI, Groq, Gemini).
+                Built for developers who want <strong>flexibility and control</strong>.
+                Review code, generate functions, refactor projects, and search semantically.
+                Run locally with <strong>Ollama</strong> for privacy, or connect to cloud LLMs like <strong>OpenAI, Groq, and Gemini</strong>.
             </p>
+            <p class="hero-manifesto">No lock-in. No forced cloud. Built for real codebases.</p>
             <div class="hero-buttons">
-                <a href="#installation" class="btn btn-primary">🚀 Get Started</a>
-                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" class="btn btn-secondary" target="_blank">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    View on GitHub
-                </a>
+                <a href="#getting-started" class="btn btn-primary">💻 Get CLI</a>
+                <a href="#getting-started" class="btn btn-secondary">🧩 Get VSCode Extension</a>
+            </div>
+
+            <!-- Dual Preview: Terminal + VSCode Side by Side -->
+            <div class="hero-previews">
+                <!-- CLI Terminal Preview -->
+                <div class="hero-preview-item">
+                    <div class="preview-label">
+                        <span>💻 Command Line Interface</span>
+                        <span class="badge">CLI</span>
+                    </div>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                            <span class="terminal-title">cognify — zsh</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span>
+                                <span class="terminal-command">cognify review src/app.py</span>
+                            </div>
+                            <div class="terminal-output">🔍 Analyzing code for issues...</div>
+                            <div class="terminal-output">✅ Found 3 suggestions</div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span>
+                                <span class="terminal-command">cognify chat</span>
+                            </div>
+                            <div class="terminal-output">💬 Using Groq (llama3)...</div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span>
+                                <span class="typing-cursor"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VSCode Preview -->
+                <div class="hero-preview-item">
+                    <div class="preview-label">
+                        <span>🧩 Visual Studio Code</span>
+                        <span class="badge">Extension</span>
+                    </div>
+                    <div class="vscode-window">
+                        <div class="vscode-header">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                            <span class="title">app.py — Cognify AI</span>
+                        </div>
+                        <div class="vscode-body">
+                            <div class="vscode-sidebar">
+                                <div class="vscode-sidebar-icon">📁</div>
+                                <div class="vscode-sidebar-icon">🔍</div>
+                                <div class="vscode-sidebar-icon active">🧠</div>
+                                <div class="vscode-sidebar-icon">⚙️</div>
+                            </div>
+                            <div class="vscode-content">
+                                <div class="vscode-chat">
+                                    <div class="vscode-chat-msg user">
+                                        <div class="bubble">Add error handling to this function</div>
+                                    </div>
+                                    <div class="vscode-chat-msg">
+                                        <div class="bubble">I'll add try-catch blocks and input validation. Here's the updated code...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms Section -->
+    <section id="platforms" class="platforms">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🚀 Choose Your Platform</span>
+                <h2 class="section-title">One AI, Multiple Ways to Access</h2>
+                <p class="section-subtitle">Whether you prefer command line or IDE integration, Cognify AI has you covered.</p>
+            </div>
+
+            <div class="platforms-grid">
+                <!-- CLI Card -->
+                <div class="platform-card">
+                    <div class="platform-icon">💻</div>
+                    <h3>Command Line Interface</h3>
+                    <p>Full-featured CLI for terminal enthusiasts. Perfect for automation, scripting, and CI/CD pipelines.</p>
+                    <ul class="platform-features">
+                        <li>Code review, generation & editing</li>
+                        <li>Semantic search & indexing</li>
+                        <li>Multi-file refactoring</li>
+                        <li>Git integration</li>
+                        <li>Interactive chat mode</li>
+                    </ul>
+                    <a href="#getting-started" class="btn btn-primary">pip install cognify-code</a>
+                </div>
+
+                <!-- VSCode Card -->
+                <div class="platform-card">
+                    <div class="platform-icon">🧩</div>
+                    <h3>VSCode Extension</h3>
+                    <p>Deep IDE integration with inline diagnostics, keyboard shortcuts, and a chat sidebar.</p>
+                    <ul class="platform-features">
+                        <li>Code review, generation & editing</li>
+                        <li>Semantic search & indexing</li>
+                        <li>Inline diagnostics & hints</li>
+                        <li>Context menu integration</li>
+                        <li>Interactive chat panel</li>
+                    </ul>
+                    <a href="#getting-started" class="btn btn-secondary">Install Extension</a>
+                </div>
+
+                <!-- Coming Soon Card -->
+                <div class="platform-card coming-soon">
+                    <span class="coming-badge">Coming Soon</span>
+                    <div class="platform-icon">🔮</div>
+                    <h3>More IDEs</h3>
+                    <p>We're expanding to bring Cognify AI to your favorite development tools.</p>
+                    <ul class="platform-features">
+                        <li>JetBrains IDEs (IntelliJ, PyCharm, WebStorm)</li>
+                        <li>Neovim & Vim</li>
+                        <li>Emacs</li>
+                        <li>Sublime Text</li>
+                        <li>Cursor AI Editor</li>
+                    </ul>
+                    <a href="#roadmap" class="btn btn-secondary">View Roadmap</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LLM Providers Section -->
+    <section id="providers" class="providers">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🔓 No Vendor Lock-In</span>
+                <h2 class="section-title">One Tool, Many AI Backends</h2>
+                <p class="section-subtitle">The freedom to choose the right AI for every task—without changing your workflow.</p>
+            </div>
+
+            <p class="providers-intro">
+                Why settle for one AI provider? Cognify AI connects to <strong>local and cloud LLMs</strong> seamlessly,
+                giving you the flexibility to optimize for <strong>privacy, speed, or cost</strong>—whatever matters most for your project.
+            </p>
+
+            <div class="providers-grid">
+                <!-- Local Providers -->
+                <div class="provider-group">
+                    <h3><span class="icon">🏠</span> Local</h3>
+                    <p>Complete privacy. Zero cost. Works offline.</p>
+                    <div class="provider-list">
+                        <div class="provider-item">
+                            <span class="name">🦙 Ollama</span>
+                            <span class="tag free">Free</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloud Providers -->
+                <div class="provider-group">
+                    <h3><span class="icon">☁️</span> Cloud</h3>
+                    <p>Maximum power. Instant responses. Latest models.</p>
+                    <div class="provider-list">
+                        <div class="provider-item">
+                            <span class="name">⚡ Groq</span>
+                            <span class="tag fast">Fast</span>
+                        </div>
+                        <div class="provider-item">
+                            <span class="name">🔮 OpenAI</span>
+                        </div>
+                        <div class="provider-item">
+                            <span class="name">💎 Gemini</span>
+                        </div>
+                        <div class="provider-item">
+                            <span class="name">🧠 Cerebras</span>
+                        </div>
+                        <div class="provider-item">
+                            <span class="name">🌐 OpenRouter</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -547,123 +1739,357 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">✨ Powerful Features</h2>
-            <p class="section-subtitle">Everything you need to supercharge your development workflow, running entirely on your local machine.</p>
+            <div class="section-header">
+                <span class="section-badge">✨ Features</span>
+                <h2 class="section-title">Powerful Capabilities</h2>
+                <p class="section-subtitle">Everything you need to supercharge your development workflow—on your terms.</p>
+            </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🔍</div>
                     <h3>Code Review</h3>
                     <p>Analyze code for bugs, security vulnerabilities, performance issues, and style problems. Get actionable suggestions with severity levels.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <h3>Code Generation</h3>
                     <p>Generate functions, classes, scripts, and unit tests from natural language descriptions. Includes type hints and docstrings.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔎</div>
                     <h3>Semantic Search</h3>
                     <p>Search your codebase using natural language queries. Powered by RAG (Retrieval Augmented Generation) for intelligent results.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📝</div>
                     <h3>AI File Editing</h3>
                     <p>Edit files with natural language instructions. Preview changes before applying, with automatic backup support.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
                     <h3>Multi-File Refactoring</h3>
                     <p>Refactor across multiple files at once. Add docstrings, convert patterns, or apply consistent changes project-wide.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode na">VSCode</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🏷️</div>
                     <h3>Symbol Renaming</h3>
                     <p>Rename functions, classes, and variables across your entire project. Smart detection ensures all references are updated.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode na">VSCode</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">💬</div>
                     <h3>Interactive Chat</h3>
                     <p>Have conversations with AI about your code. Ask questions, get explanations, and receive suggestions interactively.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
                     <h3>Codebase Indexing</h3>
                     <p>Create a searchable semantic index of your codebase. Enables fast, intelligent code discovery and context retrieval.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🎯</div>
                     <h3>Automatic Context</h3>
-                    <p>AI automatically retrieves relevant code from your indexed codebase. No manual context selection needed—like Augment Code's context engine.</p>
+                    <p>AI automatically retrieves relevant code from your indexed codebase. No manual context selection needed.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📚</div>
                     <h3>Knowledge Base</h3>
                     <p>Build a persistent knowledge base of patterns, decisions, and learnings. Automatically searched and included in AI responses.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🤖</div>
                     <h3>Multi-Agent System</h3>
                     <p>5 specialized AI agents: General Assistant, Code Reviewer, Code Generator, Documentation Writer, and Test Writer.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚙️</div>
-                    <h3>Settings & Privacy</h3>
-                    <p>Fully configurable analytics and telemetry. Toggle features on/off. Local-first, privacy-respecting data collection.</p>
+                    <div class="feature-icon">🖱️</div>
+                    <h3>Context Menu & Shortcuts</h3>
+                    <p>Right-click to access AI actions. Use keyboard shortcuts for quick commands. Deep IDE integration.</p>
+                    <div class="platform-badges"><span class="platform-badge na">CLI</span><span class="platform-badge vscode">VSCode ✓</span></div>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📜</div>
-                    <h3>License Management</h3>
-                    <p>Free tier with 100 cloud LLM calls/day. Pro tier for unlimited access. Local Ollama always unlimited.</p>
+                    <div class="feature-icon">🔔</div>
+                    <h3>Inline Diagnostics</h3>
+                    <p>See code review issues directly in your editor with inline hints, warnings, and suggestions.</p>
+                    <div class="platform-badges"><span class="platform-badge na">CLI</span><span class="platform-badge vscode">VSCode ✓</span></div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Git Integration</h3>
+                    <p>AI-generated commit messages, automatic staging, and push support. Streamline your Git workflow.</p>
+                    <div class="platform-badges"><span class="platform-badge">CLI ✓</span><span class="platform-badge vscode na">VSCode</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Installation Section -->
-    <section id="installation" class="installation">
+    <!-- Comparison Table Section -->
+    <section id="comparison" class="comparison">
         <div class="container">
-            <h2 class="section-title">🚀 Quick Start</h2>
-            <p class="section-subtitle">Get up and running in minutes with these simple steps.</p>
+            <div class="section-header">
+                <span class="section-badge">📊 Platform Comparison</span>
+                <h2 class="section-title">Feature Matrix</h2>
+                <p class="section-subtitle">See exactly what's available on each platform</p>
+            </div>
 
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3>Install Ollama</h3>
-                        <p>Download and install Ollama from the official website to run LLMs locally.</p>
-                        <div class="code-block">
-                            <code><span class="comment"># Download from https://ollama.ai</span><br><span class="command">ollama pull deepseek-coder:6.7b</span></code>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>💻 CLI</th>
+                        <th>🧩 VSCode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="category-row"><td colspan="3">🤖 AI Capabilities</td></tr>
+                    <tr><td class="feature-name"><span>🔍</span> Code Review</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>⚡</span> Code Generation</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>📝</span> Code Editing</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>💡</span> Code Explanation</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>💬</span> Interactive Chat</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🤖</span> Multi-Agent System</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+
+                    <tr class="category-row"><td colspan="3">🔎 Search & Context</td></tr>
+                    <tr><td class="feature-name"><span>🔎</span> Semantic Search</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>📊</span> Codebase Indexing</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🎯</span> Automatic Context</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>📚</span> Knowledge Base</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+
+                    <tr class="category-row"><td colspan="3">🔧 Advanced Features</td></tr>
+                    <tr><td class="feature-name"><span>🔄</span> Multi-File Refactoring</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+                    <tr><td class="feature-name"><span>🏷️</span> Symbol Renaming</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+                    <tr><td class="feature-name"><span>🔗</span> Git Integration</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+                    <tr><td class="feature-name"><span>🔔</span> Inline Diagnostics</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🖱️</span> Context Menu</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>⌨️</span> Keyboard Shortcuts</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+
+                    <tr class="category-row"><td colspan="3">🤖 LLM Providers (All supported equally)</td></tr>
+                    <tr><td class="feature-name"><span>🦙</span> Ollama (Local)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>⚡</span> Groq</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🔮</span> OpenAI</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>💎</span> Google Gemini</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🧠</span> Cerebras</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                    <tr><td class="feature-name"><span>🌐</span> OpenRouter</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">⚡ Simple & Powerful</span>
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">From your command to intelligent code assistance in seconds</p>
+            </div>
+
+            <div class="flow-container">
+                <div class="flow-step">
+                    <div class="flow-icon">💻</div>
+                    <h4>Your Code</h4>
+                    <p>Any file, any language</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon">🔍</div>
+                    <h4>Cognify AI</h4>
+                    <p>CLI or VSCode</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon">🧠</div>
+                    <h4>LLM Processing</h4>
+                    <p>Local or Cloud</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon">✨</div>
+                    <h4>Smart Results</h4>
+                    <p>Reviews, code, answers</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section id="getting-started" class="installation">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🚀 Quick Start</span>
+                <h2 class="section-title">Get Started in Minutes</h2>
+                <p class="section-subtitle">Choose your platform and preferred LLM provider. Both local and cloud options available.</p>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('cli')">💻 CLI</button>
+                    <button class="tab-btn" onclick="showTab('vscode')">🧩 VSCode Extension</button>
+                    <button class="tab-btn" onclick="showTab('providers')">🤖 Configure Provider</button>
+                </div>
+
+                <!-- CLI Tab -->
+                <div id="tab-cli" class="tab-content active">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Install Cognify CLI</h3>
+                                <p>Install directly from PyPI (recommended).</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code>pip install cognify-code</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Choose Your LLM (Local OR Cloud)</h3>
+                                <p>Option A: <strong>Local with Ollama</strong> (free, private, offline)</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># Install Ollama from ollama.ai, then:
+ollama pull deepseek-coder:6.7b</code>
+                                </div>
+                                <p style="margin-top: 16px;">Option B: <strong>Cloud with Groq</strong> (fast, free tier)</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># Set your API key (get free at console.groq.com)
+export GROQ_API_KEY=your_key_here</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Start Using!</h3>
+                                <p>Review code, generate functions, or start chatting.</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># With local Ollama
+cognify review src/app.py
+
+# Or with Groq (cloud)
+cognify review src/app.py --provider groq</code>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3>Clone & Install</h3>
-                        <p>Clone the repository and install the package in a virtual environment.</p>
-                        <div class="code-block">
-                            <code><span class="command">git clone</span> https://github.com/akkssy/cognify-ai.git<br><span class="command">cd</span> cognify-ai<br><span class="command">python -m venv</span> .venv<br><span class="command">source</span> .venv/bin/activate<br><span class="command">pip install -e</span> .</code>
+
+                <!-- VSCode Tab -->
+                <div id="tab-vscode" class="tab-content">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Install Prerequisites</h3>
+                                <p>The extension requires the CLI backend.</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code>pip install cognify-code</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Install VSCode Extension</h3>
+                                <p>Install from the VSCode marketplace or build from source:</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># From VSCode Marketplace (coming soon)
+# Or build from source:
+cd vscode-extension && npm install
+npm run compile && npx vsce package</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Configure Provider</h3>
+                                <p>Open VSCode Settings (Cmd+,) and search for "Cognify":</p>
+                                <ul style="margin-top: 8px; margin-left: 20px; color: var(--text-muted);">
+                                    <li><code>cognify.provider</code>: ollama, groq, openai, google, cerebras</li>
+                                    <li><code>cognify.model</code>: deepseek-coder:6.7b, llama3, gpt-4o, etc.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Start Using!</h3>
+                                <p>Use keyboard shortcuts or the command palette:</p>
+                                <ul style="margin-top: 8px; margin-left: 20px; color: var(--text-muted);">
+                                    <li><strong>Cmd+Shift+R</strong> — Review current file</li>
+                                    <li><strong>Cmd+Shift+G</strong> — Generate code</li>
+                                    <li><strong>Cmd+Shift+C</strong> — Open chat panel</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3>Install from PyPI</h3>
-                        <p>Or install directly from PyPI (recommended).</p>
-                        <div class="code-block">
-                            <code><span class="command">pip install</span> ai-code-assistant</code>
+
+                <!-- Provider Tab -->
+                <div id="tab-providers" class="tab-content">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">🏠</div>
+                            <div class="step-content">
+                                <h3>Local: Ollama (Recommended for Privacy)</h3>
+                                <p>100% free, runs on your machine, no internet required.</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># Install from ollama.ai, then pull a model
+ollama pull deepseek-coder:6.7b
+
+# Use with CLI
+cognify review code.py --provider ollama --model deepseek-coder:6.7b</code>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3>Verify Installation</h3>
-                        <p>Check that everything is working correctly.</p>
-                        <div class="code-block">
-                            <code><span class="command">cognify</span> --help</code>
+                        <div class="step">
+                            <div class="step-number">⚡</div>
+                            <div class="step-content">
+                                <h3>Cloud: Groq (Recommended for Speed)</h3>
+                                <p>Ultra-fast inference, generous free tier.</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code>export GROQ_API_KEY=your_key_here
+
+cognify review code.py --provider groq --model llama3-70b-8192</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">🔮</div>
+                            <div class="step-content">
+                                <h3>More Cloud Options</h3>
+                                <p>OpenAI, Google Gemini, Cerebras, OpenRouter are all supported.</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                    <code># OpenAI
+export OPENAI_API_KEY=your_key
+cognify chat --provider openai --model gpt-4o
+
+# Google Gemini
+export GOOGLE_API_KEY=your_key
+cognify chat --provider google --model gemini-pro</code>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -674,8 +2100,11 @@
     <!-- Usage Section -->
     <section id="usage" class="usage">
         <div class="container">
-            <h2 class="section-title">📖 Usage Examples</h2>
-            <p class="section-subtitle">Powerful commands at your fingertips. Here's what you can do with Cognify AI.</p>
+            <div class="section-header">
+                <span class="section-badge">📖 Examples</span>
+                <h2 class="section-title">Command Reference</h2>
+                <p class="section-subtitle">Powerful commands at your fingertips. Here's what you can do with Cognify AI.</p>
+            </div>
 
             <div class="usage-grid">
                 <div class="usage-card">
@@ -783,37 +2212,39 @@
         </div>
     </section>
 
-    <!-- VSCode Extension Section -->
-    <section id="vscode" class="installation">
+    <!-- Roadmap Section -->
+    <section id="roadmap" class="roadmap">
         <div class="container">
-            <h2 class="section-title">💻 VSCode Extension</h2>
-            <p class="section-subtitle">Seamless integration with Visual Studio Code for a streamlined development workflow.</p>
-
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">🎯</div>
-                    <div class="step-content">
-                        <h3>Key Features</h3>
-                        <p>The VSCode extension brings all Cognify AI features directly into your editor:</p>
-                        <ul style="margin-top: 1rem; margin-left: 1.5rem;">
-                            <li><strong>Multi-Agent Chat Panel</strong> — Choose from 5 specialized AI agents</li>
-                            <li><strong>Multiple Chat Sessions</strong> — Create, switch, and rename sessions</li>
-                            <li><strong>Code Review</strong> — Review files and selections with inline diagnostics</li>
-                            <li><strong>Code Generation</strong> — Generate code from natural language</li>
-                            <li><strong>License Status Bar</strong> — See remaining cloud calls at a glance</li>
-                            <li><strong>Settings Management</strong> — Toggle analytics and telemetry from VSCode</li>
-                        </ul>
-                    </div>
+            <div class="section-header">
+                <span class="section-badge">🔮 Future Integrations</span>
+                <h2 class="section-title">Expanding to More Platforms</h2>
+                <p class="section-subtitle">We're bringing Cognify AI to your favorite development tools</p>
+            </div>
+            <div class="roadmap-timeline">
+                <div class="roadmap-item available">
+                    <div class="roadmap-icon">💻</div>
+                    <h4>CLI</h4>
+                    <p class="status">Available Now</p>
                 </div>
-                <div class="step">
-                    <div class="step-number">📦</div>
-                    <div class="step-content">
-                        <h3>Installation</h3>
-                        <p>Install from the VSCode marketplace or build from source:</p>
-                        <div class="code-block">
-                            <code><span class="comment"># From source</span><br><span class="command">cd</span> vscode-extension<br><span class="command">npm install</span><br><span class="command">npm run compile</span><br><span class="command">npx vsce package</span></code>
-                        </div>
-                    </div>
+                <div class="roadmap-item available">
+                    <div class="roadmap-icon">🧩</div>
+                    <h4>VSCode</h4>
+                    <p class="status">Available Now</p>
+                </div>
+                <div class="roadmap-item coming">
+                    <div class="roadmap-icon">🚀</div>
+                    <h4>JetBrains</h4>
+                    <p class="status">Coming Soon</p>
+                </div>
+                <div class="roadmap-item coming">
+                    <div class="roadmap-icon">📝</div>
+                    <h4>Neovim</h4>
+                    <p class="status">Coming Soon</p>
+                </div>
+                <div class="roadmap-item coming">
+                    <div class="roadmap-icon">⚡</div>
+                    <h4>Emacs</h4>
+                    <p class="status">Coming Soon</p>
                 </div>
             </div>
         </div>
@@ -822,22 +2253,25 @@
     <!-- Tech Stack Section -->
     <section id="tech" class="tech-stack">
         <div class="container">
-            <h2 class="section-title">🛠️ Tech Stack</h2>
-            <p class="section-subtitle">Built with modern, reliable technologies for the best developer experience.</p>
+            <div class="section-header">
+                <span class="section-badge">🛠️ Technology</span>
+                <h2 class="section-title">Built With Modern Tech</h2>
+                <p class="section-subtitle">Reliable, battle-tested technologies for the best developer experience.</p>
+            </div>
 
             <div class="tech-grid">
-                <div class="tech-item">🦜 LangChain</div>
-                <div class="tech-item">🦙 Ollama</div>
-                <div class="tech-item">🤖 OpenAI</div>
-                <div class="tech-item">⚡ Groq</div>
-                <div class="tech-item">💎 Gemini</div>
-                <div class="tech-item">🗄️ ChromaDB</div>
-                <div class="tech-item">🤗 Sentence Transformers</div>
-                <div class="tech-item">🖱️ Click</div>
-                <div class="tech-item">✨ Rich</div>
-                <div class="tech-item">📋 Pydantic</div>
-                <div class="tech-item">💾 SQLite</div>
-                <div class="tech-item">🧪 Pytest</div>
+                <div class="tech-item"><span class="tech-icon">🦜</span> LangChain</div>
+                <div class="tech-item"><span class="tech-icon">🦙</span> Ollama</div>
+                <div class="tech-item"><span class="tech-icon">🤖</span> OpenAI</div>
+                <div class="tech-item"><span class="tech-icon">⚡</span> Groq</div>
+                <div class="tech-item"><span class="tech-icon">💎</span> Gemini</div>
+                <div class="tech-item"><span class="tech-icon">🗄️</span> ChromaDB</div>
+                <div class="tech-item"><span class="tech-icon">🤗</span> Sentence Transformers</div>
+                <div class="tech-item"><span class="tech-icon">🖱️</span> Click CLI</div>
+                <div class="tech-item"><span class="tech-icon">✨</span> Rich</div>
+                <div class="tech-item"><span class="tech-icon">📋</span> Pydantic</div>
+                <div class="tech-item"><span class="tech-icon">💾</span> SQLite</div>
+                <div class="tech-item"><span class="tech-icon">🧪</span> Pytest</div>
             </div>
         </div>
     </section>
@@ -845,19 +2279,44 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <a href="#" class="logo">🧠 Cognify AI</a>
-            <p>Code Cognition — Your Local AI-Powered Code Assistant</p>
-            <p style="font-size: 0.9rem;">Made with ❤️ for developers who value privacy and local AI</p>
-            <div class="links">
-                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" target="_blank">GitHub</a>
-                <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant#readme" target="_blank">Documentation</a>
-                <a href="https://github.com/akkssy/architects-handbook/issues" target="_blank">Issues</a>
-                <a href="https://pypi.org/project/ai-code-assistant/" target="_blank">PyPI</a>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#" class="logo">🧠 Cognify AI</a>
+                    <p>AI-powered code assistant for CLI and VSCode. Choose local (Ollama) or cloud (OpenAI, Groq, Gemini) LLMs. Your choice, your workflow.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platforms</h4>
+                    <a href="#platforms">CLI</a>
+                    <a href="#platforms">VSCode</a>
+                    <a href="#roadmap">Roadmap</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#comparison">Compare</a>
+                    <a href="#providers">LLM Providers</a>
+                    <a href="#getting-started">Get Started</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant#readme" target="_blank">Documentation</a>
+                    <a href="https://github.com/akkssy/architects-handbook/tree/main/ai-code-assistant" target="_blank">GitHub</a>
+                    <a href="https://pypi.org/project/cognify-code/" target="_blank">PyPI Package</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Community</h4>
+                    <a href="https://github.com/akkssy/architects-handbook/issues" target="_blank">Report Issues</a>
+                    <a href="https://github.com/akkssy/architects-handbook/discussions" target="_blank">Discussions</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Made with ❤️ for developers who value flexibility and choice © 2025</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Theme Toggle
         function toggleTheme() {
             const html = document.documentElement;
             const current = html.getAttribute('data-theme');
@@ -867,12 +2326,67 @@
             localStorage.setItem('theme', next);
         }
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        if (savedTheme === 'dark') {
-            document.querySelector('.theme-toggle').textContent = '☀️';
+        // Mobile Menu Toggle
+        function toggleMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.classList.toggle('active');
         }
+
+        // Copy Code to Clipboard
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = '📋 Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Tab Switching for Getting Started section
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById('tab-' + tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Activate clicked button (find by tab name)
+            tabButtons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(tabName.toLowerCase()) ||
+                    (tabName === 'cli' && btn.textContent.includes('CLI')) ||
+                    (tabName === 'vscode' && btn.textContent.includes('VSCode')) ||
+                    (tabName === 'providers' && btn.textContent.includes('Provider'))) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Load saved theme (default to dark)
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
     </script>
 </body>
 </html>
