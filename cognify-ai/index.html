@@ -1288,6 +1288,74 @@
         .provider-item .tag.free { background: var(--secondary); }
         .provider-item .tag.fast { background: var(--accent); }
 
+        /* Why Cognify Section */
+        .why-cognify {
+            padding: 80px 0;
+            background: var(--bg);
+        }
+
+        .why-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .why-quote {
+            font-size: 1.35rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 32px;
+            font-style: italic;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .why-quote::before,
+        .why-quote::after {
+            content: '"';
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.3;
+            position: absolute;
+            font-family: Georgia, serif;
+        }
+
+        .why-quote::before {
+            top: -20px;
+            left: 0;
+        }
+
+        .why-quote::after {
+            bottom: -40px;
+            right: 0;
+        }
+
+        .why-highlight {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        .why-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .why-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
         /* Platform Badges on Feature Cards */
         .platform-badges {
             display: flex;
@@ -1731,6 +1799,23 @@
                             <span class="name">🌐 OpenRouter</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Cognify Section -->
+    <section class="why-cognify">
+        <div class="container">
+            <div class="why-content">
+                <div class="why-quote">
+                    We built Cognify AI because most AI coding tools <span class="why-highlight">force you into a single model or workflow</span>.
+                    Developers deserve better. Cognify AI works with local and cloud LLMs, supports both VS Code and CLI workflows,
+                    and is designed for <span class="why-highlight">understanding and refactoring real-world projects</span>—not just autocomplete.
+                </div>
+                <div class="why-author">
+                    <div class="why-author-avatar">🧠</div>
+                    <span>— The Cognify AI Team</span>
                 </div>
             </div>
         </div>
