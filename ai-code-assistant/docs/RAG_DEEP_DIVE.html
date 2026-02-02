@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Deep Dive — Cognify AI</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-code: #0d1117;
+            --bg-highlight: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        /* Header */
+        header {
+            background: var(--gradient);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        header h1 { font-size: 3rem; margin-bottom: 0.5rem; position: relative; }
+        header p { font-size: 1.3rem; opacity: 0.9; position: relative; }
+        .badge { 
+            display: inline-block; 
+            background: rgba(255,255,255,0.2); 
+            padding: 0.5rem 1rem; 
+            border-radius: 50px; 
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+        
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 2rem;
+        }
+        nav ul {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        nav a:hover, nav a.active { 
+            background: var(--primary); 
+            color: white; 
+        }
+        
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary-light);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .card h3 { 
+            color: var(--secondary); 
+            margin: 1.5rem 0 1rem; 
+            font-size: 1.25rem;
+        }
+        .card h4 {
+            color: var(--accent);
+            margin: 1rem 0 0.5rem;
+        }
+        
+        /* Code blocks */
+        pre {
+            background: var(--bg-code);
+            border-radius: 12px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            position: relative;
+        }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; }
+        .function { color: #50fa7b; }
+        .class { color: #8be9fd; }
+        .number { color: #bd93f9; }
+        .decorator { color: #ffb86c; }
+        .variable { color: #f8f8f2; }
+        
+        /* Copy button */
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: var(--bg-highlight);
+            border: none;
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--primary); color: white; }
+
+        /* Grid layouts */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+
+        /* Feature boxes */
+        .feature-box {
+            background: var(--bg-highlight);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        .feature-box.green { border-left-color: var(--secondary); }
+        .feature-box.orange { border-left-color: var(--accent); }
+        .feature-box.red { border-left-color: var(--danger); }
+        .feature-box h4 { margin-top: 0; }
+
+        /* Flow diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 2rem;
+            background: var(--bg-code);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+        .flow-box {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 120px;
+        }
+        .flow-box.secondary { background: var(--secondary); }
+        .flow-box.accent { background: var(--accent); }
+        .flow-box.muted { background: var(--bg-highlight); color: var(--text); }
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .tab-btn {
+            background: var(--bg-highlight);
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: var(--border); }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: var(--bg-highlight); color: var(--primary-light); }
+        tr:hover { background: rgba(99, 102, 241, 0.1); }
+
+        /* Callouts */
+        .callout {
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .callout.info { background: rgba(99, 102, 241, 0.15); border-left: 4px solid var(--primary); }
+        .callout.success { background: rgba(16, 185, 129, 0.15); border-left: 4px solid var(--secondary); }
+        .callout.warning { background: rgba(245, 158, 11, 0.15); border-left: 4px solid var(--accent); }
+        .callout .icon { font-size: 1.5rem; }
+
+        /* Architecture diagram */
+        .architecture {
+            background: var(--bg-code);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+        .arch-layer {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .arch-box {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+        }
+        .arch-box.db { border-color: var(--secondary); background: rgba(16, 185, 129, 0.1); }
+        .arch-box.llm { border-color: var(--accent); background: rgba(245, 158, 11, 0.1); }
+        .arch-connector { color: var(--text-muted); font-size: 1.25rem; }
+
+        /* Progress indicator */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-highlight);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* Interactive demo */
+        .demo-container {
+            background: var(--bg-code);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .demo-input {
+            width: 100%;
+            background: var(--bg-highlight);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .demo-input:focus { outline: none; border-color: var(--primary); }
+        .demo-btn {
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .demo-btn:hover { opacity: 0.9; }
+        .demo-results { margin-top: 1rem; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+</style>
+</head>
+<body>
+    <header>
+        <h1>🔮 RAG Deep Dive</h1>
+        <p>Retrieval-Augmented Generation — The Complete Guide</p>
+        <div class="badge">Cognify AI Implementation</div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#input-layer">Input Layer</a></li>
+            <li><a href="#components">Processing</a></li>
+            <li><a href="#chunking">Chunking</a></li>
+            <li><a href="#embeddings">Embeddings</a></li>
+            <li><a href="#vectordb">Vector DB</a></li>
+            <li><a href="#cosine-similarity">Similarity</a></li>
+            <li><a href="#context-builder">Context</a></li>
+            <li><a href="#llm-integration">LLM</a></li>
+            <li><a href="#search">Search</a></li>
+            <li><a href="#integration">VSCode</a></li>
+            <li><a href="#enhancements">Enhancements</a></li>
+            <li><a href="#tutorial">Tutorial</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="card">
+            <h2>📚 What is RAG?</h2>
+            <p><strong>Retrieval-Augmented Generation (RAG)</strong> is a technique that enhances LLM responses by first retrieving relevant information from a knowledge base, then using that information as context for generation.</p>
+
+            <div class="callout info">
+                <span class="icon">💡</span>
+                <div>
+                    <strong>Why RAG?</strong><br>
+                    LLMs have knowledge cutoffs and can hallucinate. RAG grounds responses in your actual codebase, documentation, or data.
+                </div>
+            </div>
+
+            <h3>The RAG Pipeline</h3>
+            <div class="flow-diagram">
+                <div class="flow-box muted">📄 Documents</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">✂️ Chunker</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box secondary">🔢 Embeddings</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box accent">💾 Vector DB</div>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-box muted">❓ Query</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box secondary">🔢 Embed</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box accent">🔍 Search</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">📝 Context</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box" style="background: #8b5cf6;">🤖 LLM</div>
+            </div>
+
+            <div class="grid-3">
+                <div class="feature-box">
+                    <h4>🎯 Accuracy</h4>
+                    <p>Responses grounded in real code/docs, not hallucinations</p>
+                </div>
+                <div class="feature-box green">
+                    <h4>🔄 Up-to-date</h4>
+                    <p>Always uses your latest codebase, no retraining needed</p>
+                </div>
+                <div class="feature-box orange">
+                    <h4>🔒 Private</h4>
+                    <p>Your code stays local, only relevant snippets sent to LLM</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="card">
+            <h2>🏗️ Cognify AI RAG Architecture</h2>
+
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1rem; color: var(--text-muted);">
+                    <strong>Cognify AI RAG System Architecture</strong>
+                </div>
+
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Input Layer</span>
+                    <div class="arch-box">Code Files (.py, .ts, .js, ...)</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">User Queries</div>
+                </div>
+
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Processing</span>
+                    <div class="arch-box">CodeChunker</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">SentenceTransformer</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box db">ChromaDB</div>
+                </div>
+
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Retrieval</span>
+                    <div class="arch-box">Query Embedding</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">Cosine Similarity</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">Top-K Results</div>
+                </div>
+
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Generation</span>
+                    <div class="arch-box">Context Builder</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box llm">LLM (Ollama/OpenAI/Gemini)</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">Response</div>
+                </div>
+            </div>
+
+            <h3>Key Components</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>File</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>CodeChunker</code></td>
+                        <td>retrieval/chunker.py</td>
+                        <td>Splits code into semantic units</td>
+                    </tr>
+                    <tr>
+                        <td><code>CodebaseIndexer</code></td>
+                        <td>retrieval/indexer.py</td>
+                        <td>Creates embeddings & stores in ChromaDB</td>
+                    </tr>
+                    <tr>
+                        <td><code>CodebaseSearch</code></td>
+                        <td>retrieval/search.py</td>
+                        <td>Performs similarity search</td>
+                    </tr>
+                    <tr>
+                        <td><code>SentenceTransformer</code></td>
+                        <td>External Library</td>
+                        <td>Generates 384-dim embeddings</td>
+                    </tr>
+                    <tr>
+                        <td><code>ChromaDB</code></td>
+                        <td>External Library</td>
+                        <td>Vector database for storage</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- INPUT LAYER Section -->
+        <section id="input-layer" class="card">
+            <h2>📥 Input Layer — Code Files & User Queries</h2>
+
+            <p>The input layer handles two types of inputs: <strong>code files</strong> for indexing and <strong>user queries</strong> for retrieval.</p>
+
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>📄 Code Files</h4>
+                    <p>Source code files that get indexed into the vector database.</p>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>Python (.py)</li>
+                        <li>TypeScript/JavaScript (.ts, .js)</li>
+                        <li>Java, Go, Rust, C++</li>
+                        <li>Config files (YAML, JSON)</li>
+                    </ul>
+                </div>
+                <div class="feature-box green">
+                    <h4>❓ User Queries</h4>
+                    <p>Natural language questions about the codebase.</p>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>"How does authentication work?"</li>
+                        <li>"Find error handling code"</li>
+                        <li>"Show me the API routes"</li>
+                        <li>"Where is user validation?"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>File Discovery & Filtering</h3>
+            <pre><code><span class="comment"># Cognify's file discovery logic</span>
+<span class="keyword">class</span> <span class="class">CodebaseIndexer</span>:
+    <span class="comment"># Supported file extensions</span>
+    SUPPORTED_EXTENSIONS = {
+        <span class="string">".py"</span>, <span class="string">".ts"</span>, <span class="string">".js"</span>, <span class="string">".tsx"</span>, <span class="string">".jsx"</span>,
+        <span class="string">".java"</span>, <span class="string">".go"</span>, <span class="string">".rs"</span>, <span class="string">".cpp"</span>, <span class="string">".c"</span>,
+        <span class="string">".rb"</span>, <span class="string">".php"</span>, <span class="string">".swift"</span>, <span class="string">".kt"</span>,
+        <span class="string">".yaml"</span>, <span class="string">".yml"</span>, <span class="string">".json"</span>, <span class="string">".md"</span>
+    }
+
+    <span class="comment"># Directories to skip</span>
+    IGNORE_DIRS = {
+        <span class="string">"node_modules"</span>, <span class="string">"__pycache__"</span>, <span class="string">".git"</span>,
+        <span class="string">"venv"</span>, <span class="string">".venv"</span>, <span class="string">"dist"</span>, <span class="string">"build"</span>
+    }
+
+    <span class="keyword">def</span> <span class="function">_should_index_file</span>(<span class="variable">self</span>, path: Path) -> <span class="keyword">bool</span>:
+        <span class="comment"># Check extension</span>
+        <span class="keyword">if</span> path.suffix <span class="keyword">not in</span> <span class="variable">self</span>.SUPPORTED_EXTENSIONS:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="comment"># Check ignored directories</span>
+        <span class="keyword">for</span> part <span class="keyword">in</span> path.parts:
+            <span class="keyword">if</span> part <span class="keyword">in</span> <span class="variable">self</span>.IGNORE_DIRS:
+                <span class="keyword">return</span> <span class="keyword">False</span>
+
+        <span class="keyword">return</span> <span class="keyword">True</span></code></pre>
+
+            <h3>Language Detection</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Extension</th>
+                        <th>Language</th>
+                        <th>Chunking Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.py</code></td>
+                        <td>Python</td>
+                        <td>Semantic (class/function boundaries)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.ts</code>, <code>.js</code></td>
+                        <td>TypeScript/JavaScript</td>
+                        <td>Sliding window (future: AST-based)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.java</code></td>
+                        <td>Java</td>
+                        <td>Sliding window</td>
+                    </tr>
+                    <tr>
+                        <td><code>.go</code></td>
+                        <td>Go</td>
+                        <td>Sliding window</td>
+                    </tr>
+                    <tr>
+                        <td><code>.md</code></td>
+                        <td>Markdown</td>
+                        <td>Sliding window</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout info">
+                <span class="icon">💡</span>
+                <div>
+                    <strong>Query Preprocessing</strong><br>
+                    User queries are passed directly to the embedding model. Future enhancement: query expansion using LLM to generate better search terms.
+                </div>
+            </div>
+        </section>
+
+        <!-- Components Section -->
+        <section id="components" class="card">
+            <h2>🧩 RAG Components Deep Dive</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('chunker-tab')">Chunker</button>
+                <button class="tab-btn" onclick="showTab('indexer-tab')">Indexer</button>
+                <button class="tab-btn" onclick="showTab('search-tab')">Search</button>
+            </div>
+
+            <div id="chunker-tab" class="tab-content active">
+                <h3>CodeChunker — Intelligent Code Splitting</h3>
+                <p>The chunker splits code files into meaningful units for embedding. Different strategies for different languages:</p>
+
+                <div class="grid-2">
+                    <div class="feature-box green">
+                        <h4>🐍 Python Strategy</h4>
+                        <p>Semantic chunking by class/function boundaries. Preserves logical structure.</p>
+                        <pre><code><span class="keyword">class</span> <span class="class">MyClass</span>:  <span class="comment"># ← Chunk boundary</span>
+    <span class="keyword">def</span> <span class="function">method</span>(<span class="variable">self</span>):
+        <span class="keyword">pass</span>
+
+<span class="keyword">def</span> <span class="function">helper</span>():  <span class="comment"># ← New chunk</span>
+    <span class="keyword">pass</span></code></pre>
+                    </div>
+                    <div class="feature-box orange">
+                        <h4>📄 Generic Strategy</h4>
+                        <p>Sliding window with overlap for other languages. Ensures context isn't lost at boundaries.</p>
+                        <pre><code><span class="comment">// Chunk 1: lines 1-100</span>
+<span class="comment">// Chunk 2: lines 80-180 (20 line overlap)</span>
+<span class="comment">// Chunk 3: lines 160-260</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="indexer-tab" class="tab-content">
+                <h3>CodebaseIndexer — Embedding & Storage</h3>
+                <p>Converts code chunks into vectors and stores them in ChromaDB:</p>
+
+                <pre><code><span class="keyword">def</span> <span class="function">index_file</span>(<span class="variable">self</span>, <span class="variable">file_path</span>: Path) -> <span class="keyword">bool</span>:
+    <span class="comment"># 1. Read and chunk the file</span>
+    <span class="variable">chunks</span> = <span class="variable">self</span>.chunker.chunk_file(file_path)
+
+    <span class="comment"># 2. Generate embeddings using SentenceTransformer</span>
+    <span class="variable">texts</span> = [chunk.content <span class="keyword">for</span> chunk <span class="keyword">in</span> chunks]
+    <span class="variable">embeddings</span> = <span class="variable">self</span>.embedder.encode(texts)  <span class="comment"># 384-dim vectors</span>
+
+    <span class="comment"># 3. Store in ChromaDB with metadata</span>
+    <span class="variable">self</span>._collection.add(
+        ids=[chunk.id <span class="keyword">for</span> chunk <span class="keyword">in</span> chunks],
+        documents=texts,
+        embeddings=embeddings,
+        metadatas=[chunk.to_dict() <span class="keyword">for</span> chunk <span class="keyword">in</span> chunks]
+    )</code></pre>
+
+                <div class="callout success">
+                    <span class="icon">✅</span>
+                    <div>
+                        <strong>Embedding Model:</strong> <code>all-MiniLM-L6-v2</code><br>
+                        Fast, efficient, produces 384-dimensional vectors. Good balance of speed and quality.
+                    </div>
+                </div>
+            </div>
+
+            <div id="search-tab" class="tab-content">
+                <h3>CodebaseSearch — Semantic Retrieval</h3>
+                <p>Finds relevant code using cosine similarity:</p>
+
+                <pre><code><span class="keyword">def</span> <span class="function">search</span>(<span class="variable">self</span>, <span class="variable">query</span>: <span class="keyword">str</span>, <span class="variable">top_k</span>: <span class="keyword">int</span> = <span class="number">10</span>) -> SearchResponse:
+    <span class="comment"># 1. Embed the query</span>
+    <span class="variable">query_embedding</span> = <span class="variable">self</span>.embedder.encode(query)
+
+    <span class="comment"># 2. Search ChromaDB (cosine similarity)</span>
+    <span class="variable">results</span> = <span class="variable">self</span>._collection.query(
+        query_embeddings=[query_embedding],
+        n_results=top_k,
+        include=[<span class="string">"documents"</span>, <span class="string">"metadatas"</span>, <span class="string">"distances"</span>]
+    )
+
+    <span class="comment"># 3. Convert distances to similarity scores</span>
+    <span class="variable">scores</span> = [<span class="number">1</span> - d <span class="keyword">for</span> d <span class="keyword">in</span> distances]  <span class="comment"># distance → similarity</span></code></pre>
+
+                <h4>Search Features</h4>
+                <ul>
+                    <li><strong>Language filtering:</strong> Only search Python, TypeScript, etc.</li>
+                    <li><strong>File filtering:</strong> Search within specific directories</li>
+                    <li><strong>Score threshold:</strong> Filter low-confidence results</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chunking Section -->
+        <section id="chunking" class="card">
+            <h2>✂️ Code Chunking Strategies</h2>
+
+            <p>How you chunk code significantly impacts retrieval quality. Too small = no context. Too large = irrelevant noise.</p>
+
+            <div class="callout warning">
+                <span class="icon">⚠️</span>
+                <div>
+                    <strong>Chunk Size Matters!</strong><br>
+                    Cognify uses 100 lines with 20 line overlap. This balances context preservation with embedding quality.
+                </div>
+            </div>
+
+            <h3>Chunking Configuration</h3>
+            <pre><code><span class="keyword">class</span> <span class="class">IndexConfig</span>:
+    chunk_size: <span class="keyword">int</span> = <span class="number">100</span>       <span class="comment"># Lines per chunk</span>
+    chunk_overlap: <span class="keyword">int</span> = <span class="number">20</span>    <span class="comment"># Overlap between chunks</span>
+    embedding_model: <span class="keyword">str</span> = <span class="string">"all-MiniLM-L6-v2"</span>
+    collection_name: <span class="keyword">str</span> = <span class="string">"codebase"</span>
+    persist_directory: <span class="keyword">str</span> = <span class="string">".ai-assistant-index"</span></code></pre>
+
+            <h3>Python Semantic Chunking</h3>
+            <p>For Python, we chunk by class and function boundaries:</p>
+
+            <div class="grid-2">
+                <div>
+                    <h4>Input File</h4>
+                    <pre><code><span class="keyword">import</span> os
+
+<span class="keyword">class</span> <span class="class">UserService</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="variable">self</span>):
+        <span class="variable">self</span>.db = Database()
+
+    <span class="keyword">def</span> <span class="function">get_user</span>(<span class="variable">self</span>, id):
+        <span class="keyword">return</span> <span class="variable">self</span>.db.find(id)
+
+<span class="keyword">def</span> <span class="function">helper_function</span>():
+    <span class="keyword">return</span> <span class="string">"helper"</span></code></pre>
+                </div>
+                <div>
+                    <h4>Output Chunks</h4>
+                    <pre><code><span class="comment"># Chunk 1: Module header</span>
+<span class="keyword">import</span> os
+
+<span class="comment"># Chunk 2: UserService class</span>
+<span class="keyword">class</span> <span class="class">UserService</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>...
+    <span class="keyword">def</span> <span class="function">get_user</span>...
+
+<span class="comment"># Chunk 3: helper_function</span>
+<span class="keyword">def</span> <span class="function">helper_function</span>():</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Embeddings Section -->
+        <section id="embeddings" class="card">
+            <h2>🔢 Vector Embeddings Explained</h2>
+
+            <p>Embeddings convert text into numerical vectors that capture semantic meaning. Similar code = similar vectors.</p>
+
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <strong>How Embeddings Work</strong>
+                </div>
+                <div class="flow-diagram" style="background: transparent; padding: 1rem;">
+                    <div class="flow-box muted" style="min-width: 200px;">"def calculate_sum"</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box secondary">Transformer Model</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-box accent" style="min-width: 200px;">[0.12, -0.34, 0.56, ...]<br><small>384 dimensions</small></div>
+                </div>
+            </div>
+
+            <h3>Embedding Model Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Dimensions</th>
+                        <th>Speed</th>
+                        <th>Quality</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>all-MiniLM-L6-v2</code> ✅</td>
+                        <td>384</td>
+                        <td>⚡ Fast</td>
+                        <td>⭐⭐⭐</td>
+                        <td>Cognify default, good balance</td>
+                    </tr>
+                    <tr>
+                        <td><code>all-mpnet-base-v2</code></td>
+                        <td>768</td>
+                        <td>🐢 Slower</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>Higher quality, more compute</td>
+                    </tr>
+                    <tr>
+                        <td><code>CodeBERT</code></td>
+                        <td>768</td>
+                        <td>🐢 Slower</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>Code-specific, best for code</td>
+                    </tr>
+                    <tr>
+                        <td><code>text-embedding-ada-002</code></td>
+                        <td>1536</td>
+                        <td>🌐 API</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>OpenAI API, highest quality</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout info">
+                <span class="icon">🧠</span>
+                <div>
+                    <strong>Similarity Metrics</strong><br>
+                    ChromaDB uses L2 (Euclidean) distance by default. Cognify converts this to cosine similarity: <code>score = 1 - distance</code>
+                </div>
+            </div>
+
+            <h3>SentenceTransformer Deep Dive</h3>
+            <p>SentenceTransformer is a Python library that provides pre-trained models for generating dense vector representations of text.</p>
+
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <strong>Transformer Architecture for Embeddings</strong>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Input</span>
+                    <div class="arch-box">"def login(user)"</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">Tokenizer</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">[101, 2154, 7500, ...]</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Encode</span>
+                    <div class="arch-box" style="border-color: var(--accent);">Token Embeddings</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box" style="border-color: var(--accent);">6 Transformer Layers</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box" style="border-color: var(--accent);">Attention + FFN</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Pool</span>
+                    <div class="arch-box db">Mean Pooling</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box db">[0.12, -0.34, 0.56, ...]</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box db">384-dim Vector</div>
+                </div>
+            </div>
+
+            <h4>How Cognify Uses SentenceTransformer</h4>
+            <pre><code><span class="keyword">from</span> sentence_transformers <span class="keyword">import</span> SentenceTransformer
+
+<span class="keyword">class</span> <span class="class">CodebaseIndexer</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="variable">self</span>, config: IndexConfig):
+        <span class="comment"># Lazy load the embedding model</span>
+        <span class="variable">self</span>._embedder: Optional[SentenceTransformer] = <span class="keyword">None</span>
+
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">embedder</span>(<span class="variable">self</span>) -> SentenceTransformer:
+        <span class="keyword">if</span> <span class="variable">self</span>._embedder <span class="keyword">is</span> <span class="keyword">None</span>:
+            <span class="comment"># Load model on first use (downloads ~90MB)</span>
+            <span class="variable">self</span>._embedder = SentenceTransformer(
+                <span class="variable">self</span>.config.embedding_model  <span class="comment"># "all-MiniLM-L6-v2"</span>
+            )
+        <span class="keyword">return</span> <span class="variable">self</span>._embedder
+
+    <span class="keyword">def</span> <span class="function">generate_embeddings</span>(<span class="variable">self</span>, texts: List[<span class="keyword">str</span>]) -> List[List[<span class="keyword">float</span>]]:
+        <span class="comment"># Batch encode for efficiency</span>
+        embeddings = <span class="variable">self</span>.embedder.encode(
+            texts,
+            show_progress_bar=<span class="keyword">False</span>,
+            convert_to_numpy=<span class="keyword">True</span>,
+            normalize_embeddings=<span class="keyword">True</span>  <span class="comment"># L2 normalize for cosine sim</span>
+        )
+        <span class="keyword">return</span> embeddings.tolist()</code></pre>
+
+            <h4>Embedding Model Internals</h4>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>🔤 Tokenization</h4>
+                    <p>Text is split into subword tokens using WordPiece. Max 256 tokens per input.</p>
+                    <pre style="font-size: 0.8rem;"><code>"def login" → ["def", "log", "##in"]
+→ [2154, 7500, 2378]</code></pre>
+                </div>
+                <div class="feature-box green">
+                    <h4>🧠 Transformer Layers</h4>
+                    <p>6 layers of self-attention + feed-forward networks process the tokens.</p>
+                    <pre style="font-size: 0.8rem;"><code>Attention(Q, K, V) = softmax(QK^T/√d)V
+FFN(x) = ReLU(xW₁ + b₁)W₂ + b₂</code></pre>
+                </div>
+                <div class="feature-box orange">
+                    <h4>📊 Mean Pooling</h4>
+                    <p>Token embeddings are averaged to create a single sentence vector.</p>
+                    <pre style="font-size: 0.8rem;"><code>sentence_emb = mean(token_embs)
+# [T, 384] → [384]</code></pre>
+                </div>
+                <div class="feature-box">
+                    <h4>📏 Normalization</h4>
+                    <p>L2 normalization ensures vectors have unit length for cosine similarity.</p>
+                    <pre style="font-size: 0.8rem;"><code>normalized = emb / ||emb||₂
+# ||normalized|| = 1.0</code></pre>
+                </div>
+            </div>
+
+            <div class="callout warning">
+                <span class="icon">⚡</span>
+                <div>
+                    <strong>Performance Tips</strong><br>
+                    • Batch embeddings (don't encode one at a time)<br>
+                    • Use GPU if available: <code>model = SentenceTransformer('...', device='cuda')</code><br>
+                    • Cache embeddings — don't re-embed unchanged files
+                </div>
+            </div>
+        </section>
+
+        <!-- Vector DB Section -->
+        <section id="vectordb" class="card">
+            <h2>💾 Vector Databases Deep Dive</h2>
+
+            <p>Vector databases are specialized storage systems optimized for storing, indexing, and querying high-dimensional vectors. They're the backbone of any RAG system.</p>
+
+            <div class="callout info">
+                <span class="icon">🎯</span>
+                <div>
+                    <strong>Why Vector DBs?</strong><br>
+                    Traditional databases use exact matching (WHERE name = 'John'). Vector DBs find <em>similar</em> items using mathematical distance — essential for semantic search.
+                </div>
+            </div>
+
+            <h3>How Vector Databases Work</h3>
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <strong>Vector Database Architecture</strong>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 120px; color: var(--text-muted);">Storage</span>
+                    <div class="arch-box db">Vectors (float arrays)</div>
+                    <div class="arch-box">Metadata (JSON)</div>
+                    <div class="arch-box">Documents (text)</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 120px; color: var(--text-muted);">Indexing</span>
+                    <div class="arch-box" style="border-color: var(--accent);">HNSW Graph</div>
+                    <div class="arch-box" style="border-color: var(--accent);">IVF Clusters</div>
+                    <div class="arch-box" style="border-color: var(--accent);">PQ Compression</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 120px; color: var(--text-muted);">Query</span>
+                    <div class="arch-box llm">ANN Search</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box">Filter</div>
+                    <div class="arch-connector">→</div>
+                    <div class="arch-box db">Top-K Results</div>
+                </div>
+            </div>
+
+            <h3>Vector DB Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Database</th>
+                        <th>Type</th>
+                        <th>Best For</th>
+                        <th>Scaling</th>
+                        <th>Cognify</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: rgba(16, 185, 129, 0.1);">
+                        <td><strong>ChromaDB</strong> ✅</td>
+                        <td>Embedded</td>
+                        <td>Local dev, small-medium datasets</td>
+                        <td>Single node</td>
+                        <td>Used</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pinecone</strong></td>
+                        <td>Cloud</td>
+                        <td>Production, managed service</td>
+                        <td>Serverless</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Weaviate</strong></td>
+                        <td>Self-hosted/Cloud</td>
+                        <td>GraphQL API, hybrid search</td>
+                        <td>Horizontal</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Milvus</strong></td>
+                        <td>Self-hosted</td>
+                        <td>Large scale, high performance</td>
+                        <td>Distributed</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Qdrant</strong></td>
+                        <td>Self-hosted/Cloud</td>
+                        <td>Filtering, payload storage</td>
+                        <td>Horizontal</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FAISS</strong></td>
+                        <td>Library</td>
+                        <td>Research, maximum speed</td>
+                        <td>Single node</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>pgvector</strong></td>
+                        <td>PostgreSQL ext</td>
+                        <td>Existing Postgres users</td>
+                        <td>Postgres scaling</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Indexing Algorithms Explained</h3>
+            <p>Vector DBs use specialized algorithms to enable fast similarity search over millions of vectors:</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('hnsw-tab')">HNSW</button>
+                <button class="tab-btn" onclick="showTab('ivf-tab')">IVF</button>
+                <button class="tab-btn" onclick="showTab('pq-tab')">PQ</button>
+                <button class="tab-btn" onclick="showTab('flat-tab')">Flat</button>
+            </div>
+
+            <div id="hnsw-tab" class="tab-content active">
+                <h4>HNSW (Hierarchical Navigable Small World)</h4>
+                <p><strong>Used by:</strong> ChromaDB (default), Qdrant, Weaviate</p>
+
+                <div class="grid-2">
+                    <div>
+                        <p>HNSW builds a multi-layer graph where each node connects to its nearest neighbors. Search starts at the top layer (sparse) and descends to bottom (dense).</p>
+                        <ul style="padding-left: 1.5rem; margin-top: 1rem;">
+                            <li><strong>Pros:</strong> Very fast queries, good recall</li>
+                            <li><strong>Cons:</strong> High memory usage, slow index build</li>
+                            <li><strong>Complexity:</strong> O(log n) search</li>
+                        </ul>
+                    </div>
+                    <div class="demo-container">
+                        <pre style="margin: 0;"><code><span class="comment"># HNSW Parameters</span>
+M = <span class="number">16</span>        <span class="comment"># Connections per node</span>
+ef_construction = <span class="number">200</span>  <span class="comment"># Build quality</span>
+ef_search = <span class="number">50</span>  <span class="comment"># Search quality</span>
+
+<span class="comment"># Higher M = better recall, more memory</span>
+<span class="comment"># Higher ef = better quality, slower</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ivf-tab" class="tab-content">
+                <h4>IVF (Inverted File Index)</h4>
+                <p><strong>Used by:</strong> FAISS, Milvus</p>
+
+                <div class="grid-2">
+                    <div>
+                        <p>IVF clusters vectors using k-means, then only searches relevant clusters. Trade-off between speed and accuracy.</p>
+                        <ul style="padding-left: 1.5rem; margin-top: 1rem;">
+                            <li><strong>Pros:</strong> Memory efficient, fast build</li>
+                            <li><strong>Cons:</strong> Lower recall than HNSW</li>
+                            <li><strong>Complexity:</strong> O(n/k) where k = clusters</li>
+                        </ul>
+                    </div>
+                    <div class="demo-container">
+                        <pre style="margin: 0;"><code><span class="comment"># IVF Parameters</span>
+nlist = <span class="number">100</span>    <span class="comment"># Number of clusters</span>
+nprobe = <span class="number">10</span>    <span class="comment"># Clusters to search</span>
+
+<span class="comment"># More clusters = faster search</span>
+<span class="comment"># More probes = better recall</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pq-tab" class="tab-content">
+                <h4>PQ (Product Quantization)</h4>
+                <p><strong>Used by:</strong> FAISS, often combined with IVF</p>
+
+                <div class="grid-2">
+                    <div>
+                        <p>PQ compresses vectors by splitting them into subvectors and quantizing each. Dramatically reduces memory at cost of precision.</p>
+                        <ul style="padding-left: 1.5rem; margin-top: 1rem;">
+                            <li><strong>Pros:</strong> 10-100x memory reduction</li>
+                            <li><strong>Cons:</strong> Lossy compression, lower accuracy</li>
+                            <li><strong>Use case:</strong> Billion-scale datasets</li>
+                        </ul>
+                    </div>
+                    <div class="demo-container">
+                        <pre style="margin: 0;"><code><span class="comment"># PQ Parameters</span>
+m = <span class="number">8</span>          <span class="comment"># Subvector count</span>
+nbits = <span class="number">8</span>      <span class="comment"># Bits per subvector</span>
+
+<span class="comment"># 384-dim → 8 bytes (48x compression!)</span>
+<span class="comment"># Original: 384 * 4 = 1536 bytes</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="flat-tab" class="tab-content">
+                <h4>Flat (Brute Force)</h4>
+                <p><strong>Used by:</strong> All DBs as baseline</p>
+
+                <div class="grid-2">
+                    <div>
+                        <p>Compares query against every vector. 100% accurate but doesn't scale.</p>
+                        <ul style="padding-left: 1.5rem; margin-top: 1rem;">
+                            <li><strong>Pros:</strong> Perfect recall, no index build</li>
+                            <li><strong>Cons:</strong> O(n) search, very slow at scale</li>
+                            <li><strong>Use case:</strong> Small datasets (&lt;10K vectors)</li>
+                        </ul>
+                    </div>
+                    <div class="demo-container">
+                        <pre style="margin: 0;"><code><span class="comment"># Flat search pseudocode</span>
+<span class="keyword">for</span> vector <span class="keyword">in</span> all_vectors:
+    distance = cosine(query, vector)
+    <span class="keyword">if</span> distance < threshold:
+        results.append(vector)
+
+<span class="comment"># Simple but O(n) complexity</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Distance Metrics</h3>
+            <p>How similarity is measured between vectors:</p>
+
+            <div class="grid-3">
+                <div class="feature-box green">
+                    <h4>Cosine Similarity</h4>
+                    <p>Measures angle between vectors. Range: -1 to 1 (1 = identical)</p>
+                    <pre style="font-size: 0.8rem;"><code>cos(A,B) = A·B / (|A|×|B|)</code></pre>
+                    <p style="margin-top: 0.5rem;"><strong>Best for:</strong> Text, normalized embeddings</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Euclidean (L2)</h4>
+                    <p>Straight-line distance. Range: 0 to ∞ (0 = identical)</p>
+                    <pre style="font-size: 0.8rem;"><code>L2 = √Σ(Aᵢ - Bᵢ)²</code></pre>
+                    <p style="margin-top: 0.5rem;"><strong>Best for:</strong> Image features, spatial data</p>
+                </div>
+                <div class="feature-box orange">
+                    <h4>Dot Product</h4>
+                    <p>Sum of element-wise products. Range: -∞ to ∞</p>
+                    <pre style="font-size: 0.8rem;"><code>dot(A,B) = Σ(Aᵢ × Bᵢ)</code></pre>
+                    <p style="margin-top: 0.5rem;"><strong>Best for:</strong> Recommendation systems</p>
+                </div>
+            </div>
+
+            <h3>ChromaDB Deep Dive</h3>
+            <p>Cognify AI uses ChromaDB — an open-source, embedded vector database perfect for local development.</p>
+
+            <div class="callout success">
+                <span class="icon">✅</span>
+                <div>
+                    <strong>Why ChromaDB for Cognify?</strong><br>
+                    • Zero configuration — just works<br>
+                    • Persistent storage to disk<br>
+                    • Python-native API<br>
+                    • HNSW indexing built-in<br>
+                    • Metadata filtering support
+                </div>
+            </div>
+
+            <h4>ChromaDB Architecture</h4>
+            <pre><code><span class="comment"># Cognify's ChromaDB setup</span>
+<span class="keyword">import</span> chromadb
+<span class="keyword">from</span> chromadb.config <span class="keyword">import</span> Settings
+
+<span class="comment"># Create persistent client (data saved to disk)</span>
+client = chromadb.PersistentClient(
+    path=<span class="string">".ai-assistant-index"</span>,
+    settings=Settings(
+        anonymized_telemetry=<span class="keyword">False</span>,  <span class="comment"># Privacy first!</span>
+        allow_reset=<span class="keyword">True</span>
+    )
+)
+
+<span class="comment"># Create or get collection</span>
+collection = client.get_or_create_collection(
+    name=<span class="string">"codebase"</span>,
+    metadata={<span class="string">"description"</span>: <span class="string">"Code embeddings"</span>}
+)</code></pre>
+
+            <h4>CRUD Operations</h4>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('chroma-add')">Add</button>
+                <button class="tab-btn" onclick="showTab('chroma-query')">Query</button>
+                <button class="tab-btn" onclick="showTab('chroma-update')">Update</button>
+                <button class="tab-btn" onclick="showTab('chroma-delete')">Delete</button>
+            </div>
+
+            <div id="chroma-add" class="tab-content active">
+                <pre><code><span class="comment"># Add vectors with metadata</span>
+collection.add(
+    ids=[<span class="string">"chunk_001"</span>, <span class="string">"chunk_002"</span>],
+    documents=[<span class="string">"def login(user)..."</span>, <span class="string">"class AuthHandler..."</span>],
+    embeddings=[[<span class="number">0.1</span>, <span class="number">0.2</span>, ...], [<span class="number">0.3</span>, <span class="number">0.4</span>, ...]],
+    metadatas=[
+        {<span class="string">"file"</span>: <span class="string">"auth.py"</span>, <span class="string">"line"</span>: <span class="number">10</span>, <span class="string">"type"</span>: <span class="string">"function"</span>},
+        {<span class="string">"file"</span>: <span class="string">"auth.py"</span>, <span class="string">"line"</span>: <span class="number">50</span>, <span class="string">"type"</span>: <span class="string">"class"</span>}
+    ]
+)</code></pre>
+            </div>
+
+            <div id="chroma-query" class="tab-content">
+                <pre><code><span class="comment"># Query with filters</span>
+results = collection.query(
+    query_embeddings=[[<span class="number">0.15</span>, <span class="number">0.25</span>, ...]],
+    n_results=<span class="number">5</span>,
+    where={<span class="string">"type"</span>: <span class="string">"function"</span>},  <span class="comment"># Metadata filter</span>
+    where_document={<span class="string">"$contains"</span>: <span class="string">"login"</span>},  <span class="comment"># Text filter</span>
+    include=[<span class="string">"documents"</span>, <span class="string">"metadatas"</span>, <span class="string">"distances"</span>]
+)
+
+<span class="comment"># Results structure</span>
+<span class="comment"># {'ids': [['chunk_001']], 'distances': [[0.12]], ...}</span></code></pre>
+            </div>
+
+            <div id="chroma-update" class="tab-content">
+                <pre><code><span class="comment"># Update existing vectors</span>
+collection.update(
+    ids=[<span class="string">"chunk_001"</span>],
+    documents=[<span class="string">"def login(user, password)..."</span>],  <span class="comment"># Updated code</span>
+    embeddings=[[<span class="number">0.11</span>, <span class="number">0.21</span>, ...]],  <span class="comment"># New embedding</span>
+    metadatas=[{<span class="string">"file"</span>: <span class="string">"auth.py"</span>, <span class="string">"line"</span>: <span class="number">10</span>, <span class="string">"updated"</span>: <span class="keyword">True</span>}]
+)
+
+<span class="comment"># Or upsert (insert or update)</span>
+collection.upsert(ids=[...], documents=[...], embeddings=[...])</code></pre>
+            </div>
+
+            <div id="chroma-delete" class="tab-content">
+                <pre><code><span class="comment"># Delete by IDs</span>
+collection.delete(ids=[<span class="string">"chunk_001"</span>, <span class="string">"chunk_002"</span>])
+
+<span class="comment"># Delete by filter</span>
+collection.delete(where={<span class="string">"file"</span>: <span class="string">"old_file.py"</span>})
+
+<span class="comment"># Clear entire collection</span>
+client.delete_collection(<span class="string">"codebase"</span>)</code></pre>
+            </div>
+
+            <h3>Performance & Storage</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Vector Size</td>
+                        <td>384 × 4 bytes = 1.5 KB</td>
+                        <td>Per chunk (float32)</td>
+                    </tr>
+                    <tr>
+                        <td>1K chunks</td>
+                        <td>~1.5 MB vectors + metadata</td>
+                        <td>Small project</td>
+                    </tr>
+                    <tr>
+                        <td>10K chunks</td>
+                        <td>~15 MB vectors + metadata</td>
+                        <td>Medium project</td>
+                    </tr>
+                    <tr>
+                        <td>100K chunks</td>
+                        <td>~150 MB vectors + metadata</td>
+                        <td>Large monorepo</td>
+                    </tr>
+                    <tr>
+                        <td>Query latency</td>
+                        <td>&lt;10ms (10K), &lt;50ms (100K)</td>
+                        <td>HNSW index</td>
+                    </tr>
+                    <tr>
+                        <td>Index build</td>
+                        <td>~100 chunks/sec</td>
+                        <td>With embedding generation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Vector DB Best Practices</h3>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>🎯 Optimize Chunk Size</h4>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>Too small → no context</li>
+                        <li>Too large → noise in results</li>
+                        <li>Sweet spot: 100-200 lines for code</li>
+                    </ul>
+                </div>
+                <div class="feature-box green">
+                    <h4>🏷️ Rich Metadata</h4>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>Store file path, line numbers</li>
+                        <li>Include language, chunk type</li>
+                        <li>Enable powerful filtering</li>
+                    </ul>
+                </div>
+                <div class="feature-box orange">
+                    <h4>🔄 Incremental Updates</h4>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>Don't re-index everything</li>
+                        <li>Track file hashes</li>
+                        <li>Update only changed files</li>
+                    </ul>
+                </div>
+                <div class="feature-box red">
+                    <h4>⚡ Query Optimization</h4>
+                    <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                        <li>Use metadata filters first</li>
+                        <li>Limit top-k appropriately</li>
+                        <li>Cache frequent queries</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout warning">
+                <span class="icon">💡</span>
+                <div>
+                    <strong>Pro Tip: Hybrid Filtering</strong><br>
+                    Combine metadata filters with vector search for best results:
+                    <code style="display: block; margin-top: 0.5rem; background: var(--bg-code); padding: 0.5rem; border-radius: 4px;">
+                    collection.query(query_embeddings=[...], where={"language": "python"}, n_results=5)
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cosine Similarity Section -->
+        <section id="cosine-similarity" class="card">
+            <h2>📐 Cosine Similarity Deep Dive</h2>
+
+            <p>Cosine similarity measures the angle between two vectors, ignoring their magnitude. It's the most common metric for text/code similarity.</p>
+
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <strong>Cosine Similarity Visualization</strong>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 3rem; padding: 2rem; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem;">📐</div>
+                        <p><strong>cos(θ) = 1.0</strong></p>
+                        <p style="color: var(--secondary);">Identical (θ = 0°)</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem;">↗️</div>
+                        <p><strong>cos(θ) = 0.7</strong></p>
+                        <p style="color: var(--accent);">Similar (θ ≈ 45°)</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem;">➡️</div>
+                        <p><strong>cos(θ) = 0.0</strong></p>
+                        <p style="color: var(--text-muted);">Orthogonal (θ = 90°)</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem;">↙️</div>
+                        <p><strong>cos(θ) = -1.0</strong></p>
+                        <p style="color: var(--danger);">Opposite (θ = 180°)</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Math</h3>
+            <div class="grid-2">
+                <div>
+                    <h4>Formula</h4>
+                    <pre><code><span class="comment"># Cosine Similarity Formula</span>
+cos(A, B) = (A · B) / (||A|| × ||B||)
+
+<span class="comment"># Where:</span>
+<span class="comment"># A · B = dot product = Σ(Aᵢ × Bᵢ)</span>
+<span class="comment"># ||A|| = magnitude = √Σ(Aᵢ²)</span>
+
+<span class="comment"># Range: -1 to 1</span>
+<span class="comment"># 1 = identical direction</span>
+<span class="comment"># 0 = perpendicular</span>
+<span class="comment"># -1 = opposite direction</span></code></pre>
+                </div>
+                <div>
+                    <h4>Python Implementation</h4>
+                    <pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="keyword">def</span> <span class="function">cosine_similarity</span>(a, b):
+    <span class="comment"># Dot product</span>
+    dot = np.dot(a, b)
+
+    <span class="comment"># Magnitudes</span>
+    norm_a = np.linalg.norm(a)
+    norm_b = np.linalg.norm(b)
+
+    <span class="comment"># Cosine similarity</span>
+    <span class="keyword">return</span> dot / (norm_a * norm_b)
+
+<span class="comment"># Example</span>
+a = [<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.3</span>]
+b = [<span class="number">0.15</span>, <span class="number">0.25</span>, <span class="number">0.28</span>]
+<span class="keyword">print</span>(cosine_similarity(a, b))  <span class="comment"># 0.998</span></code></pre>
+                </div>
+            </div>
+
+            <h3>Why Cosine for Code?</h3>
+            <div class="grid-3">
+                <div class="feature-box green">
+                    <h4>✅ Scale Invariant</h4>
+                    <p>Doesn't matter if vectors are normalized or not — only direction matters.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>✅ Semantic Focus</h4>
+                    <p>Captures meaning similarity, not just keyword overlap.</p>
+                </div>
+                <div class="feature-box orange">
+                    <h4>✅ Fast Computation</h4>
+                    <p>Simple dot product + norms. Highly optimized in NumPy/BLAS.</p>
+                </div>
+            </div>
+
+            <h3>Distance vs Similarity</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Range</th>
+                        <th>Interpretation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Cosine Similarity</td>
+                        <td><code>A·B / (||A||×||B||)</code></td>
+                        <td>-1 to 1</td>
+                        <td>Higher = more similar</td>
+                    </tr>
+                    <tr>
+                        <td>Cosine Distance</td>
+                        <td><code>1 - cosine_similarity</code></td>
+                        <td>0 to 2</td>
+                        <td>Lower = more similar</td>
+                    </tr>
+                    <tr>
+                        <td>L2 (Euclidean)</td>
+                        <td><code>√Σ(Aᵢ - Bᵢ)²</code></td>
+                        <td>0 to ∞</td>
+                        <td>Lower = more similar</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout info">
+                <span class="icon">🔄</span>
+                <div>
+                    <strong>ChromaDB Conversion</strong><br>
+                    ChromaDB returns L2 distance. Cognify converts to similarity: <code>score = 1 - (distance / 2)</code> for normalized vectors.
+                </div>
+            </div>
+        </section>
+
+        <!-- Context Builder Section -->
+        <section id="context-builder" class="card">
+            <h2>📝 Context Builder — Assembling the Prompt</h2>
+
+            <p>The Context Builder takes retrieved code chunks and formats them into a prompt that the LLM can understand and use effectively.</p>
+
+            <div class="flow-diagram">
+                <div class="flow-box muted">Search Results</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Rank & Filter</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box secondary">Format Chunks</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box accent">Build Prompt</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box" style="background: #8b5cf6;">LLM Input</div>
+            </div>
+
+            <h3>Context Building Strategy</h3>
+            <pre><code><span class="keyword">def</span> <span class="function">build_context</span>(search_results: List[SearchResult], max_tokens: <span class="keyword">int</span> = <span class="number">4000</span>) -> <span class="keyword">str</span>:
+    <span class="string">"""Build context string from search results."""</span>
+    context_parts = []
+    total_tokens = <span class="number">0</span>
+
+    <span class="keyword">for</span> result <span class="keyword">in</span> search_results:
+        <span class="comment"># Format each chunk with metadata</span>
+        chunk_text = <span class="string">f"""
+### File: {result.file_path} (lines {result.start_line}-{result.end_line})
+**Type:** {result.chunk_type} | **Score:** {result.score:.2f}
+
+```{result.language}
+{result.content}
+```
+"""</span>
+
+        <span class="comment"># Estimate tokens (rough: 4 chars ≈ 1 token)</span>
+        chunk_tokens = len(chunk_text) // <span class="number">4</span>
+
+        <span class="keyword">if</span> total_tokens + chunk_tokens > max_tokens:
+            <span class="keyword">break</span>  <span class="comment"># Don't exceed token limit</span>
+
+        context_parts.append(chunk_text)
+        total_tokens += chunk_tokens
+
+    <span class="keyword">return</span> <span class="string">"\n"</span>.join(context_parts)</code></pre>
+
+            <h3>Prompt Template</h3>
+            <pre><code><span class="comment"># Cognify's RAG prompt structure</span>
+PROMPT_TEMPLATE = <span class="string">"""You are an AI code assistant. Use the following code context to answer the user's question.
+
+## Relevant Code Context
+{context}
+
+## User Question
+{question}
+
+## Instructions
+- Reference specific files and line numbers when applicable
+- If the context doesn't contain enough information, say so
+- Provide code examples when helpful
+"""</span>
+
+<span class="comment"># Final prompt sent to LLM</span>
+prompt = PROMPT_TEMPLATE.format(
+    context=build_context(search_results),
+    question=user_query
+)</code></pre>
+
+            <h3>Context Optimization Techniques</h3>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>🎯 Relevance Filtering</h4>
+                    <p>Only include chunks above a similarity threshold (e.g., > 0.5)</p>
+                    <pre style="font-size: 0.8rem;"><code>results = [r for r in results if r.score > 0.5]</code></pre>
+                </div>
+                <div class="feature-box green">
+                    <h4>📊 Deduplication</h4>
+                    <p>Remove overlapping chunks from the same file</p>
+                    <pre style="font-size: 0.8rem;"><code>seen_files = set()
+unique = [r for r in results if r.file not in seen_files]</code></pre>
+                </div>
+                <div class="feature-box orange">
+                    <h4>📏 Token Management</h4>
+                    <p>Respect LLM context window limits</p>
+                    <pre style="font-size: 0.8rem;"><code># GPT-4: 8K-128K tokens
+# Ollama: 2K-8K typical
+max_context = 4000  # Leave room for response</code></pre>
+                </div>
+                <div class="feature-box">
+                    <h4>🔀 Reordering</h4>
+                    <p>Put most relevant chunks first (LLMs attend more to beginning)</p>
+                    <pre style="font-size: 0.8rem;"><code>results.sort(key=lambda r: r.score, reverse=True)</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- LLM Integration Section -->
+        <section id="llm-integration" class="card">
+            <h2>🤖 LLM Integration — The Generation Layer</h2>
+
+            <p>Cognify supports multiple LLM providers. The RAG context is sent along with the user query to generate informed responses.</p>
+
+            <div class="architecture">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <strong>Multi-Provider LLM Architecture</strong>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Input</span>
+                    <div class="arch-box">System Prompt</div>
+                    <div class="arch-box db">RAG Context</div>
+                    <div class="arch-box">User Query</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Provider</span>
+                    <div class="arch-box llm">Ollama (Local)</div>
+                    <div class="arch-box llm">OpenAI API</div>
+                    <div class="arch-box llm">Google Gemini</div>
+                    <div class="arch-box llm">Groq</div>
+                </div>
+                <div class="arch-layer">
+                    <span style="width: 100px; color: var(--text-muted);">Output</span>
+                    <div class="arch-box" style="border-color: var(--secondary);">Generated Response</div>
+                </div>
+            </div>
+
+            <h3>Provider Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Models</th>
+                        <th>Context Window</th>
+                        <th>Speed</th>
+                        <th>Privacy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Ollama</strong> (Local)</td>
+                        <td>Llama 3, Mistral, CodeLlama</td>
+                        <td>2K-8K</td>
+                        <td>Depends on hardware</td>
+                        <td>✅ 100% local</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OpenAI</strong></td>
+                        <td>GPT-4, GPT-4 Turbo, GPT-3.5</td>
+                        <td>8K-128K</td>
+                        <td>⚡ Fast</td>
+                        <td>☁️ Cloud</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Gemini</strong></td>
+                        <td>Gemini Pro, Gemini Ultra</td>
+                        <td>32K-1M</td>
+                        <td>⚡ Fast</td>
+                        <td>☁️ Cloud</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Groq</strong></td>
+                        <td>Llama 3, Mixtral</td>
+                        <td>8K-32K</td>
+                        <td>⚡⚡ Fastest</td>
+                        <td>☁️ Cloud</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>LangChain Integration</h3>
+            <pre><code><span class="keyword">from</span> langchain_community.llms <span class="keyword">import</span> Ollama
+<span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI
+<span class="keyword">from</span> langchain_google_genai <span class="keyword">import</span> ChatGoogleGenerativeAI
+
+<span class="keyword">class</span> <span class="class">LLMFactory</span>:
+    <span class="string">"""Factory for creating LLM instances based on provider."""</span>
+
+    <span class="decorator">@staticmethod</span>
+    <span class="keyword">def</span> <span class="function">create</span>(provider: <span class="keyword">str</span>, model: <span class="keyword">str</span>, **kwargs):
+        <span class="keyword">if</span> provider == <span class="string">"ollama"</span>:
+            <span class="keyword">return</span> Ollama(model=model, **kwargs)
+
+        <span class="keyword">elif</span> provider == <span class="string">"openai"</span>:
+            <span class="keyword">return</span> ChatOpenAI(
+                model=model,
+                api_key=os.getenv(<span class="string">"OPENAI_API_KEY"</span>),
+                **kwargs
+            )
+
+        <span class="keyword">elif</span> provider == <span class="string">"gemini"</span>:
+            <span class="keyword">return</span> ChatGoogleGenerativeAI(
+                model=model,
+                google_api_key=os.getenv(<span class="string">"GOOGLE_API_KEY"</span>),
+                **kwargs
+            )
+
+        <span class="keyword">elif</span> provider == <span class="string">"groq"</span>:
+            <span class="keyword">return</span> ChatGroq(
+                model=model,
+                api_key=os.getenv(<span class="string">"GROQ_API_KEY"</span>),
+                **kwargs
+            )</code></pre>
+
+            <h3>RAG + LLM Flow</h3>
+            <pre><code><span class="keyword">async def</span> <span class="function">smart_chat</span>(query: <span class="keyword">str</span>, search_context: <span class="keyword">str</span>) -> <span class="keyword">str</span>:
+    <span class="string">"""Complete RAG pipeline: search → context → LLM → response."""</span>
+
+    <span class="comment"># 1. Build the prompt with RAG context</span>
+    prompt = <span class="string">f"""You are a helpful code assistant.
+
+## Code Context (from codebase search)
+{search_context}
+
+## User Question
+{query}
+
+Provide a helpful, accurate response based on the code context above."""</span>
+
+    <span class="comment"># 2. Get LLM instance</span>
+    llm = LLMFactory.create(
+        provider=config.provider,  <span class="comment"># "ollama", "openai", etc.</span>
+        model=config.model         <span class="comment"># "llama3", "gpt-4", etc.</span>
+    )
+
+    <span class="comment"># 3. Generate response</span>
+    response = <span class="keyword">await</span> llm.ainvoke(prompt)
+
+    <span class="keyword">return</span> response.content</code></pre>
+
+            <div class="callout success">
+                <span class="icon">🔒</span>
+                <div>
+                    <strong>Privacy Note</strong><br>
+                    With Ollama, your code never leaves your machine. For cloud providers, only the relevant code chunks (not your entire codebase) are sent.
+                </div>
+            </div>
+        </section>
+
+        <section id="search" class="card">
+            <h2>🔍 Semantic Search in Action</h2>
+
+            <h3>Interactive Demo</h3>
+            <div class="demo-container">
+                <input type="text" class="demo-input" id="search-query" placeholder="Try: 'user authentication logic' or 'error handling'">
+                <button class="demo-btn" onclick="simulateSearch()">🔍 Search</button>
+                <div id="search-results" class="demo-results"></div>
+            </div>
+
+            <h3>How Search Works</h3>
+            <ol style="padding-left: 1.5rem; margin: 1rem 0;">
+                <li><strong>Query Embedding:</strong> Your query is converted to a 384-dim vector</li>
+                <li><strong>Similarity Search:</strong> ChromaDB finds nearest vectors using cosine similarity</li>
+                <li><strong>Filtering:</strong> Optional language/file filters applied</li>
+                <li><strong>Ranking:</strong> Results sorted by similarity score (0-1)</li>
+                <li><strong>Context Building:</strong> Top-K results formatted for LLM</li>
+            </ol>
+
+            <h3>CLI Commands</h3>
+            <pre><code><span class="comment"># Index your codebase</span>
+$ cognify index .
+
+<span class="comment"># Search for code</span>
+$ cognify search <span class="string">"authentication middleware"</span>
+
+<span class="comment"># Search with filters</span>
+$ cognify search <span class="string">"API routes"</span> --language python --top-k <span class="number">5</span>
+
+<span class="comment"># Smart chat with auto-context</span>
+$ cognify smart-chat <span class="string">"How does user login work?"</span></code></pre>
+        </section>
+
+        <!-- Integration Section -->
+        <section id="integration" class="card">
+            <h2>🔗 VSCode Extension Integration</h2>
+
+            <p>The VSCode extension automatically leverages RAG for enhanced chat responses:</p>
+
+            <div class="flow-diagram">
+                <div class="flow-box muted">User Message</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Check Index</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box secondary">Search Codebase</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box accent">Build Context</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box" style="background: #8b5cf6;">LLM Call</div>
+            </div>
+
+            <h3>Auto-Context Flow</h3>
+            <pre><code><span class="comment">// chatViewProvider.ts</span>
+<span class="keyword">if</span> (<span class="variable">this</span>._indexState.status === <span class="string">'indexed'</span>) {
+    <span class="comment">// Automatically search for relevant code</span>
+    <span class="variable">searchContext</span> = <span class="keyword">await</span> <span class="variable">this</span>._cognifyRunner.searchCodebase(text, {
+        topK: <span class="number">5</span>,  <span class="comment">// Get top 5 most relevant chunks</span>
+        language: language
+    });
+}
+
+<span class="comment">// Include search context in LLM call</span>
+<span class="keyword">const</span> result = <span class="keyword">await</span> <span class="variable">this</span>._cognifyRunner.smartChat(text, {
+    context: contextToUse,
+    searchContext: searchContext,  <span class="comment">// ← RAG results here!</span>
+    history: conversationHistory
+});</code></pre>
+
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>📊 Index Status</h4>
+                    <p>Extension checks if workspace is indexed on startup and prompts to index if needed.</p>
+                </div>
+                <div class="feature-box green">
+                    <h4>🔄 Auto-Refresh</h4>
+                    <p>Index status refreshed periodically. Re-index when files change.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhancements Section -->
+        <section id="enhancements" class="card">
+            <h2>🚀 RAG Enhancements</h2>
+
+            <p>Current implementation is solid. Here are advanced techniques to consider:</p>
+
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h4>1️⃣ Hybrid Search</h4>
+                    <p><strong>What:</strong> Combine semantic + keyword (BM25) search</p>
+                    <p><strong>Why:</strong> Better for exact matches (function names, error codes)</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 30%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Medium</small>
+                </div>
+
+                <div class="feature-box green">
+                    <h4>2️⃣ Re-ranking</h4>
+                    <p><strong>What:</strong> Use cross-encoder to re-rank retrieved results</p>
+                    <p><strong>Why:</strong> Higher precision, better relevance</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Easy</small>
+                </div>
+
+                <div class="feature-box orange">
+                    <h4>3️⃣ Code-Specific Embeddings</h4>
+                    <p><strong>What:</strong> Use CodeBERT or StarCoder embeddings</p>
+                    <p><strong>Why:</strong> Better understanding of code semantics</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Medium</small>
+                </div>
+
+                <div class="feature-box red">
+                    <h4>4️⃣ Graph-Based RAG</h4>
+                    <p><strong>What:</strong> Build code dependency graph for retrieval</p>
+                    <p><strong>Why:</strong> Understand imports, call chains, class hierarchies</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 70%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Hard</small>
+                </div>
+
+                <div class="feature-box">
+                    <h4>5️⃣ Agentic RAG</h4>
+                    <p><strong>What:</strong> Agent decides what/when to search iteratively</p>
+                    <p><strong>Why:</strong> Complex multi-step reasoning</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Hard</small>
+                </div>
+
+                <div class="feature-box green">
+                    <h4>6️⃣ Query Expansion</h4>
+                    <p><strong>What:</strong> LLM rewrites query for better retrieval</p>
+                    <p><strong>Why:</strong> Handles vague or ambiguous queries</p>
+                    <p><strong>Impact:</strong> ⭐⭐⭐</p>
+                    <div class="progress-bar"><div class="progress-fill" style="width: 25%;"></div></div>
+                    <small style="color: var(--text-muted);">Difficulty: Easy</small>
+                </div>
+            </div>
+
+            <h3>Enhancement Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Enhancement</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>Latency</th>
+                        <th>Complexity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Current (Semantic Only)</td>
+                        <td>⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>⚡ Fast</td>
+                        <td>Simple</td>
+                    </tr>
+                    <tr>
+                        <td>+ Hybrid Search</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>⚡ Fast</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>+ Re-ranking</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>🐢 +100ms</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>+ Code Embeddings</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>🐢 Slower</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>+ Graph RAG</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>🐢🐢 Slowest</td>
+                        <td>Complex</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Tutorial Section -->
+        <section id="tutorial" class="card">
+            <h2>📖 Hands-On Tutorial</h2>
+
+            <h3>Step 1: Index Your Codebase</h3>
+            <pre><code><span class="comment"># Navigate to your project</span>
+$ cd /path/to/your/project
+
+<span class="comment"># Index the codebase (creates .ai-assistant-index/)</span>
+$ cognify index .
+
+<span class="comment"># Output:</span>
+Found <span class="number">245</span> files to index...
+  Indexed <span class="number">100</span>/<span class="number">245</span> files...
+  Indexed <span class="number">200</span>/<span class="number">245</span> files...
+✓ Indexed <span class="number">245</span> files (<span class="number">1,892</span> chunks)</code></pre>
+
+            <h3>Step 2: Search Your Code</h3>
+            <pre><code><span class="comment"># Basic search</span>
+$ cognify search <span class="string">"user authentication"</span>
+
+<span class="comment"># Search with filters</span>
+$ cognify search <span class="string">"error handling"</span> --language python --top-k <span class="number">5</span>
+
+<span class="comment"># Search returns:</span>
+┌─────────────────────────────────────────────────────┐
+│ 📄 src/auth/login.py (lines <span class="number">45</span>-<span class="number">89</span>)                 │
+│ Score: <span class="number">0.87</span>                                         │
+│ ─────────────────────────────────────────────────── │
+│ <span class="keyword">class</span> <span class="class">LoginHandler</span>:                                │
+│     <span class="keyword">def</span> <span class="function">authenticate</span>(<span class="variable">self</span>, username, password):      │
+│         ...                                         │
+└─────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>Step 3: Smart Chat with Auto-Context</h3>
+            <pre><code><span class="comment"># Chat with automatic code context</span>
+$ cognify smart-chat <span class="string">"How does the login flow work?"</span>
+
+<span class="comment"># The LLM receives:</span>
+<span class="comment"># 1. Your question</span>
+<span class="comment"># 2. Top 5 relevant code chunks from RAG</span>
+<span class="comment"># 3. Conversation history</span></code></pre>
+
+            <h3>Step 4: Use in VSCode</h3>
+            <div class="callout success">
+                <span class="icon">💡</span>
+                <div>
+                    Open the Cognify AI chat panel in VSCode. If your workspace is indexed, every chat message automatically searches for relevant code and includes it in the context!
+                </div>
+            </div>
+
+            <h3>Best Practices</h3>
+            <ul style="padding-left: 1.5rem;">
+                <li><strong>Re-index after major changes:</strong> Run <code>cognify index .</code> after refactoring</li>
+                <li><strong>Use specific queries:</strong> "user authentication middleware" > "auth"</li>
+                <li><strong>Check index status:</strong> <code>cognify index --status</code></li>
+                <li><strong>Adjust top-k:</strong> More results = more context, but also more noise</li>
+            </ul>
+        </section>
+
+        <!-- Summary Section -->
+        <section class="card" style="background: var(--gradient); border: none;">
+            <h2 style="color: white;">🎯 Summary</h2>
+            <div class="grid-3" style="margin-top: 1rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem;">✂️</div>
+                    <h4 style="color: white;">Chunk</h4>
+                    <p style="opacity: 0.9;">Split code into semantic units</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem;">🔢</div>
+                    <h4 style="color: white;">Embed</h4>
+                    <p style="opacity: 0.9;">Convert to 384-dim vectors</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem;">🔍</div>
+                    <h4 style="color: white;">Search</h4>
+                    <p style="opacity: 0.9;">Find similar code via cosine</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="#overview" style="background: white; color: var(--primary); padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">↑ Back to Top</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Built with ❤️ for <strong>Cognify AI</strong></p>
+        <p style="margin-top: 0.5rem;">RAG Deep Dive Guide • 2025</p>
+    </footer>
+
+    <script>
+        // Tab switching
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Simulated search demo
+        function simulateSearch() {
+            const query = document.getElementById('search-query').value || 'user authentication';
+            const results = document.getElementById('search-results');
+
+            results.innerHTML = '<p style="color: var(--text-muted);">🔍 Searching...</p>';
+
+            setTimeout(() => {
+                results.innerHTML = `
+                    <div style="background: var(--bg-card); border-radius: 8px; padding: 1rem; margin-top: 1rem; border-left: 4px solid var(--secondary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>📄 src/auth/handler.py (lines 23-67)</strong>
+                            <span style="color: var(--secondary);">Score: 0.89</span>
+                        </div>
+                        <code style="color: var(--text-muted); font-size: 0.85rem;">class AuthHandler: def authenticate(self, user, pwd)...</code>
+                    </div>
+                    <div style="background: var(--bg-card); border-radius: 8px; padding: 1rem; margin-top: 0.5rem; border-left: 4px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>📄 src/middleware/auth.py (lines 1-45)</strong>
+                            <span style="color: var(--primary);">Score: 0.76</span>
+                        </div>
+                        <code style="color: var(--text-muted); font-size: 0.85rem;">def require_auth(func): @wraps(func) def wrapper...</code>
+                    </div>
+                    <div style="background: var(--bg-card); border-radius: 8px; padding: 1rem; margin-top: 0.5rem; border-left: 4px solid var(--accent);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>📄 tests/test_auth.py (lines 12-56)</strong>
+                            <span style="color: var(--accent);">Score: 0.71</span>
+                        </div>
+                        <code style="color: var(--text-muted); font-size: 0.85rem;">class TestAuthentication: def test_valid_login(self)...</code>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                        ✅ Found <strong>3</strong> relevant chunks for "<em>${query}</em>"
+                    </p>
+                `;
+            }, 800);
+        }
+
+        // Copy button functionality
+        document.querySelectorAll('pre').forEach(pre => {
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = 'Copy';
+            btn.onclick = () => {
+                const code = pre.querySelector('code')?.textContent || pre.textContent;
+                navigator.clipboard.writeText(code);
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            };
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+        });
+
+        // Active nav link
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
+

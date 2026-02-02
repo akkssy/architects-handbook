@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete OAuth 2.0 and SSO Authentication Guide - Deep dive into authorization flows, OpenID Connect, SAML, and .NET Core implementation for senior engineers">
+    <meta name="keywords" content="OAuth 2.0, SSO, Single Sign-On, OpenID Connect, OIDC, SAML, JWT, Authentication, Authorization, Identity Provider, ASP.NET Core, Duende IdentityServer">
+    <meta name="author" content="Authentication & Security Reference">
+    <title>OAuth 2.0 & SSO Complete Guide | Authentication Deep Dive</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-code: #1e293b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+        .dark-mode {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-code: #0d1117;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 15px; position: relative; }
+        header p { font-size: 1.2rem; opacity: 0.95; position: relative; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 5px 3px;
+        }
+        .badge-security { background: #fef2f2; color: #991b1b; }
+        .badge-dotnet { background: #ede9fe; color: #5b21b6; }
+        .badge-advanced { background: #ecfdf5; color: #065f46; }
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover { transform: scale(1.05); }
+        /* Navigation */
+        nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        nav ul { list-style: none; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        nav a:hover { background: var(--primary); color: white; }
+        /* Sections */
+        section {
+            background: var(--bg-secondary);
+            margin: 30px 0;
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        section h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        section h3 {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            margin: 30px 0 15px;
+            padding-left: 15px;
+            border-left: 4px solid var(--secondary);
+        }
+        section h4 {
+            color: var(--primary-dark);
+            font-size: 1.15rem;
+            margin: 20px 0 10px;
+        }
+        p { margin: 15px 0; }
+        /* Collapsible */
+        .collapsible {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .collapsible-header:hover { background: var(--border); }
+        .collapsible-header::after { content: '▼'; font-size: 0.8rem; transition: transform 0.3s; }
+        .collapsible.active .collapsible-header::after { transform: rotate(180deg); }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            padding: 0 20px;
+        }
+        .collapsible.active .collapsible-content {
+            max-height: 10000px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        /* Code Blocks */
+        pre {
+            background: var(--bg-code);
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+        }
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--danger);
+        }
+        pre code { background: transparent; padding: 0; color: #e2e8f0; }
+        /* Syntax Highlighting */
+        .keyword { color: #c586c0; }
+        .type { color: #4ec9b0; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        .attribute { color: #9cdcfe; }
+        .operator { color: #d4d4d4; }
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:hover { background: var(--bg-primary); }
+        /* Info Boxes */
+        .info-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .info-box.tip { background: #ecfdf5; border-left: 4px solid var(--success); }
+        .info-box.warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .info-box.danger { background: #fef2f2; border-left: 4px solid var(--danger); }
+        .info-box.info { background: #eff6ff; border-left: 4px solid var(--info); }
+        .dark-mode .info-box.tip { background: #064e3b; }
+        .dark-mode .info-box.warning { background: #78350f; }
+        .dark-mode .info-box.danger { background: #7f1d1d; }
+        .dark-mode .info-box.info { background: #1e3a5f; }
+        .info-box-icon { font-size: 1.5rem; }
+        .info-box-content h4 { margin: 0 0 5px; }
+        /* Diagram Container */
+        .diagram-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .diagram-container h4 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .mermaid { display: flex; justify-content: center; }
+        /* Cards Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+        .card h4 { color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .card p { color: var(--text-secondary); font-size: 0.95rem; }
+        /* Comparison Table */
+        .comparison-table { font-size: 0.9rem; }
+        .comparison-table th { text-align: center; }
+        .comparison-table td:first-child { font-weight: 600; }
+        .check { color: var(--success); font-weight: bold; }
+        .cross { color: var(--danger); font-weight: bold; }
+
+        /* ============================================
+           ANIMATION SYSTEM - 60fps Smooth Animations
+           ============================================ */
+
+        /* Animation Controls */
+        .animation-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .animation-controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-play { background: var(--success); color: white; }
+        .btn-pause { background: var(--warning); color: white; }
+        .btn-reset { background: var(--secondary); color: white; }
+        .btn-step { background: var(--info); color: white; }
+        .animation-controls button:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .animation-controls button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .animation-speed {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .animation-speed input[type="range"] {
+            width: 100px;
+            accent-color: var(--primary);
+        }
+
+        /* Flow Animation Container */
+        .flow-animation {
+            position: relative;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            min-height: 400px;
+            overflow: hidden;
+        }
+
+        /* Animated Entities */
+        .entity {
+            position: absolute;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: var(--shadow);
+        }
+        .entity-user { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .entity-browser { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
+        .entity-client { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .entity-auth { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .entity-resource { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+
+        .entity.pulse {
+            animation: entityPulse 0.5s ease;
+        }
+        @keyframes entityPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+        }
+
+        /* Animated Arrows/Packets */
+        .packet {
+            position: absolute;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 20;
+            opacity: 0;
+            transform: scale(0);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .packet.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .packet-request { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+        .packet-response { background: #dcfce7; color: #166534; border: 2px solid #22c55e; }
+        .packet-token { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
+        .packet-code { background: #f3e8ff; color: #6b21a8; border: 2px solid #a855f7; }
+        .packet-error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+
+        /* Animated Connection Lines */
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: var(--border);
+            transform-origin: left center;
+            z-index: 5;
+        }
+        .connection-line.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            animation: lineFlow 1s ease-in-out;
+        }
+        @keyframes lineFlow {
+            0% { clip-path: inset(0 100% 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .step-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .step-dot.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.2);
+        }
+        .step-dot.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Step Description */
+        .step-description {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+        .step-description h4 {
+            color: var(--primary);
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-description p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+        .step-description code {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-code);
+            color: #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        /* JWT Decoder Animation */
+        .jwt-decoder {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .jwt-input-container {
+            margin-bottom: 20px;
+        }
+        .jwt-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 80px;
+        }
+        .jwt-parts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .jwt-parts { grid-template-columns: 1fr; }
+        }
+        .jwt-part {
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.5s ease;
+            opacity: 0.3;
+            transform: translateY(20px);
+        }
+        .jwt-part.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .jwt-part.header { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .jwt-part.payload { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
+        .jwt-part.signature { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .jwt-part h4 {
+            margin: 0 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .jwt-part pre {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        /* Signature Verification Animation */
+        .signature-verify {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .verify-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+        .verify-step.active {
+            opacity: 1;
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+        .verify-step.success {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+        }
+        .verify-step.error {
+            border-color: var(--danger);
+            background: var(--danger);
+            color: white;
+        }
+        .verify-arrow {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* PKCE Animation */
+        .pkce-animation {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .pkce-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            margin: 15px 0;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border-left: 4px solid var(--border);
+            transition: all 0.5s ease;
+            opacity: 0.5;
+        }
+        .pkce-step.active {
+            opacity: 1;
+            border-left-color: var(--primary);
+            transform: translateX(10px);
+        }
+        .pkce-step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .pkce-step-content {
+            flex: 1;
+        }
+        .pkce-step-content h4 {
+            margin: 0 0 8px;
+            color: var(--primary);
+        }
+        .pkce-value {
+            font-family: 'Cascadia Code', monospace;
+            background: var(--bg-code);
+            color: #10b981;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            word-break: break-all;
+            opacity: 0;
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: all 0.3s ease;
+        }
+        .pkce-value.revealed {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        /* SSO Animation */
+        .sso-animation {
+            position: relative;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            min-height: 350px;
+        }
+        .sso-apps {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        .sso-app {
+            width: 120px;
+            height: 120px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        .sso-app.app1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .sso-app.app2 { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .sso-app.app3 { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .sso-app.idp { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; width: 150px; }
+        .sso-app.active {
+            transform: scale(1.1);
+            border-color: white;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+        .sso-app.authenticated::after {
+            content: '✓';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .sso-app { position: relative; }
+
+        .sso-user {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ec4899, #be185d);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 30;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .sso-token {
+            position: absolute;
+            padding: 6px 12px;
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #92400e;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 25;
+        }
+        .sso-token.visible {
+            opacity: 1;
+        }
+
+        /* Token Refresh Animation */
+        .token-refresh-animation {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .token-timeline {
+            position: relative;
+            height: 100px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .token-bar {
+            position: absolute;
+            height: 40px;
+            top: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.5s ease;
+        }
+        .token-bar.access {
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        }
+        .token-bar.refresh {
+            background: linear-gradient(90deg, #10b981, #059669);
+            top: 75px;
+            height: 20px;
+            font-size: 0.75rem;
+        }
+        .token-bar.expired {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        .time-marker {
+            position: absolute;
+            bottom: 5px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            transform: translateX(-50%);
+        }
+        .current-time {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--danger);
+            transition: left 0.1s linear;
+        }
+        .current-time::before {
+            content: 'NOW';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        /* Flow Steps */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .flow-step {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .step-content h4 { margin: 0 0 5px; }
+        .step-content p { margin: 0; color: var(--text-secondary); }
+        /* TOC Sidebar */
+        .toc-sidebar {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            padding: 15px;
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 99;
+            width: 60px;
+            transition: width 0.3s;
+        }
+        .toc-sidebar:hover { width: 280px; }
+        .toc-sidebar:hover .toc-text { display: inline; }
+        .toc-text { display: none; margin-left: 10px; }
+        .toc-link {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 5px 0;
+            white-space: nowrap;
+        }
+        .toc-link:hover { background: var(--primary); color: white; }
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+        footer a { color: var(--primary); }
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            section { padding: 25px; }
+            nav ul { gap: 5px; }
+            nav a { padding: 6px 10px; font-size: 0.8rem; }
+            .toc-sidebar { display: none; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+        @media print {
+            nav, .theme-toggle, .toc-sidebar { display: none; }
+            section { break-inside: avoid; page-break-inside: avoid; }
+            .collapsible-content { max-height: none !important; padding: 20px !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light mode">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-text">Dark</span>
+    </button>
+
+    <!-- TOC Sidebar -->
+    <nav class="toc-sidebar" aria-label="Table of contents">
+        <a href="#overview" class="toc-link">📋<span class="toc-text">Overview</span></a>
+        <a href="#oauth-concepts" class="toc-link">🔑<span class="toc-text">OAuth 2.0 Concepts</span></a>
+        <a href="#oauth-flows" class="toc-link">🔄<span class="toc-text">OAuth Flows</span></a>
+        <a href="#sso-concepts" class="toc-link">🎫<span class="toc-text">SSO Concepts</span></a>
+        <a href="#oidc-saml" class="toc-link">🔐<span class="toc-text">OIDC & SAML</span></a>
+        <a href="#jwt-tokens" class="toc-link">📜<span class="toc-text">JWT & Tokens</span></a>
+        <a href="#architecture" class="toc-link">🏗️<span class="toc-text">Architecture</span></a>
+        <a href="#dotnet-impl" class="toc-link">💻<span class="toc-text">.NET Implementation</span></a>
+        <a href="#security" class="toc-link">🛡️<span class="toc-text">Security Best Practices</span></a>
+        <a href="#troubleshooting" class="toc-link">🔧<span class="toc-text">Troubleshooting</span></a>
+        <a href="#references" class="toc-link">📚<span class="toc-text">References</span></a>
+    </nav>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>🔐 OAuth 2.0 & SSO Complete Guide</h1>
+            <p>Deep Dive into Modern Authentication & Authorization for Enterprise Applications</p>
+            <p style="margin-top: 10px; font-size: 1rem; opacity: 0.9;">
+                For Senior Engineers • Security Architects • Tech Leads • Solution Architects
+            </p>
+            <p style="margin-top: 15px;">
+                <span class="badge badge-security">Security Focused</span>
+                <span class="badge badge-dotnet">.NET Core Examples</span>
+                <span class="badge badge-advanced">Production Ready</span>
+            </p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#overview">📋 Overview</a></li>
+                <li><a href="#oauth-concepts">🔑 OAuth 2.0</a></li>
+                <li><a href="#sso-concepts">🎫 SSO</a></li>
+                <li><a href="#oidc-saml">🔐 OIDC & SAML</a></li>
+                <li><a href="#jwt-tokens">📜 JWT</a></li>
+                <li><a href="#architecture">🏗️ Architecture</a></li>
+                <li><a href="#dotnet-impl">💻 .NET Core</a></li>
+                <li><a href="#security">🛡️ Security</a></li>
+                <li><a href="#troubleshooting">🔧 Troubleshooting</a></li>
+                <li><a href="#references">📚 References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- OVERVIEW SECTION -->
+        <section id="overview">
+            <h2>📋 Overview</h2>
+            <p>This comprehensive guide covers OAuth 2.0 and Single Sign-On (SSO) authentication in depth, providing both conceptual understanding and practical implementation guidance. Designed for senior engineers with 5+ years of experience who need a deep understanding of modern authentication systems.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🔑 OAuth 2.0</h4>
+                    <p>Industry-standard protocol for authorization. Enables secure delegated access to resources without sharing credentials.</p>
+                </div>
+                <div class="card">
+                    <h4>🎫 Single Sign-On (SSO)</h4>
+                    <p>Authentication scheme allowing users to access multiple applications with one set of credentials.</p>
+                </div>
+                <div class="card">
+                    <h4>🔐 OpenID Connect</h4>
+                    <p>Identity layer built on OAuth 2.0. Adds authentication to OAuth's authorization capabilities.</p>
+                </div>
+                <div class="card">
+                    <h4>📜 SAML 2.0</h4>
+                    <p>XML-based standard for exchanging authentication and authorization data between parties.</p>
+                </div>
+            </div>
+
+            <h3>Key Terminology Quick Reference</h3>
+            <table>
+                <thead>
+                    <tr><th>Term</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Resource Owner</strong></td><td>The user who owns the data and grants access</td><td>End user (you)</td></tr>
+                    <tr><td><strong>Client</strong></td><td>Application requesting access to resources</td><td>Your web app, mobile app</td></tr>
+                    <tr><td><strong>Authorization Server</strong></td><td>Issues tokens after authenticating the user</td><td>Azure AD, Auth0, Duende</td></tr>
+                    <tr><td><strong>Resource Server</strong></td><td>Hosts protected resources (APIs)</td><td>Your backend API</td></tr>
+                    <tr><td><strong>Identity Provider (IdP)</strong></td><td>Manages user identities and authentication</td><td>Okta, Azure AD, Google</td></tr>
+                    <tr><td><strong>Service Provider (SP)</strong></td><td>Application that relies on IdP for authentication</td><td>Your application</td></tr>
+                    <tr><td><strong>Access Token</strong></td><td>Credential used to access protected resources</td><td>JWT or opaque token</td></tr>
+                    <tr><td><strong>Refresh Token</strong></td><td>Long-lived token used to obtain new access tokens</td><td>Stored securely server-side</td></tr>
+                    <tr><td><strong>ID Token</strong></td><td>Contains user identity information (OIDC)</td><td>JWT with user claims</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- OAUTH 2.0 CONCEPTS SECTION -->
+        <section id="oauth-concepts">
+            <h2>🔑 OAuth 2.0 Deep Dive</h2>
+            <p>OAuth 2.0 is an <strong>authorization framework</strong> (not authentication!) that enables applications to obtain limited access to user accounts on an HTTP service. It works by delegating user authentication to the service that hosts the user account and authorizing third-party applications to access that account.</p>
+
+            <div class="info-box info">
+                <span class="info-box-icon">💡</span>
+                <div class="info-box-content">
+                    <h4>Authorization vs Authentication</h4>
+                    <p><strong>OAuth 2.0 is about authorization</strong> (what you can do), not authentication (who you are). OpenID Connect adds the authentication layer on top of OAuth 2.0.</p>
+                </div>
+            </div>
+
+            <h3>OAuth 2.0 Grant Types</h3>
+            <p>OAuth 2.0 defines several grant types (flows) for different use cases:</p>
+
+            <div class="collapsible">
+                <div class="collapsible-header">1. Authorization Code Grant (with PKCE) - Recommended for Most Apps</div>
+                <div class="collapsible-content">
+                    <p><strong>Best for:</strong> Server-side web apps, SPAs, mobile apps</p>
+                    <p><strong>Security Level:</strong> High (with PKCE)</p>
+
+                    <h4>How It Works:</h4>
+                    <div class="flow-steps">
+                        <div class="flow-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <h4>Authorization Request</h4>
+                                <p>Client redirects user to authorization server with client_id, redirect_uri, scope, state, and PKCE code_challenge</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <h4>User Authentication</h4>
+                                <p>User authenticates with the authorization server and grants consent</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <h4>Authorization Code</h4>
+                                <p>Authorization server redirects back with authorization code and state parameter</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">4</span>
+                            <div class="step-content">
+                                <h4>Token Exchange</h4>
+                                <p>Client exchanges code for tokens using code_verifier (PKCE)</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">5</span>
+                            <div class="step-content">
+                                <h4>Access Resource</h4>
+                                <p>Client uses access token to call protected APIs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>PKCE (Proof Key for Code Exchange)</h4>
+                    <p>PKCE prevents authorization code interception attacks, especially for public clients:</p>
+                    <pre data-lang="plaintext"><code><span class="comment">// 1. Generate a random code_verifier (43-128 characters)</span>
+code_verifier = random_string(64)
+
+<span class="comment">// 2. Create code_challenge from code_verifier</span>
+code_challenge = BASE64URL(SHA256(code_verifier))
+
+<span class="comment">// 3. Send code_challenge in authorization request</span>
+GET /authorize?
+  response_type=code&
+  client_id=my-app&
+  redirect_uri=https://app.example.com/callback&
+  scope=openid profile&
+  state=abc123&
+  code_challenge=<span class="string">E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM</span>&
+  code_challenge_method=S256
+
+<span class="comment">// 4. Send code_verifier in token request</span>
+POST /token
+  grant_type=authorization_code&
+  code=AUTH_CODE&
+  redirect_uri=https://app.example.com/callback&
+  client_id=my-app&
+  code_verifier=<span class="string">dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk</span></code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">2. Client Credentials Grant - Machine-to-Machine</div>
+                <div class="collapsible-content">
+                    <p><strong>Best for:</strong> Service-to-service communication, daemons, backend services</p>
+                    <p><strong>Security Level:</strong> High (requires client secret)</p>
+                    <p><strong>No User Involved:</strong> This flow is for applications acting on their own behalf, not on behalf of a user.</p>
+
+                    <pre data-lang="http"><code><span class="comment">// Token Request</span>
+POST /token HTTP/1.1
+Host: auth.example.com
+Content-Type: application/x-www-form-urlencoded
+
+<span class="attribute">grant_type</span>=<span class="string">client_credentials</span>&
+<span class="attribute">client_id</span>=<span class="string">backend-service</span>&
+<span class="attribute">client_secret</span>=<span class="string">super-secret-key</span>&
+<span class="attribute">scope</span>=<span class="string">api.read api.write</span>
+
+<span class="comment">// Response</span>
+{
+  <span class="string">"access_token"</span>: <span class="string">"eyJhbGciOiJSUzI1NiIsInR5..."</span>,
+  <span class="string">"token_type"</span>: <span class="string">"Bearer"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">3600</span>,
+  <span class="string">"scope"</span>: <span class="string">"api.read api.write"</span>
+}</code></pre>
+
+                    <div class="info-box warning">
+                        <span class="info-box-icon">⚠️</span>
+                        <div class="info-box-content">
+                            <h4>Security Note</h4>
+                            <p>Never expose client secrets in client-side code. Store them in secure configuration (Azure Key Vault, AWS Secrets Manager, etc.)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">3. Resource Owner Password Credentials (ROPC) - Legacy Only</div>
+                <div class="collapsible-content">
+                    <p><strong>Best for:</strong> Legacy applications, migration scenarios only</p>
+                    <p><strong>Security Level:</strong> LOW - Avoid if possible</p>
+
+                    <div class="info-box danger">
+                        <span class="info-box-icon">🚨</span>
+                        <div class="info-box-content">
+                            <h4>Deprecated - Do Not Use</h4>
+                            <p>ROPC is considered insecure and should only be used for migrating legacy applications. It exposes user credentials to the client application.</p>
+                        </div>
+                    </div>
+
+                    <pre data-lang="http"><code><span class="comment">// NOT RECOMMENDED - Legacy only</span>
+POST /token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+<span class="attribute">grant_type</span>=<span class="string">password</span>&
+<span class="attribute">username</span>=<span class="string">user@example.com</span>&
+<span class="attribute">password</span>=<span class="string">user-password</span>&  <span class="comment">// Credentials exposed to client!</span>
+<span class="attribute">client_id</span>=<span class="string">my-app</span>&
+<span class="attribute">scope</span>=<span class="string">openid profile</span></code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">4. Device Authorization Grant - IoT & Limited Input Devices</div>
+                <div class="collapsible-content">
+                    <p><strong>Best for:</strong> Smart TVs, IoT devices, CLI tools, devices without browsers</p>
+                    <p><strong>Security Level:</strong> Medium-High</p>
+
+                    <div class="flow-steps">
+                        <div class="flow-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <h4>Device requests codes</h4>
+                                <p>Device calls /device_authorization endpoint to get device_code and user_code</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <h4>Display to user</h4>
+                                <p>Device shows: "Go to https://auth.example.com/device and enter code: WDJB-MJHT"</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <h4>User authenticates</h4>
+                                <p>User visits URL on their phone/computer, enters code, and authenticates</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <span class="step-number">4</span>
+                            <div class="step-content">
+                                <h4>Device polls for token</h4>
+                                <p>Device polls token endpoint until user completes authorization</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <pre data-lang="http"><code><span class="comment">// Step 1: Device Authorization Request</span>
+POST /device_authorization HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+<span class="attribute">client_id</span>=<span class="string">smart-tv-app</span>&
+<span class="attribute">scope</span>=<span class="string">openid profile</span>
+
+<span class="comment">// Response</span>
+{
+  <span class="string">"device_code"</span>: <span class="string">"GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNh..."</span>,
+  <span class="string">"user_code"</span>: <span class="string">"WDJB-MJHT"</span>,
+  <span class="string">"verification_uri"</span>: <span class="string">"https://auth.example.com/device"</span>,
+  <span class="string">"verification_uri_complete"</span>: <span class="string">"https://auth.example.com/device?user_code=WDJB-MJHT"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">1800</span>,
+  <span class="string">"interval"</span>: <span class="number">5</span>
+}
+
+<span class="comment">// Step 4: Poll for Token</span>
+POST /token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+<span class="attribute">grant_type</span>=<span class="string">urn:ietf:params:oauth:grant-type:device_code</span>&
+<span class="attribute">device_code</span>=<span class="string">GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNh...</span>&
+<span class="attribute">client_id</span>=<span class="string">smart-tv-app</span></code></pre>
+                </div>
+            </div>
+
+            <h3>OAuth 2.0 Grant Types Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Grant Type</th>
+                        <th>User Interaction</th>
+                        <th>Client Type</th>
+                        <th>Security</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Authorization Code + PKCE</td>
+                        <td>Yes</td>
+                        <td>Public/Confidential</td>
+                        <td><span class="check">✓ High</span></td>
+                        <td>Web apps, SPAs, Mobile</td>
+                    </tr>
+                    <tr>
+                        <td>Client Credentials</td>
+                        <td>No</td>
+                        <td>Confidential only</td>
+                        <td><span class="check">✓ High</span></td>
+                        <td>Machine-to-machine</td>
+                    </tr>
+                    <tr>
+                        <td>Device Code</td>
+                        <td>Yes (separate device)</td>
+                        <td>Public</td>
+                        <td>Medium</td>
+                        <td>IoT, Smart TV, CLI</td>
+                    </tr>
+                    <tr>
+                        <td>ROPC</td>
+                        <td>Yes (credentials)</td>
+                        <td>Confidential</td>
+                        <td><span class="cross">✗ Low</span></td>
+                        <td>Legacy migration only</td>
+                    </tr>
+                    <tr>
+                        <td>Implicit (Deprecated)</td>
+                        <td>Yes</td>
+                        <td>Public</td>
+                        <td><span class="cross">✗ Low</span></td>
+                        <td>Deprecated - use Auth Code + PKCE</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- OAUTH FLOWS DIAGRAMS SECTION -->
+        <section id="oauth-flows">
+            <h2>🔄 OAuth 2.0 Flow Diagrams</h2>
+
+            <h3>Authorization Code Flow with PKCE</h3>
+            <p>The most secure and recommended flow for most applications:</p>
+
+            <div class="diagram-container">
+                <h4>Complete Authorization Code Flow with PKCE</h4>
+                <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as 👤 User
+    participant B as 🌐 Browser
+    participant C as 📱 Client App
+    participant A as 🔐 Authorization Server
+    participant R as 🗄️ Resource Server
+
+    Note over U,R: OAuth 2.0 Authorization Code Flow with PKCE
+
+    U->>B: Click "Login"
+    B->>C: Initiate login
+
+    rect rgb(200, 220, 255)
+        Note over C: Generate PKCE
+        C->>C: Generate code_verifier
+        C->>C: code_challenge = SHA256(verifier)
+    end
+
+    C->>B: Redirect to Auth Server
+    B->>A: /authorize?response_type=code&client_id=xxx&redirect_uri=xxx&scope=openid&state=xyz&code_challenge=xxx
+
+    A->>B: Show login page
+    U->>B: Enter credentials
+    B->>A: Submit credentials
+    A->>A: Validate user
+    A->>B: Show consent
+    U->>B: Grant consent
+
+    rect rgb(200, 255, 200)
+        Note over A: Generate Code
+        A->>A: Create authorization code
+    end
+
+    A->>B: Redirect to callback?code=AUTH_CODE&state=xyz
+    B->>C: Deliver code
+    C->>C: Validate state
+
+    rect rgb(255, 220, 200)
+        Note over C,A: Token Exchange
+        C->>A: POST /token (code + code_verifier)
+        A->>A: Validate verifier
+        A->>C: access_token, refresh_token, id_token
+    end
+
+    rect rgb(220, 255, 220)
+        Note over C,R: API Access
+        C->>R: GET /api (Bearer token)
+        R->>R: Validate JWT
+        R->>C: Protected data
+    end
+                </div>
+            </div>
+
+            <h3>Client Credentials Flow</h3>
+            <p>For service-to-service authentication without user involvement:</p>
+
+            <div class="diagram-container">
+                <h4>Machine-to-Machine Authentication</h4>
+                <div class="mermaid">
+sequenceDiagram
+    participant S1 as 🖥️ Service A (Client)
+    participant A as 🔐 Auth Server
+    participant S2 as 🗄️ Service B (API)
+
+    Note over S1,S2: Client Credentials Flow - No User Involved
+
+    S1->>A: POST /token
+    Note right of S1: grant_type=client_credentials<br/>client_id=service-a<br/>client_secret=xxx<br/>scope=api.read
+
+    A->>A: Validate client credentials
+    A->>S1: access_token (short-lived)
+
+    S1->>S2: GET /api/data
+    Note right of S1: Authorization: Bearer {token}
+
+    S2->>S2: Validate token
+    S2->>S2: Check scopes
+    S2->>S1: Return data
+
+    Note over S1,S2: Token expires, refresh flow
+    S1->>A: POST /token (same request)
+    A->>S1: New access_token
+                </div>
+            </div>
+        </section>
+
+        <!-- SSO CONCEPTS SECTION -->
+        <section id="sso-concepts">
+            <h2>🎫 Single Sign-On (SSO) Deep Dive</h2>
+            <p>SSO is an <strong>authentication scheme</strong> that allows users to log in with a single ID to multiple related but independent software systems. Unlike OAuth 2.0 (which is about authorization), SSO is primarily about authentication.</p>
+
+            <h3>How SSO Differs from OAuth 2.0</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>OAuth 2.0</th>
+                        <th>SSO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Primary Purpose</td>
+                        <td>Authorization (access delegation)</td>
+                        <td>Authentication (identity verification)</td>
+                    </tr>
+                    <tr>
+                        <td>Question Answered</td>
+                        <td>"What can this app do on my behalf?"</td>
+                        <td>"Who is this user?"</td>
+                    </tr>
+                    <tr>
+                        <td>Session Management</td>
+                        <td>Token-based, no central session</td>
+                        <td>Central session at IdP</td>
+                    </tr>
+                    <tr>
+                        <td>Logout</td>
+                        <td>Revoke tokens per application</td>
+                        <td>Single Logout (SLO) from all apps</td>
+                    </tr>
+                    <tr>
+                        <td>User Experience</td>
+                        <td>May prompt for each app</td>
+                        <td>One login for all apps</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box tip">
+                <span class="info-box-icon">💡</span>
+                <div class="info-box-content">
+                    <h4>SSO + OAuth 2.0 = Best of Both Worlds</h4>
+                    <p>In practice, SSO and OAuth 2.0 work together. OpenID Connect combines SSO (authentication) with OAuth 2.0 (authorization) to provide a complete solution.</p>
+                </div>
+            </div>
+
+            <h3>SSO Components</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🔐 Identity Provider (IdP)</h4>
+                    <p>Central authority that authenticates users and maintains their identities. Examples: Azure AD, Okta, Auth0, Ping Identity, ADFS.</p>
+                </div>
+                <div class="card">
+                    <h4>📱 Service Provider (SP)</h4>
+                    <p>Applications that rely on the IdP for authentication. Each SP trusts the IdP to verify user identity.</p>
+                </div>
+                <div class="card">
+                    <h4>🍪 Session Store</h4>
+                    <p>Central storage for SSO session information, enabling the IdP to recognize already-authenticated users.</p>
+                </div>
+                <div class="card">
+                    <h4>🔗 Trust Relationship</h4>
+                    <p>Pre-established trust between IdP and each SP, typically through certificate exchange or client registration.</p>
+                </div>
+            </div>
+
+            <h3>SSO Flow Diagram</h3>
+            <div class="diagram-container">
+                <h4>SSO Flow Across Multiple Applications</h4>
+                <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as 👤 User
+    participant App1 as 📱 HR Portal
+    participant App2 as 📱 Finance App
+    participant App3 as 📱 Email
+    participant IdP as 🔐 Identity Provider
+    participant S as 🍪 Session Store
+
+    Note over U,S: First Application Login
+    U->>App1: Access HR Portal
+    App1->>App1: No session found
+    App1->>IdP: Redirect to login
+
+    rect rgb(255, 230, 200)
+        Note over IdP: First Authentication
+        IdP->>U: Show login page
+        U->>IdP: Enter credentials
+        IdP->>IdP: Validate credentials
+        IdP->>S: Create SSO session
+        IdP->>U: Set IdP cookie
+    end
+
+    IdP->>App1: Return with token
+    App1->>U: ✅ Access granted
+
+    Note over U,S: Second Application - No Re-auth!
+    U->>App2: Access Finance App
+    App2->>App2: No local session
+    App2->>IdP: Redirect (with IdP cookie)
+
+    rect rgb(200, 255, 200)
+        Note over IdP: SSO Magic
+        IdP->>S: Check session
+        S->>IdP: Session valid ✓
+        IdP->>IdP: Skip login!
+    end
+
+    IdP->>App2: Return token instantly
+    App2->>U: ✅ Access granted (no password!)
+
+    Note over U,S: Third Application
+    U->>App3: Access Email
+    App3->>IdP: Redirect (with cookie)
+    IdP->>App3: Token instantly
+    App3->>U: ✅ Access granted
+
+    Note over U,S: Single Logout (SLO)
+    U->>App1: Click Logout
+    App1->>IdP: Logout request
+    IdP->>S: Invalidate session
+    IdP->>App1: Logout notification
+    IdP->>App2: Logout notification
+    IdP->>App3: Logout notification
+    App1-->>U: Logged out everywhere
+                </div>
+            </div>
+
+            <h3>SSO Implementation Approaches</h3>
+
+            <div class="collapsible">
+                <div class="collapsible-header">1. Browser-Based SSO (Cookie-based)</div>
+                <div class="collapsible-content">
+                    <p>Uses browser cookies at the IdP domain to maintain the SSO session.</p>
+                    <h4>Advantages:</h4>
+                    <ul>
+                        <li>Simple to implement</li>
+                        <li>Works well for web applications on the same domain</li>
+                        <li>Automatic session management via cookies</li>
+                    </ul>
+                    <h4>Limitations:</h4>
+                    <ul>
+                        <li>Limited to browser-based apps</li>
+                        <li>Third-party cookie restrictions (Safari ITP, Chrome changes)</li>
+                        <li>Cross-domain challenges</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">2. Token-Based SSO (OIDC/OAuth)</div>
+                <div class="collapsible-content">
+                    <p>Uses tokens (JWTs) for cross-application authentication.</p>
+                    <h4>Advantages:</h4>
+                    <ul>
+                        <li>Works across domains</li>
+                        <li>Supports mobile and native apps</li>
+                        <li>Stateless authentication</li>
+                        <li>Modern and flexible</li>
+                    </ul>
+                    <h4>Implementation:</h4>
+                    <pre data-lang="javascript"><code><span class="comment">// Check if user has valid token</span>
+<span class="keyword">const</span> token = localStorage.getItem(<span class="string">'access_token'</span>);
+<span class="keyword">if</span> (!token || isTokenExpired(token)) {
+    <span class="comment">// Redirect to IdP with prompt=none for silent auth</span>
+    window.location.href = <span class="string">`https://idp.example.com/authorize?
+        response_type=code&
+        client_id=my-app&
+        redirect_uri=${encodeURIComponent(window.location.origin + '/callback')}&
+        scope=openid profile&
+        prompt=none`</span>;  <span class="comment">// prompt=none = silent SSO</span>
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">3. Enterprise SSO (SAML/Kerberos)</div>
+                <div class="collapsible-content">
+                    <p>Uses enterprise protocols for on-premises and hybrid scenarios.</p>
+                    <h4>SAML-based SSO:</h4>
+                    <ul>
+                        <li>Common in enterprise environments</li>
+                        <li>Supports complex federation scenarios</li>
+                        <li>Works with ADFS, Shibboleth, etc.</li>
+                    </ul>
+                    <h4>Kerberos/Windows Integrated Auth:</h4>
+                    <ul>
+                        <li>Seamless authentication on corporate networks</li>
+                        <li>No password prompts within the domain</li>
+                        <li>Works with Active Directory</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- OIDC & SAML SECTION -->
+        <section id="oidc-saml">
+            <h2>🔐 OpenID Connect & SAML 2.0</h2>
+
+            <h3>OpenID Connect (OIDC)</h3>
+            <p>OpenID Connect is an <strong>identity layer built on top of OAuth 2.0</strong>. It allows clients to verify the identity of users and obtain basic profile information.</p>
+
+            <div class="info-box info">
+                <span class="info-box-icon">📝</span>
+                <div class="info-box-content">
+                    <h4>OIDC = OAuth 2.0 + Identity</h4>
+                    <p>OAuth 2.0: "Give this app access to my photos" (authorization)<br>
+                    OpenID Connect: "This is who I am" (authentication) + OAuth 2.0 authorization</p>
+                </div>
+            </div>
+
+            <h4>OIDC Key Concepts</h4>
+            <table>
+                <thead>
+                    <tr><th>Concept</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>ID Token</strong></td><td>JWT containing user identity claims (sub, name, email, etc.)</td></tr>
+                    <tr><td><strong>UserInfo Endpoint</strong></td><td>/userinfo endpoint to fetch additional user claims</td></tr>
+                    <tr><td><strong>Discovery</strong></td><td>/.well-known/openid-configuration for auto-configuration</td></tr>
+                    <tr><td><strong>Scopes</strong></td><td>openid (required), profile, email, address, phone</td></tr>
+                    <tr><td><strong>Claims</strong></td><td>User attributes: sub, name, email, picture, etc.</td></tr>
+                </tbody>
+            </table>
+
+            <h4>OIDC Discovery Document</h4>
+            <pre data-lang="json"><code><span class="comment">// GET https://auth.example.com/.well-known/openid-configuration</span>
+{
+  <span class="string">"issuer"</span>: <span class="string">"https://auth.example.com"</span>,
+  <span class="string">"authorization_endpoint"</span>: <span class="string">"https://auth.example.com/authorize"</span>,
+  <span class="string">"token_endpoint"</span>: <span class="string">"https://auth.example.com/token"</span>,
+  <span class="string">"userinfo_endpoint"</span>: <span class="string">"https://auth.example.com/userinfo"</span>,
+  <span class="string">"jwks_uri"</span>: <span class="string">"https://auth.example.com/.well-known/jwks.json"</span>,
+  <span class="string">"end_session_endpoint"</span>: <span class="string">"https://auth.example.com/logout"</span>,
+  <span class="string">"scopes_supported"</span>: [<span class="string">"openid"</span>, <span class="string">"profile"</span>, <span class="string">"email"</span>],
+  <span class="string">"response_types_supported"</span>: [<span class="string">"code"</span>, <span class="string">"token"</span>, <span class="string">"id_token"</span>],
+  <span class="string">"grant_types_supported"</span>: [<span class="string">"authorization_code"</span>, <span class="string">"refresh_token"</span>],
+  <span class="string">"subject_types_supported"</span>: [<span class="string">"public"</span>],
+  <span class="string">"id_token_signing_alg_values_supported"</span>: [<span class="string">"RS256"</span>]
+}</code></pre>
+
+            <h3>SAML 2.0</h3>
+            <p>Security Assertion Markup Language (SAML) is an <strong>XML-based standard</strong> for exchanging authentication and authorization data. It's widely used in enterprise SSO scenarios.</p>
+
+            <h4>SAML Components</h4>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>📜 Assertion</h4>
+                    <p>XML document containing statements about a user (authentication, attributes, authorization decisions).</p>
+                </div>
+                <div class="card">
+                    <h4>📨 Protocol</h4>
+                    <p>Defines how assertions are requested and transferred (AuthnRequest, Response, etc.).</p>
+                </div>
+                <div class="card">
+                    <h4>🔗 Binding</h4>
+                    <p>How SAML messages are transported: HTTP POST, HTTP Redirect, SOAP, etc.</p>
+                </div>
+                <div class="card">
+                    <h4>📋 Profile</h4>
+                    <p>Combines assertions, protocols, and bindings for specific use cases (Web SSO Profile).</p>
+                </div>
+            </div>
+
+            <h3>OIDC vs SAML Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>OpenID Connect</th>
+                        <th>SAML 2.0</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Data Format</td>
+                        <td>JSON/JWT</td>
+                        <td>XML</td>
+                    </tr>
+                    <tr>
+                        <td>Transport</td>
+                        <td>REST APIs (HTTP)</td>
+                        <td>HTTP POST/Redirect, SOAP</td>
+                    </tr>
+                    <tr>
+                        <td>Token Size</td>
+                        <td>Compact (< 1KB typical)</td>
+                        <td>Large (5-10KB+ common)</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile Support</td>
+                        <td><span class="check">✓ Native</span></td>
+                        <td><span class="cross">✗ Challenging</span></td>
+                    </tr>
+                    <tr>
+                        <td>SPA Support</td>
+                        <td><span class="check">✓ Excellent</span></td>
+                        <td><span class="cross">✗ Limited</span></td>
+                    </tr>
+                    <tr>
+                        <td>Enterprise Adoption</td>
+                        <td>Growing rapidly</td>
+                        <td>Widely established</td>
+                    </tr>
+                    <tr>
+                        <td>Implementation</td>
+                        <td>Simpler, modern SDKs</td>
+                        <td>Complex, XML parsing</td>
+                    </tr>
+                    <tr>
+                        <td>Best For</td>
+                        <td>Modern apps, APIs, mobile</td>
+                        <td>Legacy enterprise, B2B federation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="diagram-container">
+                <h4>OIDC vs SAML Flow Comparison</h4>
+                <div class="mermaid">
+flowchart LR
+    subgraph OIDC["🔑 OpenID Connect"]
+        direction TB
+        O1[User] --> O2[Relying Party]
+        O2 -->|"1. Auth Request"| O3[OpenID Provider]
+        O3 -->|"2. Authenticate"| O1
+        O3 -->|"3. ID Token JWT"| O2
+        O2 -->|"4. UserInfo"| O3
+    end
+
+    subgraph SAML["📜 SAML 2.0"]
+        direction TB
+        S1[User] --> S2[Service Provider]
+        S2 -->|"1. SAML Request"| S3[Identity Provider]
+        S3 -->|"2. Authenticate"| S1
+        S3 -->|"3. SAML Assertion XML"| S2
+    end
+
+    style OIDC fill:#059669,stroke:#047857,color:#fff
+    style SAML fill:#dc2626,stroke:#991b1b,color:#fff
+                </div>
+            </div>
+
+            <div class="info-box tip">
+                <span class="info-box-icon">✅</span>
+                <div class="info-box-content">
+                    <h4>Modern Recommendation</h4>
+                    <p><strong>Use OpenID Connect</strong> for new applications. Only use SAML when integrating with legacy enterprise systems that require it or for B2B federation with partners using SAML.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- JWT & TOKENS SECTION -->
+        <section id="jwt-tokens">
+            <h2>📜 JWT & Token Deep Dive</h2>
+
+            <h3>JSON Web Token (JWT) Structure</h3>
+            <p>A JWT consists of three parts separated by dots: <code>header.payload.signature</code></p>
+
+            <div class="diagram-container">
+                <h4>JWT Structure</h4>
+                <div class="mermaid">
+flowchart LR
+    subgraph JWT["🎫 eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature"]
+        direction TB
+        subgraph H["📋 Header"]
+            H1["alg: RS256"]
+            H2["typ: JWT"]
+        end
+        subgraph P["📦 Payload"]
+            P1["sub: user-123"]
+            P2["name: John Doe"]
+            P3["exp: 1735689600"]
+            P4["iss: auth.example.com"]
+        end
+        subgraph S["🔐 Signature"]
+            S1["RSASHA256(header + payload, key)"]
+        end
+    end
+
+    H --> P --> S
+
+    style H fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style P fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style S fill:#ef4444,stroke:#dc2626,color:#fff
+                </div>
+            </div>
+
+            <h4>Decoded JWT Example</h4>
+            <pre data-lang="json"><code><span class="comment">// HEADER (Algorithm & Token Type)</span>
+{
+  <span class="string">"alg"</span>: <span class="string">"RS256"</span>,           <span class="comment">// RSA signature with SHA-256</span>
+  <span class="string">"typ"</span>: <span class="string">"JWT"</span>,              <span class="comment">// Token type</span>
+  <span class="string">"kid"</span>: <span class="string">"key-2024-01"</span>      <span class="comment">// Key ID for rotation</span>
+}
+
+<span class="comment">// PAYLOAD (Claims)</span>
+{
+  <span class="comment">// Registered Claims (RFC 7519)</span>
+  <span class="string">"iss"</span>: <span class="string">"https://auth.example.com"</span>,     <span class="comment">// Issuer</span>
+  <span class="string">"sub"</span>: <span class="string">"user-123-456"</span>,                 <span class="comment">// Subject (user ID)</span>
+  <span class="string">"aud"</span>: <span class="string">"https://api.example.com"</span>,     <span class="comment">// Audience</span>
+  <span class="string">"exp"</span>: <span class="number">1735689600</span>,                     <span class="comment">// Expiration (Unix timestamp)</span>
+  <span class="string">"nbf"</span>: <span class="number">1735686000</span>,                     <span class="comment">// Not Before</span>
+  <span class="string">"iat"</span>: <span class="number">1735686000</span>,                     <span class="comment">// Issued At</span>
+  <span class="string">"jti"</span>: <span class="string">"unique-token-id-xyz"</span>,          <span class="comment">// JWT ID (for revocation)</span>
+
+  <span class="comment">// OpenID Connect Claims</span>
+  <span class="string">"name"</span>: <span class="string">"John Doe"</span>,
+  <span class="string">"email"</span>: <span class="string">"john@example.com"</span>,
+  <span class="string">"email_verified"</span>: <span class="keyword">true</span>,
+  <span class="string">"picture"</span>: <span class="string">"https://example.com/john.jpg"</span>,
+
+  <span class="comment">// Custom Claims</span>
+  <span class="string">"roles"</span>: [<span class="string">"admin"</span>, <span class="string">"user"</span>],
+  <span class="string">"permissions"</span>: [<span class="string">"read:users"</span>, <span class="string">"write:users"</span>],
+  <span class="string">"tenant_id"</span>: <span class="string">"tenant-abc"</span>,
+  <span class="string">"scope"</span>: <span class="string">"openid profile email api.read"</span>
+}
+
+<span class="comment">// SIGNATURE</span>
+RSASHA256(
+  base64UrlEncode(header) + <span class="string">"."</span> + base64UrlEncode(payload),
+  privateKey
+)</code></pre>
+
+            <h3>Token Types</h3>
+            <table>
+                <thead>
+                    <tr><th>Token Type</th><th>Purpose</th><th>Lifetime</th><th>Storage</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Access Token</strong></td>
+                        <td>Access protected resources (APIs)</td>
+                        <td>Short (5-60 minutes)</td>
+                        <td>Memory (SPA), HttpOnly cookie (server)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Refresh Token</strong></td>
+                        <td>Obtain new access tokens</td>
+                        <td>Long (days to weeks)</td>
+                        <td>Secure HttpOnly cookie, server-side only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ID Token</strong></td>
+                        <td>User identity information (OIDC)</td>
+                        <td>Short (matches access token)</td>
+                        <td>Used once for login, then discarded</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Token Validation Flow</h3>
+            <div class="diagram-container">
+                <h4>JWT Validation Process</h4>
+                <div class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant API as API Server
+    participant A as Auth Server
+
+    C->>API: GET /api/data<br/>Authorization: Bearer eyJhbG...
+
+    rect rgb(220, 240, 255)
+        Note over API: Token Validation
+        API->>API: 1. Parse JWT (split by '.')
+        API->>API: 2. Decode header (get 'kid')
+        API->>A: 3. Fetch JWKS (public keys)
+        Note right of A: /.well-known/jwks.json
+        A->>API: 4. Return public keys
+        API->>API: 5. Verify signature (RS256)
+        API->>API: 6. Check 'exp' claim (not expired)
+        API->>API: 7. Check 'nbf' claim (not before)
+        API->>API: 8. Validate 'iss' (trusted issuer)
+        API->>API: 9. Validate 'aud' (correct audience)
+        API->>API: 10. Check required scopes/roles
+    end
+
+    alt Validation Success
+        API->>C: 200 OK + Data
+    else Validation Failed
+        API->>C: 401 Unauthorized
+    end
+                </div>
+            </div>
+
+            <h3>Token Refresh Pattern</h3>
+            <pre data-lang="csharp"><code><span class="keyword">public class</span> <span class="type">TokenService</span>
+{
+    <span class="keyword">private readonly</span> <span class="type">IHttpClientFactory</span> _httpClientFactory;
+    <span class="keyword">private readonly</span> <span class="type">ITokenStore</span> _tokenStore;
+
+    <span class="keyword">public async</span> Task&lt;<span class="type">string</span>&gt; <span class="function">GetValidAccessTokenAsync</span>(<span class="type">string</span> userId)
+    {
+        <span class="keyword">var</span> tokens = <span class="keyword">await</span> _tokenStore.GetTokensAsync(userId);
+
+        <span class="comment">// Check if access token is still valid (with buffer)</span>
+        <span class="keyword">if</span> (!IsTokenExpired(tokens.AccessToken, bufferSeconds: <span class="number">60</span>))
+        {
+            <span class="keyword">return</span> tokens.AccessToken;
+        }
+
+        <span class="comment">// Access token expired, try to refresh</span>
+        <span class="keyword">if</span> (IsTokenExpired(tokens.RefreshToken))
+        {
+            <span class="keyword">throw new</span> <span class="type">AuthenticationException</span>(<span class="string">"Session expired. Please login again."</span>);
+        }
+
+        <span class="comment">// Refresh the tokens</span>
+        <span class="keyword">var</span> newTokens = <span class="keyword">await</span> RefreshTokensAsync(tokens.RefreshToken);
+        <span class="keyword">await</span> _tokenStore.SaveTokensAsync(userId, newTokens);
+
+        <span class="keyword">return</span> newTokens.AccessToken;
+    }
+
+    <span class="keyword">private async</span> Task&lt;<span class="type">TokenResponse</span>&gt; <span class="function">RefreshTokensAsync</span>(<span class="type">string</span> refreshToken)
+    {
+        <span class="keyword">var</span> client = _httpClientFactory.CreateClient(<span class="string">"Auth"</span>);
+
+        <span class="keyword">var</span> request = <span class="keyword">new</span> <span class="type">Dictionary</span>&lt;<span class="type">string</span>, <span class="type">string</span>&gt;
+        {
+            [<span class="string">"grant_type"</span>] = <span class="string">"refresh_token"</span>,
+            [<span class="string">"refresh_token"</span>] = refreshToken,
+            [<span class="string">"client_id"</span>] = _config.ClientId,
+            [<span class="string">"client_secret"</span>] = _config.ClientSecret
+        };
+
+        <span class="keyword">var</span> response = <span class="keyword">await</span> client.PostAsync(<span class="string">"/token"</span>,
+            <span class="keyword">new</span> <span class="type">FormUrlEncodedContent</span>(request));
+
+        response.EnsureSuccessStatusCode();
+
+        <span class="keyword">return await</span> response.Content.ReadFromJsonAsync&lt;<span class="type">TokenResponse</span>&gt;();
+    }
+}</code></pre>
+
+            <div class="info-box warning">
+                <span class="info-box-icon">⚠️</span>
+                <div class="info-box-content">
+                    <h4>Token Storage Security</h4>
+                    <ul>
+                        <li><strong>Never</strong> store tokens in localStorage (XSS vulnerable)</li>
+                        <li><strong>SPAs:</strong> Keep access token in memory only, use refresh token rotation</li>
+                        <li><strong>Server apps:</strong> Use HttpOnly, Secure, SameSite cookies</li>
+                        <li><strong>Mobile:</strong> Use secure storage (Keychain/Keystore)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ARCHITECTURE SECTION -->
+        <section id="architecture">
+            <h2>🏗️ Production Architecture</h2>
+            <p>A well-designed authentication architecture separates concerns and provides multiple layers of security.</p>
+
+            <div class="diagram-container">
+                <h4>Enterprise OAuth 2.0 / OIDC Architecture</h4>
+                <div class="mermaid">
+flowchart TB
+    subgraph Users["👥 Users"]
+        U1[Employees]
+        U2[Customers]
+        U3[Partners]
+    end
+
+    subgraph Frontend["🌐 Frontend"]
+        SPA[React/Angular SPA]
+        MVC[ASP.NET MVC]
+        Mobile[Mobile Apps]
+    end
+
+    subgraph Gateway["🛡️ API Gateway"]
+        AG[Kong / APIM / Ocelot]
+        RL[Rate Limiting]
+        WAF[WAF Protection]
+    end
+
+    subgraph Auth["🔐 Identity Layer"]
+        IdP[Identity Server<br/>Duende / Azure AD]
+        US[(User Store)]
+        TS[(Token Store)]
+    end
+
+    subgraph APIs["🗄️ Microservices"]
+        API1[User Service]
+        API2[Order Service]
+        API3[Payment Service]
+    end
+
+    U1 & U2 & U3 --> SPA & MVC & Mobile
+    SPA & MVC & Mobile --> AG
+    AG --> RL --> WAF
+    SPA & MVC & Mobile -.->|Auth| IdP
+    IdP --> US & TS
+    WAF --> API1 & API2 & API3
+
+    style IdP fill:#6366f1,stroke:#4f46e5,color:#fff
+    style AG fill:#0ea5e9,stroke:#0284c7,color:#fff
+                </div>
+            </div>
+
+            <h3>Component Responsibilities</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🌐 Frontend Applications</h4>
+                    <ul>
+                        <li>Initiate OAuth/OIDC flows</li>
+                        <li>Handle redirects and callbacks</li>
+                        <li>Store tokens securely</li>
+                        <li>Attach tokens to API requests</li>
+                        <li>Handle token refresh</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🛡️ API Gateway</h4>
+                    <ul>
+                        <li>JWT validation (signature, expiry)</li>
+                        <li>Rate limiting per client</li>
+                        <li>Request/response transformation</li>
+                        <li>SSL termination</li>
+                        <li>Logging and monitoring</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🔐 Identity Provider</h4>
+                    <ul>
+                        <li>User authentication</li>
+                        <li>Token issuance (access, refresh, ID)</li>
+                        <li>Client registration</li>
+                        <li>Consent management</li>
+                        <li>Federation (external IdPs)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🗄️ Resource Servers (APIs)</h4>
+                    <ul>
+                        <li>Validate incoming tokens</li>
+                        <li>Authorize based on claims/scopes</li>
+                        <li>Implement business logic</li>
+                        <li>Audit access</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Multi-Tenant Architecture</h3>
+            <div class="diagram-container">
+                <h4>Multi-Tenant SSO with Federation</h4>
+                <div class="mermaid">
+flowchart TB
+    subgraph Tenants["🏢 Tenant Organizations"]
+        T1["Acme Corp<br/>(Azure AD)"]
+        T2["Globex Inc<br/>(Okta)"]
+        T3["Initech<br/>(On-prem ADFS)"]
+    end
+
+    subgraph Platform["🏠 Your Platform"]
+        IdP["🔐 Central IdP<br/>(Duende IdentityServer)"]
+
+        subgraph Apps["Applications"]
+            App1[Web App]
+            App2[Mobile App]
+            App3[Admin Portal]
+        end
+
+        API[Protected APIs]
+    end
+
+    T1 -->|"OIDC Federation"| IdP
+    T2 -->|"OIDC Federation"| IdP
+    T3 -->|"SAML Federation"| IdP
+
+    App1 & App2 & App3 --> IdP
+    App1 & App2 & App3 --> API
+
+    style IdP fill:#6366f1,stroke:#4f46e5,color:#fff
+                </div>
+            </div>
+        </section>
+
+        <!-- .NET IMPLEMENTATION SECTION -->
+        <section id="dotnet-impl">
+            <h2>💻 .NET Core Implementation</h2>
+            <p>Complete, production-ready implementation using ASP.NET Core with Duende IdentityServer (successor to IdentityServer4).</p>
+
+            <div class="info-box info">
+                <span class="info-box-icon">📦</span>
+                <div class="info-box-content">
+                    <h4>NuGet Packages Required</h4>
+                    <code>Duende.IdentityServer</code>, <code>Microsoft.AspNetCore.Authentication.OpenIdConnect</code>, <code>Microsoft.AspNetCore.Authentication.JwtBearer</code>
+                </div>
+            </div>
+
+            <div class="collapsible active">
+                <div class="collapsible-header">1. Identity Server Setup (Authorization Server)</div>
+                <div class="collapsible-content">
+                    <h4>Program.cs - Identity Server Configuration</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">using</span> Duende.IdentityServer;
+<span class="keyword">using</span> Duende.IdentityServer.Models;
+
+<span class="keyword">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="comment">// Add IdentityServer</span>
+builder.Services.AddIdentityServer(options =>
+{
+    options.EmitStaticAudienceClaim = <span class="keyword">true</span>;
+    options.Events.RaiseErrorEvents = <span class="keyword">true</span>;
+    options.Events.RaiseInformationEvents = <span class="keyword">true</span>;
+    options.Events.RaiseFailureEvents = <span class="keyword">true</span>;
+    options.Events.RaiseSuccessEvents = <span class="keyword">true</span>;
+})
+.AddInMemoryIdentityResources(Config.IdentityResources)
+.AddInMemoryApiScopes(Config.ApiScopes)
+.AddInMemoryApiResources(Config.ApiResources)
+.AddInMemoryClients(Config.Clients)
+.AddTestUsers(Config.TestUsers); <span class="comment">// Replace with real user store in production</span>
+
+<span class="comment">// Add ASP.NET Core Identity (optional, for local accounts)</span>
+builder.Services.AddIdentity&lt;ApplicationUser, IdentityRole&gt;()
+    .AddEntityFrameworkStores&lt;ApplicationDbContext&gt;()
+    .AddDefaultTokenProviders();
+
+<span class="keyword">var</span> app = builder.Build();
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseIdentityServer();
+app.UseAuthorization();
+
+app.MapRazorPages().RequireAuthorization();
+
+app.Run();</code></pre>
+
+                    <h4>Config.cs - Clients, Scopes, and Resources</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">public static class</span> <span class="type">Config</span>
+{
+    <span class="keyword">public static</span> IEnumerable&lt;<span class="type">IdentityResource</span>&gt; IdentityResources =&gt;
+        <span class="keyword">new</span> <span class="type">IdentityResource</span>[]
+        {
+            <span class="keyword">new</span> IdentityResources.OpenId(),
+            <span class="keyword">new</span> IdentityResources.Profile(),
+            <span class="keyword">new</span> IdentityResources.Email(),
+            <span class="keyword">new</span> <span class="type">IdentityResource</span>(<span class="string">"roles"</span>, <span class="keyword">new</span>[] { <span class="string">"role"</span> })
+        };
+
+    <span class="keyword">public static</span> IEnumerable&lt;<span class="type">ApiScope</span>&gt; ApiScopes =&gt;
+        <span class="keyword">new</span> <span class="type">ApiScope</span>[]
+        {
+            <span class="keyword">new</span>(<span class="string">"api.read"</span>, <span class="string">"Read API"</span>),
+            <span class="keyword">new</span>(<span class="string">"api.write"</span>, <span class="string">"Write API"</span>),
+            <span class="keyword">new</span>(<span class="string">"api.admin"</span>, <span class="string">"Admin API"</span>)
+        };
+
+    <span class="keyword">public static</span> IEnumerable&lt;<span class="type">ApiResource</span>&gt; ApiResources =&gt;
+        <span class="keyword">new</span> <span class="type">ApiResource</span>[]
+        {
+            <span class="keyword">new</span>(<span class="string">"api"</span>, <span class="string">"My Protected API"</span>)
+            {
+                Scopes = { <span class="string">"api.read"</span>, <span class="string">"api.write"</span>, <span class="string">"api.admin"</span> },
+                UserClaims = { <span class="string">"role"</span>, <span class="string">"email"</span> }
+            }
+        };
+
+    <span class="keyword">public static</span> IEnumerable&lt;<span class="type">Client</span>&gt; Clients =&gt;
+        <span class="keyword">new</span> <span class="type">Client</span>[]
+        {
+            <span class="comment">// Web Application (Authorization Code + PKCE)</span>
+            <span class="keyword">new</span> <span class="type">Client</span>
+            {
+                ClientId = <span class="string">"webapp"</span>,
+                ClientName = <span class="string">"Web Application"</span>,
+                ClientSecrets = { <span class="keyword">new</span> <span class="type">Secret</span>(<span class="string">"secret"</span>.Sha256()) },
+
+                AllowedGrantTypes = GrantTypes.Code,
+                RequirePkce = <span class="keyword">true</span>,
+
+                RedirectUris = { <span class="string">"https://localhost:5002/signin-oidc"</span> },
+                PostLogoutRedirectUris = { <span class="string">"https://localhost:5002/signout-callback-oidc"</span> },
+
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.Email,
+                    <span class="string">"api.read"</span>,
+                    <span class="string">"roles"</span>
+                },
+
+                AllowOfflineAccess = <span class="keyword">true</span>, <span class="comment">// Enable refresh tokens</span>
+                RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                RefreshTokenExpiration = TokenExpiration.Sliding,
+                SlidingRefreshTokenLifetime = <span class="number">1296000</span>, <span class="comment">// 15 days</span>
+
+                AccessTokenLifetime = <span class="number">3600</span>, <span class="comment">// 1 hour</span>
+            },
+
+            <span class="comment">// SPA Application (Authorization Code + PKCE, no secret)</span>
+            <span class="keyword">new</span> <span class="type">Client</span>
+            {
+                ClientId = <span class="string">"spa"</span>,
+                ClientName = <span class="string">"Single Page Application"</span>,
+                RequireClientSecret = <span class="keyword">false</span>,
+
+                AllowedGrantTypes = GrantTypes.Code,
+                RequirePkce = <span class="keyword">true</span>,
+
+                RedirectUris = { <span class="string">"https://localhost:3000/callback"</span> },
+                PostLogoutRedirectUris = { <span class="string">"https://localhost:3000"</span> },
+                AllowedCorsOrigins = { <span class="string">"https://localhost:3000"</span> },
+
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    <span class="string">"api.read"</span>
+                },
+
+                AccessTokenLifetime = <span class="number">900</span>, <span class="comment">// 15 minutes (shorter for SPAs)</span>
+            },
+
+            <span class="comment">// Machine-to-Machine (Client Credentials)</span>
+            <span class="keyword">new</span> <span class="type">Client</span>
+            {
+                ClientId = <span class="string">"backend-service"</span>,
+                ClientSecrets = { <span class="keyword">new</span> <span class="type">Secret</span>(<span class="string">"service-secret"</span>.Sha256()) },
+
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+
+                AllowedScopes = { <span class="string">"api.read"</span>, <span class="string">"api.write"</span> }
+            }
+        };
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">2. Protected API Setup (Resource Server)</div>
+                <div class="collapsible-content">
+                    <h4>Program.cs - API with JWT Bearer Authentication</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">using</span> Microsoft.AspNetCore.Authentication.JwtBearer;
+<span class="keyword">using</span> Microsoft.IdentityModel.Tokens;
+
+<span class="keyword">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="comment">// Add JWT Bearer authentication</span>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = <span class="string">"https://localhost:5001"</span>; <span class="comment">// IdentityServer URL</span>
+        options.Audience = <span class="string">"api"</span>;
+
+        options.TokenValidationParameters = <span class="keyword">new</span> <span class="type">TokenValidationParameters</span>
+        {
+            ValidateIssuer = <span class="keyword">true</span>,
+            ValidateAudience = <span class="keyword">true</span>,
+            ValidateLifetime = <span class="keyword">true</span>,
+            ValidateIssuerSigningKey = <span class="keyword">true</span>,
+            ClockSkew = TimeSpan.FromSeconds(<span class="number">30</span>)
+        };
+
+        options.Events = <span class="keyword">new</span> <span class="type">JwtBearerEvents</span>
+        {
+            OnAuthenticationFailed = context =>
+            {
+                <span class="keyword">if</span> (context.Exception <span class="keyword">is</span> SecurityTokenExpiredException)
+                {
+                    context.Response.Headers.Add(<span class="string">"Token-Expired"</span>, <span class="string">"true"</span>);
+                }
+                <span class="keyword">return</span> Task.CompletedTask;
+            }
+        };
+    });
+
+<span class="comment">// Add authorization policies</span>
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(<span class="string">"ApiReader"</span>, policy =>
+        policy.RequireClaim(<span class="string">"scope"</span>, <span class="string">"api.read"</span>));
+
+    options.AddPolicy(<span class="string">"ApiWriter"</span>, policy =>
+        policy.RequireClaim(<span class="string">"scope"</span>, <span class="string">"api.write"</span>));
+
+    options.AddPolicy(<span class="string">"AdminOnly"</span>, policy =>
+        policy.RequireRole(<span class="string">"admin"</span>));
+});
+
+builder.Services.AddControllers();
+
+<span class="keyword">var</span> app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();</code></pre>
+
+                    <h4>Protected API Controller</h4>
+                    <pre data-lang="csharp"><code>[<span class="attribute">ApiController</span>]
+[<span class="attribute">Route</span>(<span class="string">"api/[controller]"</span>)]
+[<span class="attribute">Authorize</span>]
+<span class="keyword">public class</span> <span class="type">UsersController</span> : ControllerBase
+{
+    <span class="comment">// Requires authentication</span>
+    [<span class="attribute">HttpGet</span>]
+    <span class="keyword">public</span> IActionResult <span class="function">GetAll</span>()
+    {
+        <span class="keyword">var</span> userId = User.FindFirst(<span class="string">"sub"</span>)?.Value;
+        <span class="keyword">var</span> email = User.FindFirst(<span class="string">"email"</span>)?.Value;
+        <span class="keyword">var</span> scopes = User.FindAll(<span class="string">"scope"</span>).Select(c => c.Value);
+
+        <span class="keyword">return</span> Ok(<span class="keyword">new</span>
+        {
+            UserId = userId,
+            Email = email,
+            Scopes = scopes,
+            Claims = User.Claims.Select(c => <span class="keyword">new</span> { c.Type, c.Value })
+        });
+    }
+
+    <span class="comment">// Requires specific scope</span>
+    [<span class="attribute">HttpPost</span>]
+    [<span class="attribute">Authorize</span>(Policy = <span class="string">"ApiWriter"</span>)]
+    <span class="keyword">public</span> IActionResult <span class="function">Create</span>([FromBody] CreateUserDto dto)
+    {
+        <span class="comment">// Only users with api.write scope can access</span>
+        <span class="keyword">return</span> CreatedAtAction(<span class="keyword">nameof</span>(GetById), <span class="keyword">new</span> { id = <span class="number">1</span> }, dto);
+    }
+
+    <span class="comment">// Requires admin role</span>
+    [<span class="attribute">HttpDelete</span>(<span class="string">"{id}"</span>)]
+    [<span class="attribute">Authorize</span>(Policy = <span class="string">"AdminOnly"</span>)]
+    <span class="keyword">public</span> IActionResult <span class="function">Delete</span>(<span class="keyword">int</span> id)
+    {
+        <span class="comment">// Only admins can delete</span>
+        <span class="keyword">return</span> NoContent();
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">3. Web Client (MVC Application)</div>
+                <div class="collapsible-content">
+                    <h4>Program.cs - Client with OpenID Connect</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">using</span> Microsoft.AspNetCore.Authentication;
+<span class="keyword">using</span> Microsoft.AspNetCore.Authentication.Cookies;
+<span class="keyword">using</span> Microsoft.AspNetCore.Authentication.OpenIdConnect;
+<span class="keyword">using</span> Microsoft.IdentityModel.Tokens;
+
+<span class="keyword">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="comment">// Add authentication</span>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.Cookie.Name = <span class="string">"auth"</span>;
+    options.Cookie.HttpOnly = <span class="keyword">true</span>;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromHours(<span class="number">8</span>);
+    options.SlidingExpiration = <span class="keyword">true</span>;
+})
+.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+{
+    options.Authority = <span class="string">"https://localhost:5001"</span>;
+    options.ClientId = <span class="string">"webapp"</span>;
+    options.ClientSecret = <span class="string">"secret"</span>;
+
+    options.ResponseType = <span class="string">"code"</span>; <span class="comment">// Authorization Code flow</span>
+    options.UsePkce = <span class="keyword">true</span>;
+
+    options.Scope.Clear();
+    options.Scope.Add(<span class="string">"openid"</span>);
+    options.Scope.Add(<span class="string">"profile"</span>);
+    options.Scope.Add(<span class="string">"email"</span>);
+    options.Scope.Add(<span class="string">"api.read"</span>);
+    options.Scope.Add(<span class="string">"offline_access"</span>); <span class="comment">// For refresh tokens</span>
+
+    options.GetClaimsFromUserInfoEndpoint = <span class="keyword">true</span>;
+    options.SaveTokens = <span class="keyword">true</span>; <span class="comment">// Store tokens in auth cookie</span>
+
+    options.TokenValidationParameters = <span class="keyword">new</span> <span class="type">TokenValidationParameters</span>
+    {
+        NameClaimType = <span class="string">"name"</span>,
+        RoleClaimType = <span class="string">"role"</span>
+    };
+
+    options.Events = <span class="keyword">new</span> <span class="type">OpenIdConnectEvents</span>
+    {
+        OnTokenValidated = context =>
+        {
+            <span class="comment">// Custom logic after successful authentication</span>
+            <span class="keyword">var</span> userId = context.Principal?.FindFirst(<span class="string">"sub"</span>)?.Value;
+            <span class="comment">// Log user login, sync user data, etc.</span>
+            <span class="keyword">return</span> Task.CompletedTask;
+        },
+        OnRemoteFailure = context =>
+        {
+            context.Response.Redirect(<span class="string">"/Home/Error?message="</span> +
+                context.Failure?.Message);
+            context.HandleResponse();
+            <span class="keyword">return</span> Task.CompletedTask;
+        }
+    };
+});
+
+<span class="comment">// Add HttpClient for API calls with token</span>
+builder.Services.AddHttpClient(<span class="string">"Api"</span>, client =>
+{
+    client.BaseAddress = <span class="keyword">new</span> Uri(<span class="string">"https://localhost:5003"</span>);
+});
+
+builder.Services.AddControllersWithViews();
+
+<span class="keyword">var</span> app = builder.Build();
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllerRoute(<span class="string">"default"</span>, <span class="string">"{controller=Home}/{action=Index}/{id?}"</span>);
+
+app.Run();</code></pre>
+
+                    <h4>Calling Protected API with Token</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">public class</span> <span class="type">HomeController</span> : Controller
+{
+    <span class="keyword">private readonly</span> <span class="type">IHttpClientFactory</span> _httpClientFactory;
+
+    [<span class="attribute">Authorize</span>]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="function">CallApi</span>()
+    {
+        <span class="comment">// Get access token from authentication cookie</span>
+        <span class="keyword">var</span> accessToken = <span class="keyword">await</span> HttpContext.GetTokenAsync(<span class="string">"access_token"</span>);
+
+        <span class="keyword">if</span> (<span class="type">string</span>.IsNullOrEmpty(accessToken))
+        {
+            <span class="comment">// Token missing, force re-authentication</span>
+            <span class="keyword">return</span> Challenge();
+        }
+
+        <span class="keyword">var</span> client = _httpClientFactory.CreateClient(<span class="string">"Api"</span>);
+        client.DefaultRequestHeaders.Authorization =
+            <span class="keyword">new</span> AuthenticationHeaderValue(<span class="string">"Bearer"</span>, accessToken);
+
+        <span class="keyword">var</span> response = <span class="keyword">await</span> client.GetAsync(<span class="string">"/api/users"</span>);
+
+        <span class="keyword">if</span> (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            <span class="comment">// Token expired, try to refresh</span>
+            <span class="keyword">return</span> Challenge();
+        }
+
+        <span class="keyword">var</span> data = <span class="keyword">await</span> response.Content.ReadAsStringAsync();
+        <span class="keyword">return</span> View(<span class="string">"ApiResult"</span>, data);
+    }
+
+    [<span class="attribute">Authorize</span>]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="function">Logout</span>()
+    {
+        <span class="keyword">await</span> HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        <span class="keyword">await</span> HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+        <span class="keyword">return</span> Redirect(<span class="string">"/"</span>);
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">4. Azure AD Integration (Alternative to Duende)</div>
+                <div class="collapsible-content">
+                    <h4>appsettings.json</h4>
+                    <pre data-lang="json"><code>{
+  <span class="string">"AzureAd"</span>: {
+    <span class="string">"Instance"</span>: <span class="string">"https://login.microsoftonline.com/"</span>,
+    <span class="string">"TenantId"</span>: <span class="string">"your-tenant-id"</span>,
+    <span class="string">"ClientId"</span>: <span class="string">"your-client-id"</span>,
+    <span class="string">"ClientSecret"</span>: <span class="string">"your-client-secret"</span>,
+    <span class="string">"CallbackPath"</span>: <span class="string">"/signin-oidc"</span>,
+    <span class="string">"Domain"</span>: <span class="string">"yourtenant.onmicrosoft.com"</span>
+  },
+  <span class="string">"DownstreamApi"</span>: {
+    <span class="string">"BaseUrl"</span>: <span class="string">"https://api.example.com"</span>,
+    <span class="string">"Scopes"</span>: <span class="string">"api://your-api-client-id/.default"</span>
+  }
+}</code></pre>
+
+                    <h4>Program.cs - Azure AD Authentication</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">using</span> Microsoft.Identity.Web;
+
+<span class="keyword">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="comment">// Add Azure AD authentication with Microsoft.Identity.Web</span>
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(<span class="string">"AzureAd"</span>))
+    .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddDownstreamApi(<span class="string">"MyApi"</span>, builder.Configuration.GetSection(<span class="string">"DownstreamApi"</span>))
+    .AddInMemoryTokenCaches();
+
+builder.Services.AddControllersWithViews()
+    .AddMicrosoftIdentityUI(); <span class="comment">// Adds /MicrosoftIdentity/Account/* endpoints</span>
+
+builder.Services.AddRazorPages();
+
+<span class="keyword">var</span> app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapRazorPages();
+
+app.Run();</code></pre>
+
+                    <h4>Controller with Downstream API Call</h4>
+                    <pre data-lang="csharp"><code>[<span class="attribute">Authorize</span>]
+<span class="keyword">public class</span> <span class="type">HomeController</span> : Controller
+{
+    <span class="keyword">private readonly</span> <span class="type">IDownstreamApi</span> _downstreamApi;
+
+    <span class="keyword">public</span> HomeController(<span class="type">IDownstreamApi</span> downstreamApi)
+    {
+        _downstreamApi = downstreamApi;
+    }
+
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="function">CallApi</span>()
+    {
+        <span class="comment">// Microsoft.Identity.Web handles token acquisition automatically</span>
+        <span class="keyword">var</span> result = <span class="keyword">await</span> _downstreamApi.GetForUserAsync&lt;<span class="type">UserData</span>&gt;(
+            <span class="string">"MyApi"</span>,
+            <span class="string">"/api/users"</span>);
+
+        <span class="keyword">return</span> View(result);
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">5. Token Refresh Handler (Automatic Refresh)</div>
+                <div class="collapsible-content">
+                    <h4>Custom Delegating Handler for API Calls</h4>
+                    <pre data-lang="csharp"><code><span class="keyword">public class</span> <span class="type">TokenRefreshHandler</span> : DelegatingHandler
+{
+    <span class="keyword">private readonly</span> <span class="type">IHttpContextAccessor</span> _httpContextAccessor;
+    <span class="keyword">private readonly</span> <span class="type">ITokenRefreshService</span> _tokenRefreshService;
+
+    <span class="keyword">protected override async</span> Task&lt;<span class="type">HttpResponseMessage</span>&gt; <span class="function">SendAsync</span>(
+        <span class="type">HttpRequestMessage</span> request,
+        <span class="type">CancellationToken</span> cancellationToken)
+    {
+        <span class="keyword">var</span> context = _httpContextAccessor.HttpContext;
+        <span class="keyword">var</span> accessToken = <span class="keyword">await</span> context.GetTokenAsync(<span class="string">"access_token"</span>);
+        <span class="keyword">var</span> expiresAt = <span class="keyword">await</span> context.GetTokenAsync(<span class="string">"expires_at"</span>);
+
+        <span class="comment">// Check if token is about to expire (5 min buffer)</span>
+        <span class="keyword">if</span> (DateTime.TryParse(expiresAt, <span class="keyword">out var</span> expiry) &&
+            expiry < DateTime.UtcNow.AddMinutes(<span class="number">5</span>))
+        {
+            <span class="keyword">var</span> refreshToken = <span class="keyword">await</span> context.GetTokenAsync(<span class="string">"refresh_token"</span>);
+
+            <span class="keyword">if</span> (!<span class="type">string</span>.IsNullOrEmpty(refreshToken))
+            {
+                <span class="keyword">var</span> newTokens = <span class="keyword">await</span> _tokenRefreshService.RefreshAsync(refreshToken);
+
+                <span class="comment">// Update stored tokens</span>
+                <span class="keyword">var</span> authInfo = <span class="keyword">await</span> context.AuthenticateAsync();
+                authInfo.Properties.UpdateTokenValue(<span class="string">"access_token"</span>, newTokens.AccessToken);
+                authInfo.Properties.UpdateTokenValue(<span class="string">"refresh_token"</span>, newTokens.RefreshToken);
+                authInfo.Properties.UpdateTokenValue(<span class="string">"expires_at"</span>,
+                    DateTime.UtcNow.AddSeconds(newTokens.ExpiresIn).ToString(<span class="string">"o"</span>));
+
+                <span class="keyword">await</span> context.SignInAsync(authInfo.Principal, authInfo.Properties);
+
+                accessToken = newTokens.AccessToken;
+            }
+        }
+
+        request.Headers.Authorization = <span class="keyword">new</span> AuthenticationHeaderValue(<span class="string">"Bearer"</span>, accessToken);
+
+        <span class="keyword">return await base</span>.SendAsync(request, cancellationToken);
+    }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECURITY BEST PRACTICES SECTION -->
+        <section id="security">
+            <h2>🛡️ Security Best Practices</h2>
+
+            <h3>CSRF (Cross-Site Request Forgery) Protection</h3>
+            <div class="info-box danger">
+                <span class="info-box-icon">🚨</span>
+                <div class="info-box-content">
+                    <h4>Always Use the State Parameter</h4>
+                    <p>The <code>state</code> parameter prevents CSRF attacks by binding the authorization request to the user's session.</p>
+                </div>
+            </div>
+
+            <pre data-lang="csharp"><code><span class="comment">// Generate state parameter</span>
+<span class="keyword">var</span> state = Convert.ToBase64String(RandomNumberGenerator.GetBytes(<span class="number">32</span>));
+HttpContext.Session.SetString(<span class="string">"oauth_state"</span>, state);
+
+<span class="comment">// Include in authorization request</span>
+<span class="keyword">var</span> authUrl = <span class="string">$"https://auth.example.com/authorize?"</span> +
+    <span class="string">$"response_type=code&"</span> +
+    <span class="string">$"client_id={clientId}&"</span> +
+    <span class="string">$"redirect_uri={redirectUri}&"</span> +
+    <span class="string">$"state={state}&"</span> +  <span class="comment">// Critical!</span>
+    <span class="string">$"code_challenge={codeChallenge}&"</span> +
+    <span class="string">$"code_challenge_method=S256"</span>;
+
+<span class="comment">// Validate state in callback</span>
+<span class="keyword">var</span> expectedState = HttpContext.Session.GetString(<span class="string">"oauth_state"</span>);
+<span class="keyword">if</span> (state != expectedState)
+{
+    <span class="keyword">throw new</span> SecurityException(<span class="string">"State mismatch - possible CSRF attack"</span>);
+}</code></pre>
+
+            <h3>XSS (Cross-Site Scripting) Prevention</h3>
+            <table>
+                <thead>
+                    <tr><th>Attack Vector</th><th>Prevention</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Token stored in localStorage</td>
+                        <td>Use HttpOnly cookies instead, or keep in memory only</td>
+                    </tr>
+                    <tr>
+                        <td>Token in URL fragment</td>
+                        <td>Use Authorization Code flow, not Implicit</td>
+                    </tr>
+                    <tr>
+                        <td>Reflected token values</td>
+                        <td>Always encode output, use CSP headers</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Token Storage Guidelines</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🌐 Web Applications (Server)</h4>
+                    <ul>
+                        <li>Store tokens in encrypted, HttpOnly cookies</li>
+                        <li>Set Secure and SameSite flags</li>
+                        <li>Implement token encryption at rest</li>
+                        <li>Consider server-side session storage</li>
+                    </ul>
+                    <pre data-lang="csharp"><code>options.Cookie.HttpOnly = <span class="keyword">true</span>;
+options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+options.Cookie.SameSite = SameSiteMode.Strict;</code></pre>
+                </div>
+                <div class="card">
+                    <h4>📱 SPAs (Single Page Apps)</h4>
+                    <ul>
+                        <li>Keep access token in memory only</li>
+                        <li>Use refresh token rotation</li>
+                        <li>Consider BFF (Backend for Frontend) pattern</li>
+                        <li>Short access token lifetime (5-15 min)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>📲 Mobile Apps</h4>
+                    <ul>
+                        <li>Use platform secure storage (Keychain/Keystore)</li>
+                        <li>Never store in SharedPreferences/UserDefaults</li>
+                        <li>Implement certificate pinning</li>
+                        <li>Use custom URL schemes for redirects</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Additional Security Measures</h3>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Token Binding & DPoP (Demonstration of Proof-of-Possession)</div>
+                <div class="collapsible-content">
+                    <p>DPoP binds tokens to a specific client, preventing token theft and replay attacks.</p>
+                    <pre data-lang="http"><code><span class="comment">// DPoP-bound token request</span>
+POST /token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+<span class="attribute">DPoP</span>: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwieCI6...
+
+grant_type=authorization_code&
+code=AUTH_CODE&
+client_id=my-app
+
+<span class="comment">// Using DPoP token in API call</span>
+GET /api/resource HTTP/1.1
+Authorization: <span class="string">DPoP</span> eyJhbGciOiJSUzI1NiIsInR5cCI6ImF0K2p3dCJ9...
+<span class="attribute">DPoP</span>: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2In0...</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Security Headers Configuration</div>
+                <div class="collapsible-content">
+                    <pre data-lang="csharp"><code><span class="comment">// Add security headers in Program.cs</span>
+app.Use(<span class="keyword">async</span> (context, next) =>
+{
+    context.Response.Headers.Add(<span class="string">"X-Content-Type-Options"</span>, <span class="string">"nosniff"</span>);
+    context.Response.Headers.Add(<span class="string">"X-Frame-Options"</span>, <span class="string">"DENY"</span>);
+    context.Response.Headers.Add(<span class="string">"X-XSS-Protection"</span>, <span class="string">"1; mode=block"</span>);
+    context.Response.Headers.Add(<span class="string">"Referrer-Policy"</span>, <span class="string">"strict-origin-when-cross-origin"</span>);
+    context.Response.Headers.Add(<span class="string">"Content-Security-Policy"</span>,
+        <span class="string">"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"</span>);
+
+    <span class="keyword">await</span> next();
+});</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Audit Logging</div>
+                <div class="collapsible-content">
+                    <pre data-lang="csharp"><code><span class="keyword">public class</span> <span class="type">AuthAuditLogger</span>
+{
+    <span class="keyword">private readonly</span> <span class="type">ILogger</span>&lt;<span class="type">AuthAuditLogger</span>&gt; _logger;
+
+    <span class="keyword">public void</span> <span class="function">LogAuthenticationEvent</span>(<span class="type">AuthEvent</span> authEvent)
+    {
+        _logger.LogInformation(
+            <span class="string">"Auth Event: {EventType} | User: {UserId} | Client: {ClientId} | "</span> +
+            <span class="string">"IP: {IpAddress} | Success: {Success} | Timestamp: {Timestamp}"</span>,
+            authEvent.EventType,
+            authEvent.UserId,
+            authEvent.ClientId,
+            authEvent.IpAddress,
+            authEvent.Success,
+            authEvent.Timestamp);
+
+        <span class="comment">// Also write to audit database for compliance</span>
+        <span class="keyword">await</span> _auditRepository.SaveAsync(authEvent);
+    }
+}
+
+<span class="keyword">public enum</span> <span class="type">AuthEventType</span>
+{
+    LoginAttempt,
+    LoginSuccess,
+    LoginFailed,
+    TokenIssued,
+    TokenRefreshed,
+    TokenRevoked,
+    Logout,
+    SuspiciousActivity
+}</code></pre>
+                </div>
+            </div>
+
+            <h3>Security Checklist</h3>
+            <table>
+                <thead>
+                    <tr><th>Item</th><th>Status</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Use HTTPS everywhere</td><td><span class="check">✓</span></td><td>TLS 1.2+, HSTS enabled</td></tr>
+                    <tr><td>PKCE for all OAuth flows</td><td><span class="check">✓</span></td><td>Required for public clients</td></tr>
+                    <tr><td>State parameter validation</td><td><span class="check">✓</span></td><td>Prevents CSRF attacks</td></tr>
+                    <tr><td>Token expiration validation</td><td><span class="check">✓</span></td><td>Short-lived access tokens</td></tr>
+                    <tr><td>Secure token storage</td><td><span class="check">✓</span></td><td>HttpOnly cookies or memory</td></tr>
+                    <tr><td>Refresh token rotation</td><td><span class="check">✓</span></td><td>One-time use refresh tokens</td></tr>
+                    <tr><td>Audience validation</td><td><span class="check">✓</span></td><td>Validate 'aud' claim</td></tr>
+                    <tr><td>Issuer validation</td><td><span class="check">✓</span></td><td>Validate 'iss' claim</td></tr>
+                    <tr><td>Clock skew handling</td><td><span class="check">✓</span></td><td>Allow ~30 seconds skew</td></tr>
+                    <tr><td>Audit logging</td><td><span class="check">✓</span></td><td>Log all auth events</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- TROUBLESHOOTING SECTION -->
+        <section id="troubleshooting">
+            <h2>🔧 Troubleshooting Common Issues</h2>
+
+            <div class="collapsible">
+                <div class="collapsible-header">401 Unauthorized - Token Validation Failure</div>
+                <div class="collapsible-content">
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>API returns 401 even with seemingly valid token</li>
+                        <li>WWW-Authenticate header shows "invalid_token"</li>
+                    </ul>
+                    <h4>Common Causes & Solutions:</h4>
+                    <table>
+                        <tr><th>Cause</th><th>Solution</th></tr>
+                        <tr>
+                            <td>Token expired</td>
+                            <td>Check 'exp' claim, implement refresh logic</td>
+                        </tr>
+                        <tr>
+                            <td>Wrong audience</td>
+                            <td>Ensure 'aud' claim matches API's expected audience</td>
+                        </tr>
+                        <tr>
+                            <td>Issuer mismatch</td>
+                            <td>Verify 'iss' matches configured authority URL exactly</td>
+                        </tr>
+                        <tr>
+                            <td>Clock skew</td>
+                            <td>Sync server clocks, add ClockSkew tolerance</td>
+                        </tr>
+                        <tr>
+                            <td>JWKS key rotation</td>
+                            <td>Clear cached keys, verify JWKS endpoint accessible</td>
+                        </tr>
+                    </table>
+                    <pre data-lang="bash"><code><span class="comment"># Debug: Decode and inspect your token</span>
+<span class="comment"># Visit https://jwt.io or use:</span>
+echo "YOUR_TOKEN" | cut -d'.' -f2 | base64 -d | jq</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">CORS Errors with OAuth Endpoints</div>
+                <div class="collapsible-content">
+                    <h4>Error:</h4>
+                    <code>Access to fetch from origin 'https://spa.example.com' has been blocked by CORS policy</code>
+
+                    <h4>Solutions:</h4>
+                    <ol>
+                        <li>Configure AllowedCorsOrigins on the client in IdentityServer</li>
+                        <li>Ensure the token endpoint supports CORS (it usually doesn't need to for authorization code flow)</li>
+                        <li>For SPAs, avoid calling /token directly - use the authorization code callback instead</li>
+                    </ol>
+                    <pre data-lang="csharp"><code><span class="comment">// In IdentityServer client configuration</span>
+<span class="keyword">new</span> <span class="type">Client</span>
+{
+    ClientId = <span class="string">"spa"</span>,
+    AllowedCorsOrigins = { <span class="string">"https://spa.example.com"</span> }, <span class="comment">// Add your SPA origin</span>
+    <span class="comment">// ...</span>
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">State Mismatch / Invalid State Error</div>
+                <div class="collapsible-content">
+                    <h4>Causes:</h4>
+                    <ul>
+                        <li>User opened multiple login tabs</li>
+                        <li>Session expired during authentication</li>
+                        <li>Cookie blocked by browser settings</li>
+                        <li>Load balancer sticky sessions not configured</li>
+                    </ul>
+                    <h4>Solutions:</h4>
+                    <ul>
+                        <li>Store state in a distributed cache (Redis) for load-balanced environments</li>
+                        <li>Increase state/nonce cookie lifetime</li>
+                        <li>Ensure SameSite cookie settings are compatible</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Infinite Redirect Loop</div>
+                <div class="collapsible-content">
+                    <h4>Symptoms:</h4>
+                    <p>Browser keeps redirecting between app and IdP endlessly</p>
+
+                    <h4>Common Causes:</h4>
+                    <ol>
+                        <li><strong>Cookie not being set:</strong> Check SameSite policy, Secure flag with HTTPS</li>
+                        <li><strong>Authentication cookie missing:</strong> Ensure cookie middleware is correctly ordered</li>
+                        <li><strong>Redirect URI mismatch:</strong> Case-sensitive, trailing slashes matter</li>
+                    </ol>
+
+                    <pre data-lang="csharp"><code><span class="comment">// Correct middleware order is critical!</span>
+app.UseAuthentication(); <span class="comment">// Must come before UseAuthorization</span>
+app.UseAuthorization();</code></pre>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Refresh Token Not Working</div>
+                <div class="collapsible-content">
+                    <h4>Checklist:</h4>
+                    <ul>
+                        <li>Is <code>offline_access</code> scope requested?</li>
+                        <li>Is <code>AllowOfflineAccess = true</code> on the client?</li>
+                        <li>Has the refresh token expired?</li>
+                        <li>Was it already used (one-time use)?</li>
+                        <li>Check token store for revocation status</li>
+                    </ul>
+
+                    <pre data-lang="csharp"><code><span class="comment">// Enable refresh tokens on client</span>
+<span class="keyword">new</span> <span class="type">Client</span>
+{
+    AllowOfflineAccess = <span class="keyword">true</span>,
+    RefreshTokenUsage = TokenUsage.OneTimeOnly, <span class="comment">// Rotation</span>
+    RefreshTokenExpiration = TokenExpiration.Sliding,
+    AbsoluteRefreshTokenLifetime = <span class="number">2592000</span>, <span class="comment">// 30 days max</span>
+    SlidingRefreshTokenLifetime = <span class="number">1296000</span>, <span class="comment">// 15 days sliding</span>
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- REFERENCES SECTION -->
+        <section id="references">
+            <h2>📚 References & Resources</h2>
+
+            <h3>Official Specifications</h3>
+            <table>
+                <thead>
+                    <tr><th>Specification</th><th>Description</th><th>Link</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>RFC 6749</strong></td>
+                        <td>OAuth 2.0 Authorization Framework</td>
+                        <td><a href="https://tools.ietf.org/html/rfc6749" target="_blank">ietf.org/html/rfc6749</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>RFC 6750</strong></td>
+                        <td>Bearer Token Usage</td>
+                        <td><a href="https://tools.ietf.org/html/rfc6750" target="_blank">ietf.org/html/rfc6750</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>RFC 7519</strong></td>
+                        <td>JSON Web Token (JWT)</td>
+                        <td><a href="https://tools.ietf.org/html/rfc7519" target="_blank">ietf.org/html/rfc7519</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>RFC 7636</strong></td>
+                        <td>PKCE (Proof Key for Code Exchange)</td>
+                        <td><a href="https://tools.ietf.org/html/rfc7636" target="_blank">ietf.org/html/rfc7636</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>OpenID Connect Core</strong></td>
+                        <td>OIDC Core 1.0 Specification</td>
+                        <td><a href="https://openid.net/specs/openid-connect-core-1_0.html" target="_blank">openid.net/specs</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>SAML 2.0</strong></td>
+                        <td>OASIS SAML Technical Overview</td>
+                        <td><a href="https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html" target="_blank">oasis-open.org</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>OAuth 2.1</strong></td>
+                        <td>OAuth 2.1 Draft (consolidates best practices)</td>
+                        <td><a href="https://oauth.net/2.1/" target="_blank">oauth.net/2.1</a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Implementation Resources</h3>
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🔐 Duende IdentityServer</h4>
+                    <p>Production-ready OIDC provider for .NET</p>
+                    <p><a href="https://docs.duendesoftware.com" target="_blank">docs.duendesoftware.com</a></p>
+                </div>
+                <div class="card">
+                    <h4>☁️ Microsoft Identity Platform</h4>
+                    <p>Azure AD / Entra ID documentation</p>
+                    <p><a href="https://docs.microsoft.com/azure/active-directory/develop/" target="_blank">Microsoft Docs</a></p>
+                </div>
+                <div class="card">
+                    <h4>🔑 Auth0</h4>
+                    <p>Identity platform with excellent docs</p>
+                    <p><a href="https://auth0.com/docs" target="_blank">auth0.com/docs</a></p>
+                </div>
+                <div class="card">
+                    <h4>🛡️ Okta</h4>
+                    <p>Enterprise identity management</p>
+                    <p><a href="https://developer.okta.com/docs/" target="_blank">developer.okta.com</a></p>
+                </div>
+            </div>
+
+            <h3>Security Guidelines</h3>
+            <ul>
+                <li><a href="https://oauth.net/2/security-best-practices/" target="_blank">OAuth 2.0 Security Best Current Practice (BCP)</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank">OWASP Authentication Cheat Sheet</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" target="_blank">OWASP JWT Security Cheat Sheet</a></li>
+            </ul>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>OAuth 2.0 & SSO Complete Guide</strong></p>
+        <p>A comprehensive reference for modern authentication and authorization</p>
+        <p style="margin-top: 15px; font-size: 0.9rem;">
+            Last Updated: February 2026 |
+            <a href="#overview">Back to Top</a>
+        </p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.querySelector('.theme-icon').textContent = isDark ? '☀️' : '🌙';
+            document.querySelector('.theme-text').textContent = isDark ? 'Light' : 'Dark';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+            // Re-render Mermaid diagrams with appropriate theme
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: isDark ? 'dark' : 'default'
+            });
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.theme-icon').textContent = '☀️';
+            document.querySelector('.theme-text').textContent = 'Light';
+        }
+
+        // Collapsible sections
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const collapsible = header.parentElement;
+                collapsible.classList.toggle('active');
+            });
+        });
+
+        // Open first collapsible in each section by default
+        document.querySelectorAll('section').forEach(section => {
+            const firstCollapsible = section.querySelector('.collapsible');
+            if (firstCollapsible && !firstCollapsible.classList.contains('active')) {
+                // Keep some closed by default for cleaner initial view
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Highlight active section in nav
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('nav a, .toc-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+

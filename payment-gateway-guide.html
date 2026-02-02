@@ -27,6 +27,35 @@
         .cost-card { @apply bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100; }
         details summary { cursor: pointer; }
         details summary::-webkit-details-marker { display: none; }
+
+        /* Animation Styles */
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes slideRight { 0% { transform: translateX(-20px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideDown { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes dataFlow { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); } 50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.9), 0 0 50px rgba(99, 102, 241, 0.5); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes checkmark { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        .flow-node { transition: all 0.3s ease; }
+        .flow-node.active {
+            animation: glow 1s ease-in-out infinite;
+            transform: scale(1.08);
+            z-index: 10;
+        }
+        .flow-node.completed {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            border-color: #059669 !important;
+            color: white !important;
+        }
+        .flow-node.completed * { color: white !important; }
+        .flow-arrow { transition: all 0.3s ease; }
+        .flow-arrow.active { color: #6366f1 !important; animation: bounce 0.5s ease-in-out infinite; font-size: 1.5rem; }
+        .flow-arrow.completed { color: #10b981 !important; animation: checkmark 0.3s ease-out; }
+        .step-detail { animation: fadeInUp 0.5s ease-out; }
+        .data-packet { position: absolute; width: 12px; height: 12px; background: #6366f1; border-radius: 50%; }
+        .progress-bar { transition: width 0.5s ease; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -41,6 +70,7 @@
                     <span class="font-bold text-xl">Payment Gateway Guide</span>
                 </div>
                 <div class="hidden md:flex space-x-1" id="nav-links">
+                    <a href="#animated-flow" class="nav-link">🎬 Live Demo</a>
                     <a href="#architecture" class="nav-link">Architecture</a>
                     <a href="#tech-stack" class="nav-link">Tech Stack</a>
                     <a href="#compliance" class="nav-link">Compliance</a>
@@ -72,6 +102,10 @@
         <div class="bg-white rounded-2xl shadow-xl p-8">
             <h2 class="text-2xl font-bold mb-6">📋 Table of Contents</h2>
             <div class="grid md:grid-cols-3 gap-4">
+                <a href="#animated-flow" class="flex items-center p-4 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg hover:from-indigo-200 hover:to-purple-200 transition border-2 border-indigo-300">
+                    <span class="text-3xl mr-4">🎬</span>
+                    <div><h3 class="font-semibold text-indigo-700">Interactive Demo</h3><p class="text-sm text-indigo-600">Watch payment flow in real-time</p></div>
+                </a>
                 <a href="#architecture" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition">
                     <span class="text-3xl mr-4">🏗️</span>
                     <div><h3 class="font-semibold">1. System Architecture</h3><p class="text-sm text-gray-600">Components, microservices, database design</p></div>
@@ -96,6 +130,173 @@
                     <span class="text-3xl mr-4">📅</span>
                     <div><h3 class="font-semibold">6. Timeline & Costs</h3><p class="text-sm text-gray-600">Milestones, team, budget</p></div>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Animated Payment Flow Section -->
+    <section id="animated-flow" class="section bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold mb-2">🎬 Interactive Payment Flow Animation</h2>
+            <p class="text-indigo-200 mb-8">Watch how a payment flows through the system in real-time</p>
+
+            <!-- Control Panel -->
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6 mb-8">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <button id="startAnimation" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition">
+                            <span id="playIcon">▶️</span> Start Payment
+                        </button>
+                        <button id="resetAnimation" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold transition">
+                            🔄 Reset
+                        </button>
+                        <select id="scenarioSelect" class="bg-white/20 text-white px-4 py-3 rounded-lg">
+                            <option value="success">✅ Successful Payment</option>
+                            <option value="3ds">🔐 3D Secure Required</option>
+                            <option value="fraud">🚫 Fraud Detected</option>
+                            <option value="declined">❌ Card Declined</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm">Speed:</span>
+                        <input type="range" id="speedControl" min="1" max="5" value="3" class="w-24">
+                        <span id="speedLabel" class="text-sm">Normal</span>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
+                    <div id="progressBar" class="progress-bar bg-gradient-to-r from-green-400 to-emerald-500 h-full w-0"></div>
+                </div>
+            </div>
+
+            <!-- Main Animation Area -->
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Flow Diagram -->
+                <div class="lg:col-span-2 bg-white/5 backdrop-blur rounded-xl p-6">
+                    <h3 class="text-xl font-semibold mb-6">Payment Flow</h3>
+
+                    <!-- Animated Flow Nodes -->
+                    <div class="relative">
+                        <!-- Row 1: Customer Side -->
+                        <div class="flex items-center justify-between mb-8">
+                            <div id="node-customer" class="flow-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">👤</div>
+                                <div class="font-semibold text-sm">Customer</div>
+                                <div class="text-xs text-blue-300">Enters card</div>
+                            </div>
+                            <div id="arrow-1" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-merchant" class="flow-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🏪</div>
+                                <div class="font-semibold text-sm">Merchant</div>
+                                <div class="text-xs text-purple-300">Checkout page</div>
+                            </div>
+                            <div id="arrow-2" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-gateway" class="flow-node bg-indigo-500/20 border-2 border-indigo-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🌐</div>
+                                <div class="font-semibold text-sm">API Gateway</div>
+                                <div class="text-xs text-indigo-300">Rate limit, auth</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Processing -->
+                        <div class="flex items-center justify-between mb-8">
+                            <div id="node-tokenizer" class="flow-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🔐</div>
+                                <div class="font-semibold text-sm">Tokenization</div>
+                                <div class="text-xs text-yellow-300">Secure vault</div>
+                            </div>
+                            <div id="arrow-3" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-fraud" class="flow-node bg-red-500/20 border-2 border-red-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🛡️</div>
+                                <div class="font-semibold text-sm">Fraud Engine</div>
+                                <div class="text-xs text-red-300">Risk scoring</div>
+                            </div>
+                            <div id="arrow-4" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-3ds" class="flow-node bg-orange-500/20 border-2 border-orange-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🔒</div>
+                                <div class="font-semibold text-sm">3D Secure</div>
+                                <div class="text-xs text-orange-300">If required</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: External -->
+                        <div class="flex items-center justify-between mb-8">
+                            <div id="node-processor" class="flow-node bg-cyan-500/20 border-2 border-cyan-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">⚡</div>
+                                <div class="font-semibold text-sm">Processor</div>
+                                <div class="text-xs text-cyan-300">Authorization</div>
+                            </div>
+                            <div id="arrow-5" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-network" class="flow-node bg-pink-500/20 border-2 border-pink-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">💳</div>
+                                <div class="font-semibold text-sm">Card Network</div>
+                                <div class="text-xs text-pink-300">Visa/MC/Amex</div>
+                            </div>
+                            <div id="arrow-6" class="flow-arrow text-2xl text-gray-500">→</div>
+                            <div id="node-bank" class="flow-node bg-emerald-500/20 border-2 border-emerald-400 rounded-xl p-4 w-36 text-center">
+                                <div class="text-3xl mb-2">🏦</div>
+                                <div class="font-semibold text-sm">Issuing Bank</div>
+                                <div class="text-xs text-emerald-300">Approve/Decline</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Response -->
+                        <div class="flex items-center justify-center">
+                            <div id="node-result" class="flow-node bg-gray-500/20 border-2 border-gray-400 rounded-xl p-4 w-48 text-center">
+                                <div id="resultIcon" class="text-4xl mb-2">⏳</div>
+                                <div id="resultText" class="font-semibold">Waiting...</div>
+                                <div id="resultDetail" class="text-xs text-gray-300">Start the animation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Details Panel -->
+                <div class="bg-white/5 backdrop-blur rounded-xl p-6">
+                    <h3 class="text-xl font-semibold mb-4">📋 Current Step</h3>
+                    <div id="stepDetails" class="space-y-4">
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-sm text-indigo-300 mb-1">Step 0 of 10</div>
+                            <div class="font-semibold text-lg mb-2">Ready to Start</div>
+                            <p class="text-sm text-gray-300">Click "Start Payment" to begin the animation and see how a payment flows through the system.</p>
+                        </div>
+                    </div>
+
+                    <!-- Live Data Panel -->
+                    <h3 class="text-xl font-semibold mt-6 mb-4">📊 Live Data</h3>
+                    <div id="liveData" class="bg-gray-900/50 rounded-lg p-4 font-mono text-xs overflow-auto max-h-64">
+                        <div class="text-gray-500">// Payment data will appear here...</div>
+                    </div>
+
+                    <!-- Timing Stats -->
+                    <h3 class="text-xl font-semibold mt-6 mb-4">⏱️ Timing</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Tokenization</span>
+                            <span id="time-token" class="text-gray-400">--</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Fraud Check</span>
+                            <span id="time-fraud" class="text-gray-400">--</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Authorization</span>
+                            <span id="time-auth" class="text-gray-400">--</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-semibold border-t border-white/20 pt-2 mt-2">
+                            <span>Total Time</span>
+                            <span id="time-total" class="text-green-400">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="mt-8 bg-white/5 backdrop-blur rounded-xl p-6">
+                <h3 class="text-xl font-semibold mb-4">📜 Event Log</h3>
+                <div id="eventLog" class="bg-gray-900/50 rounded-lg p-4 font-mono text-xs h-32 overflow-auto">
+                    <div class="text-gray-500">[System] Ready to process payments...</div>
+                </div>
             </div>
         </div>
     </section>
@@ -1374,6 +1575,289 @@ gantt
                     link.classList.add('active');
                 }
             });
+        });
+
+        // ============================================
+        // PAYMENT FLOW ANIMATION ENGINE
+        // ============================================
+
+        const PaymentAnimation = {
+            isRunning: false,
+            currentStep: 0,
+            speed: 1000,
+            scenario: 'success',
+
+            nodes: ['customer', 'merchant', 'gateway', 'tokenizer', 'fraud', '3ds', 'processor', 'network', 'bank', 'result'],
+            arrows: ['arrow-1', 'arrow-2', 'arrow-3', 'arrow-4', 'arrow-5', 'arrow-6'],
+
+            steps: {
+                success: [
+                    { node: 'customer', title: 'Customer Initiates Payment', detail: 'Customer enters card details (4242 4242 4242 4242) on the checkout page', data: { card: '4242...4242', amount: '$99.00', currency: 'USD' } },
+                    { node: 'merchant', arrow: 'arrow-1', title: 'Merchant Creates PaymentIntent', detail: 'Merchant backend calls POST /v1/payment_intents with amount and currency', data: { endpoint: 'POST /v1/payment_intents', amount: 9900, currency: 'usd' } },
+                    { node: 'gateway', arrow: 'arrow-2', title: 'API Gateway Processing', detail: 'Request authenticated, rate limits checked, routed to payment service', data: { api_key: 'sk_live_...', rate_limit: '100/min', status: 'passed' } },
+                    { node: 'tokenizer', arrow: 'arrow-3', title: 'Card Tokenization', detail: 'Card PAN encrypted and stored in vault, token generated', data: { token: 'tok_1abc2def3ghi', vault: 'HSM-encrypted', time: '45ms' }, timing: 'token' },
+                    { node: 'fraud', arrow: 'arrow-4', title: 'Fraud Analysis', detail: 'ML model analyzes transaction, velocity checks, device fingerprint verified', data: { risk_score: 12, risk_level: 'low', signals: ['trusted_device', 'known_customer'] }, timing: 'fraud' },
+                    { node: '3ds', title: '3D Secure Check', detail: 'Low risk score - 3DS challenge not required, proceeding to authorization', data: { '3ds_required': false, reason: 'low_risk_exemption' } },
+                    { node: 'processor', arrow: 'arrow-5', title: 'Payment Processor', detail: 'Authorization request sent to acquiring bank via processor', data: { processor: 'stripe_us', merchant_id: 'acct_1234', request_id: 'req_abc123' } },
+                    { node: 'network', arrow: 'arrow-6', title: 'Card Network Routing', detail: 'Visa network routes authorization to issuing bank', data: { network: 'visa', bin: '424242', issuer_country: 'US' } },
+                    { node: 'bank', title: 'Issuing Bank Authorization', detail: 'Bank verifies funds, checks limits, approves transaction', data: { auth_code: 'A12345', response_code: '00', available_credit: '$5,000' }, timing: 'auth' },
+                    { node: 'result', title: '✅ Payment Successful!', detail: 'Payment confirmed, webhook sent to merchant, receipt generated', data: { status: 'succeeded', charge_id: 'ch_1abc2def', receipt_url: 'https://...' }, result: 'success' }
+                ],
+                '3ds': [
+                    { node: 'customer', title: 'Customer Initiates Payment', detail: 'Customer enters card details on the checkout page', data: { card: '4000...0002', amount: '$299.00', currency: 'USD' } },
+                    { node: 'merchant', arrow: 'arrow-1', title: 'Merchant Creates PaymentIntent', detail: 'Merchant backend calls POST /v1/payment_intents', data: { endpoint: 'POST /v1/payment_intents', amount: 29900, currency: 'usd' } },
+                    { node: 'gateway', arrow: 'arrow-2', title: 'API Gateway Processing', detail: 'Request authenticated and routed', data: { api_key: 'sk_live_...', status: 'passed' } },
+                    { node: 'tokenizer', arrow: 'arrow-3', title: 'Card Tokenization', detail: 'Card securely tokenized', data: { token: 'tok_2xyz3abc', time: '42ms' }, timing: 'token' },
+                    { node: 'fraud', arrow: 'arrow-4', title: 'Fraud Analysis', detail: 'Medium risk detected - new device, high amount', data: { risk_score: 55, risk_level: 'elevated', signals: ['new_device', 'high_amount'] }, timing: 'fraud' },
+                    { node: '3ds', title: '🔐 3D Secure Required', detail: 'Customer redirected to bank for authentication', data: { '3ds_required': true, version: '2.2', challenge: 'required' } },
+                    { node: 'customer', title: 'Customer Authenticates', detail: 'Customer completes 3DS challenge (OTP/biometric)', data: { auth_method: 'otp', status: 'authenticated' } },
+                    { node: 'processor', arrow: 'arrow-5', title: 'Payment Processor', detail: 'Authorization with 3DS proof sent', data: { eci: '05', cavv: 'AAABBJg...', processor: 'stripe_us' } },
+                    { node: 'bank', title: 'Bank Authorization', detail: 'Bank approves with liability shift to issuer', data: { auth_code: 'B67890', liability_shift: true }, timing: 'auth' },
+                    { node: 'result', title: '✅ Payment Successful (3DS)', detail: 'Payment confirmed with strong authentication', data: { status: 'succeeded', authentication: '3ds_authenticated' }, result: 'success' }
+                ],
+                fraud: [
+                    { node: 'customer', title: 'Customer Initiates Payment', detail: 'Suspicious payment attempt detected', data: { card: '4000...0019', amount: '$2,500.00', ip: '185.x.x.x (VPN)' } },
+                    { node: 'merchant', arrow: 'arrow-1', title: 'Merchant Creates PaymentIntent', detail: 'Payment request received', data: { amount: 250000, currency: 'usd' } },
+                    { node: 'gateway', arrow: 'arrow-2', title: 'API Gateway Processing', detail: 'Request passes initial checks', data: { status: 'passed' } },
+                    { node: 'tokenizer', arrow: 'arrow-3', title: 'Card Tokenization', detail: 'Card tokenized for analysis', data: { token: 'tok_3sus4pect', time: '38ms' }, timing: 'token' },
+                    { node: 'fraud', arrow: 'arrow-4', title: '🚨 Fraud Detected!', detail: 'Multiple high-risk signals triggered', data: { risk_score: 92, risk_level: 'critical', signals: ['vpn_detected', 'velocity_exceeded', 'card_country_mismatch', 'device_fingerprint_suspicious'] }, timing: 'fraud' },
+                    { node: 'result', title: '🚫 Payment Blocked', detail: 'Transaction rejected by fraud engine before authorization', data: { status: 'blocked', reason: 'fraud_detected', decline_code: 'fraudulent' }, result: 'blocked' }
+                ],
+                declined: [
+                    { node: 'customer', title: 'Customer Initiates Payment', detail: 'Customer enters card details', data: { card: '4000...0002', amount: '$150.00' } },
+                    { node: 'merchant', arrow: 'arrow-1', title: 'Merchant Creates PaymentIntent', detail: 'Payment request created', data: { amount: 15000, currency: 'usd' } },
+                    { node: 'gateway', arrow: 'arrow-2', title: 'API Gateway Processing', detail: 'Request authenticated', data: { status: 'passed' } },
+                    { node: 'tokenizer', arrow: 'arrow-3', title: 'Card Tokenization', detail: 'Card tokenized', data: { token: 'tok_4dec5line', time: '41ms' }, timing: 'token' },
+                    { node: 'fraud', arrow: 'arrow-4', title: 'Fraud Analysis', detail: 'Low risk - proceeding', data: { risk_score: 8, risk_level: 'low' }, timing: 'fraud' },
+                    { node: 'processor', arrow: 'arrow-5', title: 'Payment Processor', detail: 'Sending authorization request', data: { processor: 'stripe_us' } },
+                    { node: 'network', arrow: 'arrow-6', title: 'Card Network Routing', detail: 'Routing to issuing bank', data: { network: 'visa' } },
+                    { node: 'bank', title: '❌ Bank Declines', detail: 'Insufficient funds in customer account', data: { response_code: '51', decline_reason: 'insufficient_funds' }, timing: 'auth' },
+                    { node: 'result', title: '❌ Payment Declined', detail: 'Card declined by issuing bank', data: { status: 'failed', decline_code: 'insufficient_funds', message: 'Your card has insufficient funds.' }, result: 'declined' }
+                ]
+            },
+
+            init() {
+                document.getElementById('startAnimation').addEventListener('click', () => this.toggle());
+                document.getElementById('resetAnimation').addEventListener('click', () => this.reset());
+                document.getElementById('scenarioSelect').addEventListener('change', (e) => {
+                    this.scenario = e.target.value;
+                    this.reset();
+                });
+                document.getElementById('speedControl').addEventListener('input', (e) => {
+                    const speeds = { 1: 2000, 2: 1500, 3: 1000, 4: 600, 5: 300 };
+                    const labels = { 1: 'Slow', 2: 'Slower', 3: 'Normal', 4: 'Fast', 5: 'Very Fast' };
+                    this.speed = speeds[e.target.value];
+                    document.getElementById('speedLabel').textContent = labels[e.target.value];
+                });
+            },
+
+            toggle() {
+                if (this.isRunning) {
+                    this.pause();
+                } else {
+                    this.start();
+                }
+            },
+
+            async start() {
+                if (this.currentStep >= this.steps[this.scenario].length) {
+                    this.reset();
+                }
+                this.isRunning = true;
+                document.getElementById('playIcon').textContent = '⏸️';
+                document.getElementById('startAnimation').querySelector('span:last-child')?.remove();
+
+                const steps = this.steps[this.scenario];
+                const startTime = Date.now();
+
+                for (let i = this.currentStep; i < steps.length && this.isRunning; i++) {
+                    this.currentStep = i;
+                    await this.animateStep(steps[i], i, steps.length);
+                    if (this.isRunning) {
+                        await this.delay(this.speed);
+                    }
+                }
+
+                if (this.currentStep >= steps.length - 1) {
+                    const totalTime = Date.now() - startTime;
+                    document.getElementById('time-total').textContent = `${totalTime}ms`;
+                    this.isRunning = false;
+                    document.getElementById('playIcon').textContent = '🔄';
+                }
+            },
+
+            pause() {
+                this.isRunning = false;
+                document.getElementById('playIcon').textContent = '▶️';
+            },
+
+            reset() {
+                this.isRunning = false;
+                this.currentStep = 0;
+                document.getElementById('playIcon').textContent = '▶️';
+                document.getElementById('progressBar').style.width = '0%';
+
+                // Original node styles mapping
+                const nodeStyles = {
+                    'customer': 'flow-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 w-36 text-center',
+                    'merchant': 'flow-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 w-36 text-center',
+                    'gateway': 'flow-node bg-indigo-500/20 border-2 border-indigo-400 rounded-xl p-4 w-36 text-center',
+                    'tokenizer': 'flow-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 w-36 text-center',
+                    'fraud': 'flow-node bg-red-500/20 border-2 border-red-400 rounded-xl p-4 w-36 text-center',
+                    '3ds': 'flow-node bg-orange-500/20 border-2 border-orange-400 rounded-xl p-4 w-36 text-center',
+                    'processor': 'flow-node bg-cyan-500/20 border-2 border-cyan-400 rounded-xl p-4 w-36 text-center',
+                    'network': 'flow-node bg-pink-500/20 border-2 border-pink-400 rounded-xl p-4 w-36 text-center',
+                    'bank': 'flow-node bg-emerald-500/20 border-2 border-emerald-400 rounded-xl p-4 w-36 text-center',
+                    'result': 'flow-node bg-gray-500/20 border-2 border-gray-400 rounded-xl p-4 w-48 text-center'
+                };
+
+                // Reset all nodes to original styles
+                this.nodes.forEach(node => {
+                    const el = document.getElementById('node-' + node);
+                    if (el && nodeStyles[node]) {
+                        el.className = nodeStyles[node];
+                    }
+                });
+
+                // Reset arrows
+                this.arrows.forEach(arrow => {
+                    const el = document.getElementById(arrow);
+                    if (el) {
+                        el.className = 'flow-arrow text-2xl text-gray-500';
+                        el.textContent = '→';
+                    }
+                });
+
+                // Reset result node content
+                document.getElementById('resultIcon').textContent = '⏳';
+                document.getElementById('resultText').textContent = 'Waiting...';
+                document.getElementById('resultDetail').textContent = 'Start the animation';
+
+                // Reset panels
+                document.getElementById('stepDetails').innerHTML = `
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <div class="text-sm text-indigo-300 mb-1">Step 0 of ${this.steps[this.scenario].length}</div>
+                        <div class="font-semibold text-lg mb-2">Ready to Start</div>
+                        <p class="text-sm text-gray-300">Click "Start Payment" to begin the animation.</p>
+                    </div>
+                `;
+                document.getElementById('liveData').innerHTML = '<div class="text-gray-500">// Payment data will appear here...</div>';
+                document.getElementById('eventLog').innerHTML = '<div class="text-gray-500">[System] Ready to process payments...</div>';
+
+                // Reset timing
+                ['token', 'fraud', 'auth', 'total'].forEach(t => {
+                    const el = document.getElementById('time-' + t);
+                    if (el) {
+                        el.textContent = '--';
+                        el.className = 'text-gray-400';
+                    }
+                });
+            },
+
+            async animateStep(step, index, total) {
+                // Update progress bar
+                const progress = ((index + 1) / total) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+
+                // Activate current node
+                const nodeEl = document.getElementById('node-' + step.node);
+                if (nodeEl) {
+                    nodeEl.classList.add('active');
+                }
+
+                // Animate arrow if present
+                if (step.arrow) {
+                    const arrowEl = document.getElementById(step.arrow);
+                    if (arrowEl) {
+                        arrowEl.classList.add('active');
+                        arrowEl.textContent = '→→→';
+                    }
+                }
+
+                // Update step details panel
+                document.getElementById('stepDetails').innerHTML = `
+                    <div class="step-detail bg-white/10 rounded-lg p-4">
+                        <div class="text-sm text-indigo-300 mb-1">Step ${index + 1} of ${total}</div>
+                        <div class="font-semibold text-lg mb-2">${step.title}</div>
+                        <p class="text-sm text-gray-300">${step.detail}</p>
+                    </div>
+                `;
+
+                // Update live data
+                if (step.data) {
+                    const dataHtml = JSON.stringify(step.data, null, 2)
+                        .replace(/"([^"]+)":/g, '<span class="text-purple-400">"$1"</span>:')
+                        .replace(/: "([^"]+)"/g, ': <span class="text-green-400">"$1"</span>')
+                        .replace(/: (\d+)/g, ': <span class="text-yellow-400">$1</span>')
+                        .replace(/: (true|false)/g, ': <span class="text-blue-400">$1</span>');
+                    document.getElementById('liveData').innerHTML = `<pre>${dataHtml}</pre>`;
+                }
+
+                // Add to event log
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = step.result === 'blocked' || step.result === 'declined' ? 'text-red-400' :
+                                     step.result === 'success' ? 'text-green-400' : 'text-indigo-300';
+                logEntry.textContent = `[${timestamp}] ${step.title}`;
+                document.getElementById('eventLog').appendChild(logEntry);
+                document.getElementById('eventLog').scrollTop = document.getElementById('eventLog').scrollHeight;
+
+                // Update timing if applicable
+                if (step.timing) {
+                    const times = { token: '45ms', fraud: '120ms', auth: '350ms' };
+                    document.getElementById('time-' + step.timing).textContent = times[step.timing];
+                    document.getElementById('time-' + step.timing).className = 'text-green-400';
+                }
+
+                // Handle result
+                if (step.result) {
+                    const resultNode = document.getElementById('node-result');
+                    const resultIcon = document.getElementById('resultIcon');
+                    const resultText = document.getElementById('resultText');
+                    const resultDetail = document.getElementById('resultDetail');
+
+                    if (step.result === 'success') {
+                        resultNode.className = 'flow-node bg-green-500/30 border-2 border-green-400 rounded-xl p-4 w-48 text-center';
+                        resultIcon.textContent = '✅';
+                        resultText.textContent = 'Payment Successful!';
+                        resultDetail.textContent = step.data.charge_id || 'Transaction complete';
+                    } else if (step.result === 'blocked') {
+                        resultNode.className = 'flow-node bg-red-500/30 border-2 border-red-400 rounded-xl p-4 w-48 text-center';
+                        resultIcon.textContent = '🚫';
+                        resultText.textContent = 'Blocked by Fraud';
+                        resultDetail.textContent = 'High risk score detected';
+                    } else if (step.result === 'declined') {
+                        resultNode.className = 'flow-node bg-orange-500/30 border-2 border-orange-400 rounded-xl p-4 w-48 text-center';
+                        resultIcon.textContent = '❌';
+                        resultText.textContent = 'Card Declined';
+                        resultDetail.textContent = step.data.decline_code;
+                    }
+                }
+
+                // Mark previous nodes as completed
+                await this.delay(this.speed * 0.8);
+                if (nodeEl && !step.result) {
+                    nodeEl.classList.remove('active');
+                    nodeEl.classList.add('completed');
+                }
+                if (step.arrow) {
+                    const arrowEl = document.getElementById(step.arrow);
+                    if (arrowEl) {
+                        arrowEl.classList.remove('active');
+                        arrowEl.classList.add('completed');
+                        arrowEl.textContent = '✓';
+                    }
+                }
+            },
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        };
+
+        // Initialize animation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            PaymentAnimation.init();
         });
     </script>
 </body>
