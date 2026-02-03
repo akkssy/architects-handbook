@@ -53,6 +53,15 @@ class RetrievalConfig(BaseModel):
     chunk_size: int = 50
     chunk_overlap: int = 10
     max_file_size_kb: int = 1024
+    # Hybrid Search Configuration
+    hybrid_search_enabled: bool = True  # Enable hybrid search by default
+    hybrid_alpha: float = 0.5  # Balance between semantic (1.0) and keyword (0.0) search
+    bm25_k1: float = 1.5  # BM25 term frequency saturation parameter
+    bm25_b: float = 0.75  # BM25 length normalization parameter
+    # Re-Ranking Configuration
+    rerank_enabled: bool = True  # Enable cross-encoder re-ranking by default
+    rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Fast, good quality
+    rerank_top_k: int = 20  # Number of candidates to re-rank (before final top_k)
 
 
 class EditorConfig(BaseModel):

@@ -379,19 +379,35 @@ def index(ctx, directory: Path, clear: bool):
 @click.option("--top-k", "-k", default=5, help="Number of results to return")
 @click.option("--file", "-f", "file_filter", help="Filter by file path")
 @click.option("--language", "-l", "lang_filter", help="Filter by language")
+@click.option("--hybrid/--semantic", default=True,
+              help="Use hybrid search (semantic + keyword). Use --semantic for vector-only search.")
+@click.option("--alpha", default=0.5, type=float,
+              help="Hybrid search balance: 1.0=semantic only, 0.0=keyword only, 0.5=balanced")
+@click.option("--rerank/--no-rerank", default=False,
+              help="Apply cross-encoder re-ranking for improved precision.")
 @click.option("--format", "output_format", default="console",
               type=click.Choice(["console", "json", "context"]))
 @click.pass_context
 def search(ctx, query: str, top_k: int, file_filter: Optional[str],
-           lang_filter: Optional[str], output_format: str):
+           lang_filter: Optional[str], hybrid: bool, alpha: float,
+           rerank: bool, output_format: str):
     """Search codebase using natural language.
 
     Find relevant code by describing what you're looking for.
+
+    By default, uses hybrid search combining semantic (vector) and keyword (BM25) search
+    for better exact match retrieval of function names, class names, and error codes.
+
+    Use --rerank to apply cross-encoder re-ranking for improved precision (slower but
+    more accurate ordering of results).
 
     Examples:
         ai-assist search "user authentication"
         ai-assist search "database connection" -k 10
         ai-assist search "error handling" --language python
+        ai-assist search "processRequest" --alpha 0.3  # More weight on keyword match
+        ai-assist search "config loading" --semantic   # Pure semantic search
+        ai-assist search "config loading" --rerank     # Apply re-ranking
         ai-assist search "config loading" --format context
     """
     from ai_code_assistant.retrieval import CodebaseSearch
@@ -412,19 +428,37 @@ def search(ctx, query: str, top_k: int, file_filter: Optional[str],
         console.print("\nRun [cyan]ai-assist index .[/cyan] first to create the index.")
         sys.exit(1)
 
-    with console.status("[bold green]Searching..."):
-        response = searcher.search(
-            query=query,
-            top_k=top_k,
-            file_filter=file_filter,
-            language_filter=lang_filter,
-        )
+    search_type = "hybrid" if hybrid else "semantic"
+    if rerank:
+        search_type += "+rerank"
+
+    with console.status(f"[bold green]Searching ({search_type})..."):
+        if hybrid:
+            response = searcher.hybrid_search(
+                query=query,
+                top_k=top_k,
+                alpha=alpha,
+                file_filter=file_filter,
+                language_filter=lang_filter,
+                rerank=rerank,
+                rerank_top_k=config.retrieval.rerank_top_k,
+            )
+        else:
+            response = searcher.search(
+                query=query,
+                top_k=top_k,
+                file_filter=file_filter,
+                language_filter=lang_filter,
+            )
 
     if output_format == "json":
         import json
         output = {
             "query": response.query,
             "total_results": response.total_results,
+            "search_type": search_type,
+            "alpha": alpha if hybrid else None,
+            "rerank": rerank,
             "results": [r.to_dict() for r in response.results],
         }
         console.print(json.dumps(output, indent=2))
@@ -435,6 +469,7 @@ def search(ctx, query: str, top_k: int, file_filter: Optional[str],
 
     else:  # console
         console.print(f"\n[bold]Search:[/bold] {query}")
+        console.print(f"[bold]Mode:[/bold] {search_type}" + (f" (α={alpha})" if hybrid else ""))
         console.print(f"[bold]Results:[/bold] {response.total_results}\n")
 
         if not response.has_results:
@@ -447,7 +482,12 @@ def search(ctx, query: str, top_k: int, file_filter: Optional[str],
         for i, result in enumerate(response.results, 1):
             console.print(f"[bold cyan]─── Result {i} ───[/bold cyan]")
             console.print(f"[bold]{result.file_path}[/bold]:{result.start_line}-{result.end_line}")
-            console.print(f"[dim]Type: {result.chunk_type} | Name: {result.name} | Score: {result.score:.3f}[/dim]")
+            # Show detailed scores for hybrid search
+            if hybrid and (result.semantic_score > 0 or result.keyword_score > 0):
+                console.print(f"[dim]Type: {result.chunk_type} | Name: {result.name}[/dim]")
+                console.print(f"[dim]Score: {result.score:.3f} (semantic: {result.semantic_score:.3f}, keyword: {result.keyword_score:.3f})[/dim]")
+            else:
+                console.print(f"[dim]Type: {result.chunk_type} | Name: {result.name} | Score: {result.score:.3f}[/dim]")
             console.print()
 
             # Show code with syntax highlighting
