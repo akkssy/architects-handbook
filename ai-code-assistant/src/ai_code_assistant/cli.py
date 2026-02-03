@@ -61,9 +61,11 @@ def main(ctx, config: Optional[Path], verbose: bool):
               type=click.Choice(["console", "markdown", "json"]), help="Output format")
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file path")
 @click.option("--recursive", "-r", is_flag=True, help="Recursively review directories")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
 def review(ctx, files: Tuple[Path, ...], review_type: str, output_format: str,
-           output: Optional[Path], recursive: bool):
+           output: Optional[Path], recursive: bool, provider: Optional[str], model: Optional[str]):
     """Review code files for issues and improvements."""
     import time
     from ai_code_assistant.analytics import get_collector
@@ -77,7 +79,7 @@ def review(ctx, files: Tuple[Path, ...], review_type: str, output_format: str,
         sys.exit(1)
 
     try:
-        config, llm = get_components(ctx.obj.get("config_path"))
+        config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
         analyzer = CodeAnalyzer(config, llm)
         file_handler = FileHandler(config)
         formatter = get_formatter(output_format, config.output.use_colors)
@@ -143,10 +145,12 @@ def review(ctx, files: Tuple[Path, ...], review_type: str, output_format: str,
               type=click.Choice(["console", "markdown", "json"]))
 @click.option("--source", "-s", type=click.Path(exists=True, path_type=Path),
               help="Source file (for test mode)")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
 def generate(ctx, description: str, mode: str, language: str, name: Optional[str],
              params: Optional[str], output: Optional[Path], output_format: str,
-             source: Optional[Path]):
+             source: Optional[Path], provider: Optional[str], model: Optional[str]):
     """Generate code from natural language description."""
     import time
     from ai_code_assistant.analytics import get_collector
@@ -156,7 +160,7 @@ def generate(ctx, description: str, mode: str, language: str, name: Optional[str
     success = True
 
     try:
-        config, llm = get_components(ctx.obj.get("config_path"))
+        config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
         generator = CodeGenerator(config, llm)
         formatter = get_formatter(output_format, config.output.use_colors)
 
@@ -204,10 +208,12 @@ def generate(ctx, description: str, mode: str, language: str, name: Optional[str
 @click.option("--context", "-c", multiple=True, type=click.Path(exists=True, path_type=Path),
               help="Files to load as context")
 @click.option("--stream/--no-stream", default=True, help="Stream responses")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
-def chat(ctx, context: Tuple[Path, ...], stream: bool):
+def chat(ctx, context: Tuple[Path, ...], stream: bool, provider: Optional[str], model: Optional[str]):
     """Start an interactive chat session about code."""
-    config, llm = get_components(ctx.obj.get("config_path"))
+    config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
     session = ChatSession(config, llm)
 
     # Load context files
@@ -515,10 +521,12 @@ def search(ctx, query: str, top_k: int, file_filter: Optional[str],
               type=click.Choice(["console", "json"]), help="Output format")
 @click.option("--start-line", "-s", type=int, help="Start line for targeted edit")
 @click.option("--end-line", "-e", type=int, help="End line for targeted edit")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
 def edit(ctx, file: Path, instruction: str, mode: str, preview: bool,
          no_backup: bool, output_format: str, start_line: Optional[int],
-         end_line: Optional[int]):
+         end_line: Optional[int], provider: Optional[str], model: Optional[str]):
     """Edit a file using AI based on natural language instructions.
 
     Examples:
@@ -528,7 +536,7 @@ def edit(ctx, file: Path, instruction: str, mode: str, preview: bool,
         ai-assist edit api.py "Add logging" --preview
         ai-assist edit config.py "Update the timeout value" -s 10 -e 20
     """
-    config, llm = get_components(ctx.obj.get("config_path"))
+    config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
     editor = FileEditor(config, llm)
 
     # Determine edit mode
@@ -600,10 +608,12 @@ def edit(ctx, file: Path, instruction: str, mode: str, preview: bool,
 @click.option("--no-backup", is_flag=True, help="Don't create backup")
 @click.option("--format", "output_format", default="console",
               type=click.Choice(["console", "json"]), help="Output format")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
 def refactor(ctx, instruction: str, files: Tuple[Path, ...], pattern: Optional[str],
              directory: Path, dry_run: bool, no_confirm: bool, no_backup: bool,
-             output_format: str):
+             output_format: str, provider: Optional[str], model: Optional[str]):
     """Perform multi-file refactoring using AI.
 
     Analyzes the codebase and applies coordinated changes across multiple files.
@@ -617,7 +627,7 @@ def refactor(ctx, instruction: str, files: Tuple[Path, ...], pattern: Optional[s
     from ai_code_assistant.refactor import MultiFileEditor
     from ai_code_assistant.utils import FileHandler
 
-    config, llm = get_components(ctx.obj.get("config_path"))
+    config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
     editor = MultiFileEditor(config, llm)
     file_handler = FileHandler(config)
 
@@ -745,9 +755,12 @@ def refactor(ctx, instruction: str, files: Tuple[Path, ...], pattern: Optional[s
 @click.option("--directory", "-d", type=click.Path(exists=True, path_type=Path),
               default=".", help="Directory to search")
 @click.option("--dry-run", is_flag=True, help="Show changes without applying")
+@click.option("--provider", help="LLM provider (ollama, openai, google, groq)")
+@click.option("--model", help="Model name to use")
 @click.pass_context
 def rename(ctx, old_name: str, new_name: str, symbol_type: str, files: Tuple[Path, ...],
-           pattern: Optional[str], directory: Path, dry_run: bool):
+           pattern: Optional[str], directory: Path, dry_run: bool,
+           provider: Optional[str], model: Optional[str]):
     """Rename a symbol across multiple files.
 
     Examples:
@@ -758,7 +771,7 @@ def rename(ctx, old_name: str, new_name: str, symbol_type: str, files: Tuple[Pat
     from ai_code_assistant.refactor import MultiFileEditor
     from ai_code_assistant.utils import FileHandler
 
-    config, llm = get_components(ctx.obj.get("config_path"))
+    config, llm = get_components(ctx.obj.get("config_path"), provider=provider, model=model)
     editor = MultiFileEditor(config, llm)
     file_handler = FileHandler(config)
 

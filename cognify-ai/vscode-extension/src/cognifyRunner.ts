@@ -214,22 +214,14 @@ export class CognifyRunner {
 
     async reviewFile(filePath: string): Promise<ReviewResult> {
         const config = this.getConfig();
-        const args = ['agent-review', filePath, '--format', 'json'];
-        
-        if (config.autoContext) {
-            args.push('--auto-context');
-            args.push('--max-context-tokens', config.maxContextTokens.toString());
-        }
+        const args = ['review', filePath, '--format', 'json'];
 
-        try {
-            const output = await this.runCommand(args);
-            return this.parseReviewOutput(output);
-        } catch (error) {
-            // Fallback to basic review
-            const basicArgs = ['review', filePath, '--format', 'json'];
-            const output = await this.runCommand(basicArgs);
-            return this.parseReviewOutput(output);
-        }
+        // Add provider and model
+        args.push('--provider', config.provider);
+        args.push('--model', config.model);
+
+        const output = await this.runCommand(args);
+        return this.parseReviewOutput(output);
     }
 
     async reviewCode(code: string, language: string): Promise<ReviewResult> {
@@ -253,22 +245,30 @@ export class CognifyRunner {
     }
 
     async generateCode(description: string, language: string): Promise<GenerateResult> {
-        const args = ['agent-generate', description, '--language', language];
+        const config = this.getConfig();
+        const args = ['generate', description, '--language', language];
+        // Add provider and model
+        args.push('--provider', config.provider);
+        args.push('--model', config.model);
         const output = await this.runCommand(args);
         return { code: this.extractCode(output), explanation: output };
     }
 
     async editCode(code: string, instruction: string, language: string): Promise<GenerateResult> {
+        const config = this.getConfig();
         const fs = require('fs');
         const os = require('os');
         const path = require('path');
-        
+
         const ext = this.getExtension(language);
         const tempFile = path.join(os.tmpdir(), `cognify_edit_${Date.now()}${ext}`);
-        
+
         try {
             fs.writeFileSync(tempFile, code);
             const args = ['edit', tempFile, instruction, '--preview'];
+            // Add provider and model
+            args.push('--provider', config.provider);
+            args.push('--model', config.model);
             const output = await this.runCommand(args);
             const newCode = fs.readFileSync(tempFile, 'utf-8');
             fs.unlinkSync(tempFile);
@@ -280,7 +280,11 @@ export class CognifyRunner {
     }
 
     async explainCode(code: string, language: string): Promise<string> {
-        const args = ['agent-explain', '--code', code];
+        const config = this.getConfig();
+        // Use smart-chat for explanations since there's no dedicated explain command
+        const args = ['smart-chat', `Explain this ${language} code:\n\n${code}`];
+        args.push('--provider', config.provider);
+        args.push('--model', config.model);
         return await this.runCommand(args);
     }
 
@@ -300,6 +304,7 @@ export class CognifyRunner {
     }
 
     async chat(message: string, context?: string, history?: ChatMessage[]): Promise<string> {
+        const config = this.getConfig();
         const args = ['smart-chat', message];
         if (context) {
             args.push('--context', context);
@@ -307,6 +312,9 @@ export class CognifyRunner {
         if (history && history.length > 0) {
             args.push('--history', JSON.stringify(history));
         }
+        // Add provider and model
+        args.push('--provider', config.provider);
+        args.push('--model', config.model);
         return await this.runCommand(args);
     }
 
