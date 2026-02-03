@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-code-assistant"
-version = "0.4.0"
+version = "0.4.1"
 description = "Cognify AI - AI-powered code assistant with code review, generation, editing, semantic search, knowledge base, and usage analytics"
 readme = "README.md"
 license = {text = "MIT"}
