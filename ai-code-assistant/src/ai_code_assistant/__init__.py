@@ -8,7 +8,7 @@ Uses LangChain for orchestration and supports multiple LLM providers:
 - Groq
 """
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __author__ = "Ashok"
 
 from ai_code_assistant.config import Config, load_config
